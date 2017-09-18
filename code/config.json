@@ -1,21 +1,21 @@
 {
     "META": {
         "AUTHOR": "Pascal Sturmfels",
-        "DATE": "2017-08-07",
-        "DESCR": "Recognizing my own face!"
+        "DATE": "2017-09-18",
+        "DESCR": "Analysis of MRI images"
     },
     "DATA": {
         "TRAIN": {
-            "IMAGES": "../data/train/cropped",
-            "LABELS": "../data/train/labels.txt"
-        },
+            "IMAGES": "",
+            "LABELS": ""
+        },s
         "VALIDATION": {
-            "IMAGES": "../data/validation/cropped",
-            "LABELS": "../data/validation/labels.txt"
+            "IMAGES": "",
+            "LABELS": ""
         },
         "TEST": {
-            "IMAGES": "../data/test/cropped",
-            "LABELS": "../data/test/labels.txt"
+            "IMAGES": "",
+            "LABELS": ""
         }
     },
     "TRAIN": {
