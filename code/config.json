@@ -1,0 +1,29 @@
+{
+    "META": {
+        "AUTHOR": "Pascal Sturmfels",
+        "DATE": "2017-08-07",
+        "DESCR": "Recognizing my own face!"
+    },
+    "DATA": {
+        "TRAIN": {
+            "IMAGES": "../data/train/cropped",
+            "LABELS": "../data/train/labels.txt"
+        },
+        "VALIDATION": {
+            "IMAGES": "../data/validation/cropped",
+            "LABELS": "../data/validation/labels.txt"
+        },
+        "TEST": {
+            "IMAGES": "../data/test/cropped",
+            "LABELS": "../data/test/labels.txt"
+        }
+    },
+    "TRAIN": {
+        "CNN": {
+            "CHECKPOINT": "../checkpoints/cnn.ckpt",
+            "LEARNING_RATE": 0.0005,
+            "NB_STEPS": 1001,
+            "BATCH_SIZE": 128
+        }
+    }
+}
