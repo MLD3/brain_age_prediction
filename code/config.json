@@ -5,17 +5,11 @@
         "DESCR": "Analysis of MRI images"
     },
     "DATA": {
-        "TRAIN": {
-            "IMAGES": "",
-            "LABELS": ""
-        },s
-        "VALIDATION": {
-            "IMAGES": "",
-            "LABELS": ""
+        "PHENOTYPICS": {
+            "PATH": "../Data/PNC_519_phenotypics.csv"
         },
-        "TEST": {
-            "IMAGES": "",
-            "LABELS": ""
+        "MATRICES": {
+            "PATH": "../Data/Matrices"
         }
     },
     "TRAIN": {

@@ -6,15 +6,14 @@ from tensorflow.python.framework import dtypes
 from utils.config import get
 
 class DataSet(object):
-
     def __init__(self,
                  images,
                  labels,
-                 oneHot=True,
+                 oneHot=False,
                  numClasses=2,
                  fake_data=False,
                  dtype=dtypes.uint8,
-                 reshape=True):
+                 reshape=False):
         """Construct a DataSet.
         """
         dtype = dtypes.as_dtype(dtype).base_dtype
