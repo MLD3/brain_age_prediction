@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-def plotHist(X, title="Histogram of X"):
+def plotHist(X, saveName='', title='Histogram of X'):
     fig, ax = plt.subplots()
     counts, bins, patches = ax.hist(X, facecolor='mediumseagreen', edgecolor='black')
 
@@ -23,10 +23,6 @@ def plotHist(X, title="Histogram of X"):
 
     # Label the raw counts and the percentages below the x-axis...
     bin_centers = 0.5 * np.diff(bins) + bins[:-1]
-    ax.annotate("counts: ", xy=(0, 0), xycoords=('data', 'axes fraction'),
-        xytext=(-15, -18), textcoords='offset points', va='top', ha='center')
-    ax.annotate("percentages: ", xy=(0, 0), xycoords=('data', 'axes fraction'),
-            xytext=(-30, -32), textcoords='offset points', va='top', ha='center')
     for count, x in zip(counts, bin_centers):
         # Label the raw counts
         ax.annotate(str(count), xy=(x, 0), xycoords=('data', 'axes fraction'),
@@ -41,4 +37,7 @@ def plotHist(X, title="Histogram of X"):
     plt.subplots_adjust(bottom=0.15)
     plt.ylabel('Frequency in counts')
     plt.title(title)
-    plt.show()
+    if saveName == '':
+        plt.show()
+    else:
+        plt.savefig(saveName, bbox_inches='tight')

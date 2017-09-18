@@ -2,8 +2,6 @@ import tensorflow as tf
 from utils.config import get, is_file_prefix
 from model.build_cnn import cnn
 
-from preprocessing.labeling import getAugmentedDataSet, getDataSet
-
 def get_weights(saver, sess):
     if is_file_prefix('TRAIN.CNN.CHECKPOINT'):
         saver.restore(sess, get('TRAIN.CNN.CHECKPOINT'))

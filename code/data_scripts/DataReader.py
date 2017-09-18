@@ -1,15 +1,7 @@
-import numpy as np
 import pandas as pd
 
-class DataReader(object):
-    def __init__(self, path):
-        self._path = path
+def readCSVData(path):
+    return pd.read_csv(path)
 
-    def readCSVData(self, path=""):
-        if path != "":
-            self._path = path
-
-        df = pd.read_csv(self._path)
-        return df
-
-if __name__ == '__main__':
+def readMatrix(path):
+    return pd.read_csv(path).as_matrix()
