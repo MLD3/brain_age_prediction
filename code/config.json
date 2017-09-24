@@ -16,7 +16,9 @@
         "CNN": {
             "CHECKPOINT": "../checkpoints/cnn.ckpt",
             "LEARNING_RATE": 0.0005,
-            "NB_STEPS": 1001,
+            "LEARNING_RATE_LARGE": 0.01,
+            "MOMENTUM": 0.9,
+            "NB_STEPS": 11,
             "BATCH_SIZE": 128
         }
     }

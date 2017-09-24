@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from data_scripts.DataReader import *
 from data_scripts.DataPlotter import plotHist
+from data_scripts.DataSet import DataSet
 from utils.config import get, is_file_prefix
 
 class DataHolder(object):
@@ -18,6 +19,17 @@ class DataHolder(object):
             matrixPath = path + str(subjectID) + '.csv'
             matrix = readMatrix(matrixPath)
             self.matrices.append(matrix)
+
+    def matricesToImages(self):
+        for index in range(self.numSubjects):
+            np.fill_diagonal(self.matrices[index], 0)
+
+    def returnDataSet(self):
+        mats = np.array(self.matrices)
+        mats = np.reshape(mats, (mats.shape[0], mats.shape[1], mats.shape[2], 1))
+        labels = np.array(self._df['AgeYears'].values.copy())
+        labels = np.reshape(labels, (labels.shape[0], 1))
+        return DataSet(mats, labels, reshape=True)
 
     def filterByColumn(self, columnName, equalValue):
         return self._df[self._df[columnName] == equalValue]

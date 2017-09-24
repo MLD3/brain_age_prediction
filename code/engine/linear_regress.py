@@ -10,7 +10,7 @@ from utils.config import get, is_file_prefix
 def RMSE(y_true, y_pred):
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
-def crossValidate(ridge_model, X, Y, k=5, numReps=20):
+def crossValidate(ridge_model, X, Y, k=5, numReps=10):
     validationPerformance = []
 
     for i in range(numReps):
@@ -45,7 +45,7 @@ def getTestPerformance(X, Y, alphas):
         testPerf.append(error)
     return (np.array(averageCVPerf), np.array(testPerf))
 
-def runTests(X, Y, alphas, numReps=100):
+def runTests(X, Y, alphas, numReps=10):
     summedCVPerf = np.zeros(len(alphas))
     summedTestPerf = np.zeros(len(alphas))
     for i in range(numReps):
@@ -57,6 +57,27 @@ def runTests(X, Y, alphas, numReps=100):
     averageTestPerf = summedTestPerf / numReps
     return (averageCVPerf, averageTestPerf)
 
+def performance_CI(clf, X, y):
+    N = 1000
+    bootstrap_performances = np.zeros(N)
+    (n, d) = X.shape
+    indices = np.arange(n)
+
+    for i in range(N):
+        sample_indices = np.random.choice(indices, size=n, replace=True)
+        test_data = X[sample_indices]
+        test_labels = y[sample_indices]
+
+        y_pred = clf.predict(test_data)
+
+        bootstrap_performances[i] = RMSE(test_labels, y_pred)
+
+    bootstrap_performances = np.sort(bootstrap_performances)
+    point_performance = np.mean(bootstrap_performances)
+
+    return (point_performance, bootstrap_performances[25], bootstrap_performances[975])
+
+
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
     dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
@@ -67,5 +88,16 @@ if __name__ == '__main__':
     print('--------------------------------------------')
     print('---------------FINAL RESULTS----------------')
     print('--------------------------------------------')
+    minIndex = 0
+    minPerf = averageCVPerf[minIndex]
     for i in range(len(alphas)):
         print('Alpha: ' + '%f' % alphas[i] + ' CV: ' + '%f' % averageCVPerf[i] + ' TEST: ' '%f' % averageTestPerf[i])
+        if (averageCVPerf[i] < minPerf):
+            minPerf = averageCVPerf[i]
+            minIndex = i
+
+    clf = Ridge(alpha=alphas[minIndex], normalize=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+    clf.fit(X_train, y_train)
+    (p, l, u) = performance_CI(clf, X_test, Y_test)
+    print("Confidence Interval Perf: " + str(p) + " (" + str(l) + "," + str(u) + ")")
