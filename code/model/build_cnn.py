@@ -81,6 +81,6 @@ def cnnSmall(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
                         filter_size=4, output_channels=64, padding='SAME',
                         act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
     pool3 = pool_layer(x=conv3, input_size=11, input_channels=64, k_length=3, stride=2, padding='SAME')
-    fn1 = fully_connected_layer(pool3, shape=[11 * 11 * 64, 1000], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
-    fn2 = fully_connected_layer(fn1, shape=[1000, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    fn1 = fully_connected_layer(pool3, shape=[6 * 6 * 64, 256], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    fn2 = fully_connected_layer(fn1, shape=[256, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     return (input_layer, fn2)
