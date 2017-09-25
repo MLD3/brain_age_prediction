@@ -157,23 +157,7 @@ def test5(trainSet):
 
 def test6(trainSet):
     print("=========================================")
-    print("Sixth architecture: Mean Absolute Error Loss")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    mae = tf.metrics.mean_absolute_error(labels=true_ages, predictions=prediction_layer)
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(mae[0])
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, mae, optimizer)
-
-def test7(trainSet):
-    print("=========================================")
-    print("Seventh architecture: SGD + Momentum optimizer, momentum=0.9")
+    print("Sixth architecture: SGD + Momentum optimizer, momentum=0.9")
     print("=========================================")
     input_layer, prediction_layer = cnnDefault()
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
@@ -274,22 +258,7 @@ if __name__ == '__main__':
 
 
     print("=========================================")
-    print("Sixth architecture: Mean Absolute Error Loss")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    mae = tf.metrics.mean_absolute_error(labels=true_ages, predictions=prediction_layer)
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(mae[0])
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, mae, optimizer)
-
-    print("=========================================")
-    print("Seventh architecture: SGD + Momentum optimizer, momentum=0.9")
+    print("Sixth architecture: SGD + Momentum optimizer, momentum=0.9")
     print("=========================================")
     input_layer, prediction_layer = cnnDefault()
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
