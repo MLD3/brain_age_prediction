@@ -99,5 +99,5 @@ if __name__ == '__main__':
     clf = Ridge(alpha=alphas[minIndex], normalize=True)
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
     clf.fit(X_train, y_train)
-    (p, l, u) = performance_CI(clf, X_test, Y_test)
+    (p, l, u) = performance_CI(clf, X_test, y_test)
     print("Confidence Interval Perf: " + str(p) + " (" + str(l) + "," + str(u) + ")")

@@ -62,13 +62,13 @@ def crossValidate(sess, trainingSet, input_layer, prediction_layer, loss_func, o
     return np.mean(validationPerformance)
 
 def performanceOnParameter(trainSet, sess, input_layer, prediction_layer, loss_func, optimizer):
-    numTestSplits = 5
+    numTestSplits = 2
     for trial in range(numTestSplits):
         X_train, X_test, y_train, y_test = train_test_split(trainSet.images, trainSet.labels, test_size=0.2)
         splitTrainSet = DataSet(X_train, y_train)
         splitTestSet = DataSet(X_test, y_test)
 
-        valPerf = crossValidate(sess, splitTrainSet, input_layer, prediction_layer, loss_func, optimizer)
+        # valPerf = crossValidate(sess, splitTrainSet, input_layer, prediction_layer, loss_func, optimizer)
         trainCNN(sess, input_layer, prediction_layer, loss_func, optimizer, splitTrainSet, splitTestSet)
         error = loss_func.eval(feed_dict={input_layer: splitTestSet.images, true_ages: splitTestSet.labels})
         print("TEST performance with given loss was: " + '%f' % error)
@@ -192,7 +192,6 @@ if __name__ == '__main__':
     # get_weights(saver, sess)
 
     performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
 
     print("=========================================")
     print("Second architecture: 3x3 filters, relu, 3x3 pooling, stride=1, large init biases and sd")
