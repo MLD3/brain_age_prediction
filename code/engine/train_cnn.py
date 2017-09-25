@@ -47,8 +47,7 @@ def trainCNN(sess, input_layer, prediction_layer, loss_func, optimizer, training
     except KeyboardInterrupt:
         print('Terminating training session due to keyboard exception...')
 
-#TODO: Default k=5
-def crossValidate(sess, trainingSet, input_layer, prediction_layer, loss_func, optimizer, k=2, numReps=1):
+def crossValidate(sess, trainingSet, input_layer, prediction_layer, loss_func, optimizer, k=5, numReps=1):
     validationPerformance = []
     skf = KFold(n_splits=k)
     for trial in range(numReps):
@@ -62,9 +61,8 @@ def crossValidate(sess, trainingSet, input_layer, prediction_layer, loss_func, o
             validationPerformance.append(perf)
     return np.mean(validationPerformance)
 
-#TODO: default numTestSplits=2
 def performanceOnParameter(trainSet, sess, input_layer, prediction_layer, loss_func, optimizer):
-    numTestSplits = 1
+    numTestSplits = 5
     for trial in range(numTestSplits):
         X_train, X_test, y_train, y_test = train_test_split(trainSet.images, trainSet.labels, test_size=0.2)
         splitTrainSet = DataSet(X_train, y_train)
@@ -180,81 +178,81 @@ if __name__ == '__main__':
     dataHolder.matricesToImages()
     trainSet = dataHolder.returnDataSet()
 
-    # print("=========================================")
-    # print("First architecture: 3x3 filters, relu, 3x3 pooling, stride=1, small init biases and sd")
-    # print("=========================================")
-    # input_layer, prediction_layer = cnnDefault()
-    # true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    # rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    # optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-    #
-    # sess = tf.InteractiveSession()
-    # sess.run(tf.global_variables_initializer())
-    # # saver = tf.train.Saver()
-    # # get_weights(saver, sess)
-    #
-    # performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-    #
-    #
-    # print("=========================================")
-    # print("Second architecture: 3x3 filters, relu, 3x3 pooling, stride=1, large init biases and sd")
-    # print("=========================================")
-    # input_layer, prediction_layer = cnnDefault(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0)
-    # true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    # rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    # optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-    #
-    # sess = tf.InteractiveSession()
-    # sess.run(tf.global_variables_initializer())
-    # # saver = tf.train.Saver()
-    # # get_weights(saver, sess)
-    #
-    # performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-    #
-    # print("=========================================")
-    # print("Third architecture: 3x3 filters, relu, 3x3 pooling, stride=1, positive initial means")
-    # print("=========================================")
-    # input_layer, prediction_layer = cnnDefault(meanDefault=0.1, sdDefault=0.1, biasDefault=1.0)
-    # true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    # rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    # optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-    #
-    # sess = tf.InteractiveSession()
-    # sess.run(tf.global_variables_initializer())
-    # # saver = tf.train.Saver()
-    # # get_weights(saver, sess)
-    #
-    # performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-    #
-    # print("=========================================")
-    # print("Fourth architecture: 4x4 filters and varying stride, relu, 3x3 pooling")
-    # print("=========================================")
-    # input_layer, prediction_layer = cnnSmall()
-    # true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    # rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    # optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-    #
-    # sess = tf.InteractiveSession()
-    # sess.run(tf.global_variables_initializer())
-    # # saver = tf.train.Saver()
-    # # get_weights(saver, sess)
-    #
-    # performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-    #
-    # print("=========================================")
-    # print("Fifth architecture: large learning rate")
-    # print("=========================================")
-    # input_layer, prediction_layer = cnnDefault()
-    # true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    # rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    # optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE_LARGE')).minimize(rmse)
-    #
-    # sess = tf.InteractiveSession()
-    # sess.run(tf.global_variables_initializer())
-    # # saver = tf.train.Saver()
-    # # get_weights(saver, sess)
-    #
-    # performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+    print("=========================================")
+    print("First architecture: 3x3 filters, relu, 3x3 pooling, stride=1, small init biases and sd")
+    print("=========================================")
+    input_layer, prediction_layer = cnnDefault()
+    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
+    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # saver = tf.train.Saver()
+    # get_weights(saver, sess)
+
+    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+
+
+    print("=========================================")
+    print("Second architecture: 3x3 filters, relu, 3x3 pooling, stride=1, large init biases and sd")
+    print("=========================================")
+    input_layer, prediction_layer = cnnDefault(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0)
+    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
+    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # saver = tf.train.Saver()
+    # get_weights(saver, sess)
+
+    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+
+    print("=========================================")
+    print("Third architecture: 3x3 filters, relu, 3x3 pooling, stride=1, positive initial means")
+    print("=========================================")
+    input_layer, prediction_layer = cnnDefault(meanDefault=0.1, sdDefault=0.1, biasDefault=1.0)
+    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
+    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # saver = tf.train.Saver()
+    # get_weights(saver, sess)
+
+    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+
+    print("=========================================")
+    print("Fourth architecture: 4x4 filters and varying stride, relu, 3x3 pooling")
+    print("=========================================")
+    input_layer, prediction_layer = cnnSmall()
+    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
+    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # saver = tf.train.Saver()
+    # get_weights(saver, sess)
+
+    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+
+    print("=========================================")
+    print("Fifth architecture: large learning rate")
+    print("=========================================")
+    input_layer, prediction_layer = cnnDefault()
+    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
+    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE_LARGE')).minimize(rmse)
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # saver = tf.train.Saver()
+    # get_weights(saver, sess)
+
+    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
 
 
     print("=========================================")
