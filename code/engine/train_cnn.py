@@ -279,7 +279,7 @@ if __name__ == '__main__':
     input_layer, prediction_layer = cnnDefault()
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
     mae = tf.metrics.mean_absolute_error(labels=true_ages, predictions=prediction_layer)
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(mae)
+    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(mae[0])
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
