@@ -179,9 +179,9 @@ if __name__ == '__main__':
     trainSet = dataHolder.returnDataSet()
 
     print("=========================================")
-    print("First architecture: 3x3 filters, relu, 3x3 pooling, stride=1, small init biases and sd")
+    print("First architecture: four layer neural network with relu")
     print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
+    input_layer, prediction_layer = cnnNeural()
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
     rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
     optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
@@ -194,9 +194,9 @@ if __name__ == '__main__':
     performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
 
     print("=========================================")
-    print("Second architecture: 3x3 filters, relu, 3x3 pooling, stride=1, large init biases and sd")
+    print("Second architecture: four layer neural network with tanh")
     print("=========================================")
-    input_layer, prediction_layer = cnnDefault(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0)
+    input_layer, prediction_layer = cnnNeural(act_type='tanh')
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
     rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
     optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
@@ -209,9 +209,9 @@ if __name__ == '__main__':
     performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
 
     print("=========================================")
-    print("Third architecture: 3x3 filters, relu, 3x3 pooling, stride=1, positive initial means")
+    print("Third architecture: four layer neural network with sigmoid")
     print("=========================================")
-    input_layer, prediction_layer = cnnDefault(meanDefault=0.1, sdDefault=0.1, biasDefault=1.0)
+    input_layer, prediction_layer = cnnNeural(act_type='sigmoid')
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
     rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
     optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
@@ -224,43 +224,12 @@ if __name__ == '__main__':
     performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
 
     print("=========================================")
-    print("Fourth architecture: 4x4 filters and varying stride, relu, 3x3 pooling")
+    print("Third architecture: four layer neural network with relu, larger init sd and bias")
     print("=========================================")
-    input_layer, prediction_layer = cnnSmall()
+    input_layer, prediction_layer = cnnNeural(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0, act_type='relu')
     true_ages = tf.placeholder(tf.float32, shape=[None, 1])
     rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
     optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-    print("=========================================")
-    print("Fifth architecture: large learning rate")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE_LARGE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-
-    print("=========================================")
-    print("Sixth architecture: SGD + Momentum optimizer, momentum=0.9")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.MomentumOptimizer(get('TRAIN.CNN.LEARNING_RATE'), get('TRAIN.CNN.MOMENTUM')).minimize(rmse)
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())

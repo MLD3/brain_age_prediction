@@ -84,3 +84,11 @@ def cnnSmall(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
     fn1 = fully_connected_layer(pool3, shape=[6 * 6 * 64, 256], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     fn2 = fully_connected_layer(fn1, shape=[256, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     return (input_layer, fn2)
+
+def cnnNeural(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1, act_type='relu'):
+    input_layer = tf.placeholder(tf.float32, shape=[None, 264*264])
+    fn1 = fully_connected_layer(pool3, shape=[264*264, 64*64], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    fn2 = fully_connected_layer(fn1, shape=[64*64, 32*32], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    fn3 = fully_connected_layer(pool3, shape=[32 * 32, 8*8], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    fn4 = fully_connected_layer(fn1, shape=[8*8, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    return (input_layer, fn4)
