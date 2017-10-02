@@ -29,7 +29,7 @@ def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, 
         print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f', (step, trainingLoss, validationLoss))
 
 def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperation, lossFunction):
-    X_train, X_test, y_train, y_test = train_test_split(trainSet.images, trainSet.labels, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
 
@@ -46,14 +46,14 @@ if __name__ == '__main__':
     dataHolder.matricesToImages()
     dataSet = dataHolder.returnDataSet()
 
-    imagesPL, predictionLayer = build_cnn()
+    imagesPL, predictionLayer = cnnDefault()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
-    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
     with tf.train.MonitoredSession(
-            hook=hooks
+            hooks=hooks
     ) as sess:
-        sess.run(tf.global_variables_initializer())
         TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
