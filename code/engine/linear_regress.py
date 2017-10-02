@@ -21,7 +21,7 @@ def performance_CI(regressor, X_test, y_test, loss_func):
         test_data = X_test[sample_indices]
         test_labels = y_test[sample_indices]
 
-        y_pred = clf.predict(test_data)
+        y_pred = regressor.predict(test_data)
 
         bootstrap_performances[i] = loss_func(test_labels, y_pred)
 
