@@ -45,7 +45,7 @@ if __name__ == '__main__':
                 param_grid, scoring='neg_mean_squared_error', n_jobs=20,
                 cv=folder, refit=True, verbose=1)
     numTestSplits = 10
-    for i in range(len(numTestSplits)):
+    for i in range(numTestSplits):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         regressor.fit(X_train, y_train)
 
