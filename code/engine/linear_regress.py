@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 cv=folder, refit=True, verbose=1)
     numTestSplits = 10
     for i in range(numTestSplits):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
         regressor.fit(X_train, y_train)
 
         cvResults = regressor.cv_results
