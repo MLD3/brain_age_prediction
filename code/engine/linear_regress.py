@@ -49,7 +49,7 @@ if __name__ == '__main__':
         X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
         regressor.fit(X_train, y_train)
 
-        cvResults = regressor.cv_results
+        cvResults = regressor.cv_results_
         bestPerf = regressor.best_score_
         bestRidge = regressor.best_estimator_
         bestRidge.fit(X_train, y_train) #NOT SURE IF THIS IS NECESSARY
