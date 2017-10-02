@@ -9,231 +9,51 @@ from utils.config import get, is_file_prefix
 from data_scripts.DataSet import DataSet
 from model.build_cnn import *
 
-def get_weights(saver, sess):
-    if is_file_prefix('TRAIN.CNN.CHECKPOINT'):
-        saver.restore(sess, get('TRAIN.CNN.CHECKPOINT'))
-        print('Restored weights from a checkpoint.')
-    else:
-        print('Training from scratch...')
+def DefineFeedDict(dataSet, imagesPL, labelsPL):
+    feed_dict = {
+        imagesPL: dataSet.images,
+        labelsPL: dataSet.labels
+    }
+    return feed_dict
 
-def save_model(sess, path):
-    saver = tf.train.Saver()
-    save_path = saver.save(sess, path)
-    print("Model saved to file: " + str(save_path))
+def GetEvaluatedLoss(sess, dataSet, lossFunction, imagesPL, labelsPL):
+    feed_dict = DefineFeedDict(dataSet, imagesPL, labelsPL)
+    return sess.run(lossFunction, feed_dict=feed_dict)
 
-def report_training_progress(sess, batch_index, input_layer, loss_func, validationSet):
-    if batch_index % 5:
-        return
-    print('starting batch number %d \033[100D\033[1A' % batch_index)
-    if batch_index % 50:
-        return
-    error = loss_func.eval(feed_dict={input_layer: validationSet.images, true_ages: validationSet.labels})
-    print('\n \t Evaluated Loss Function: %f' % error)
-    if batch_index % 500:
-        return
-    print("Saving model...")
-    save_model(sess, get('TRAIN.CNN.CHECKPOINT'))
+def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet):
+    if step % 100 == 0:
+        trainFeedDict = DefineFeedDict(splitTrainSet, imagesPL, labelsPL)
+        trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
+        testFeedDict = DefineFeedDict(splitTestSet, imagesPL, labelsPL)
+        validationLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
+        print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f', (step, trainingLoss, validationLoss))
 
+def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperation, lossFunction):
+    X_train, X_test, y_train, y_test = train_test_split(trainSet.images, trainSet.labels, test_size=0.2)
+    splitTrainSet = DataSet(X_train, y_train)
+    splitTestSet = DataSet(X_test, y_test)
 
-def trainCNN(sess, input_layer, prediction_layer, loss_func, optimizer, trainingSet, validationSet):
-    try:
-        for batch_index in range(get('TRAIN.CNN.NB_STEPS')):
-            report_training_progress(sess,
-                batch_index, input_layer, loss_func, validationSet)
-            batch_images, batch_labels = trainingSet.next_batch(
-                get('TRAIN.CNN.BATCH_SIZE'))
-            optimizer.run(
-                feed_dict={input_layer: batch_images, true_ages: batch_labels})
-    except KeyboardInterrupt:
-        print('Terminating training session due to keyboard exception...')
-
-def crossValidate(sess, trainingSet, input_layer, prediction_layer, loss_func, optimizer, k=5, numReps=1):
-    validationPerformance = []
-    skf = KFold(n_splits=k)
-    for trial in range(numReps):
-        for trainIndex, valdIndex in skf.split(trainingSet.images, trainingSet.labels):
-            X_train, X_vald = trainingSet.images[trainIndex], trainingSet.images[valdIndex]
-            y_train, y_vald = trainingSet.labels[trainIndex], trainingSet.labels[valdIndex]
-            splitTrainSet = DataSet(X_train, y_train)
-            validationSet = DataSet(X_vald, y_vald)
-            trainCNN(sess, input_layer, prediction_layer, loss_func, optimizer, splitTrainSet, validationSet)
-            perf = loss_func.eval(feed_dict={input_layer: X_vald, true_ages: y_vald})
-            validationPerformance.append(perf)
-    return np.mean(validationPerformance)
-
-def performanceOnParameter(trainSet, sess, input_layer, prediction_layer, loss_func, optimizer):
-    numTestSplits = 2
-    for trial in range(numTestSplits):
-        X_train, X_test, y_train, y_test = train_test_split(trainSet.images, trainSet.labels, test_size=0.2)
-        splitTrainSet = DataSet(X_train, y_train)
-        splitTestSet = DataSet(X_test, y_test)
-
-        # valPerf = crossValidate(sess, splitTrainSet, input_layer, prediction_layer, loss_func, optimizer)
-        trainCNN(sess, input_layer, prediction_layer, loss_func, optimizer, splitTrainSet, splitTestSet)
-        error = loss_func.eval(feed_dict={input_layer: splitTestSet.images, true_ages: splitTestSet.labels})
-        print("TEST performance with given loss was: " + '%f' % error)
-
-def test1(trainSet):
-    print("=========================================")
-    print("First architecture: 3x3 filters, relu, 3x3 pooling, stride=1, small init biases and sd")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-def test2(trainSet):
-    print("=========================================")
-    print("Second architecture: 3x3 filters, relu, 3x3 pooling, stride=1, large init biases and sd")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0)
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-def test3(trainSet):
-    print("=========================================")
-    print("Third architecture: 3x3 filters, relu, 3x3 pooling, stride=1, positive initial means")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault(meanDefault=0.1, sdDefault=0.1, biasDefault=1.0)
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-def test4(trainSet):
-    print("=========================================")
-    print("Fourth architecture: 4x4 filters and varying stride, relu, 3x3 pooling")
-    print("=========================================")
-    input_layer, prediction_layer = cnnSmall()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-def test5(trainSet):
-    print("=========================================")
-    print("Fifth architecture: large learning rate")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE_LARGE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-def test6(trainSet):
-    print("=========================================")
-    print("Sixth architecture: SGD + Momentum optimizer, momentum=0.9")
-    print("=========================================")
-    input_layer, prediction_layer = cnnDefault()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.MomentumOptimizer(get('TRAIN.CNN.LEARNING_RATE'), get('TRAIN.CNN.MOMENTUM')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+    for batch_index in range(get('TRAIN.CNN.NB_STEPS')):
+        batch_images, batch_labels = splitTrainSet.next_batch(
+            get('TRAIN.CNN.BATCH_SIZE'))
+        feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
+        sess.run(trainingOperation, feed_dict=feed_dict)
+        ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
 
 if __name__ == '__main__':
-    ##########################################################################
-    ############################# GET DATA SETS ##############################
-    ##########################################################################
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
     dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
     dataHolder.matricesToImages()
-    trainSet = dataHolder.returnDataSet()
+    dataSet = dataHolder.returnDataSet()
 
-    print("=========================================")
-    print("First architecture: four layer neural network with relu")
-    print("=========================================")
-    input_layer, prediction_layer = cnnNeural()
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
+    imagesPL, predictionLayer = build_cnn()
+    labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
+    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction)
 
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-    print("=========================================")
-    print("Second architecture: four layer neural network with tanh")
-    print("=========================================")
-    input_layer, prediction_layer = cnnNeural(act_type='tanh')
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-    print("=========================================")
-    print("Third architecture: four layer neural network with sigmoid")
-    print("=========================================")
-    input_layer, prediction_layer = cnnNeural(act_type='sigmoid')
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
-
-    print("=========================================")
-    print("Third architecture: four layer neural network with relu, larger init sd and bias")
-    print("=========================================")
-    input_layer, prediction_layer = cnnNeural(meanDefault=0.0, sdDefault=0.1, biasDefault=1.0, act_type='relu')
-    true_ages = tf.placeholder(tf.float32, shape=[None, 1])
-    rmse = tf.sqrt(tf.losses.mean_squared_error(labels=true_ages, predictions=prediction_layer))
-    optimizer = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(rmse)
-
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # saver = tf.train.Saver()
-    # get_weights(saver, sess)
-
-    performanceOnParameter(trainSet, sess, input_layer, prediction_layer, rmse, optimizer)
+    hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
+    with tf.train.MonitoredSession(
+            hook=hooks
+    ) as sess:
+        sess.run(tf.global_variables_initializer())
+        TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)

@@ -18,7 +18,7 @@
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 501,
+            "NB_STEPS": 2000,
             "BATCH_SIZE": 128
         }
     }
