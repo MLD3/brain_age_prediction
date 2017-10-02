@@ -42,14 +42,24 @@ if __name__ == '__main__':
     param_grid = {'alpha': alphas, 'solver': solvers}
     folder = RepeatedKFold(n_splits=5, n_repeats=20)
     regressor = GridSearchCV(ridgeModel,
-                param_grid, scoring='neg_mean_squared_error', n_jobs=10,
+                param_grid, scoring='neg_mean_squared_error', n_jobs=20,
                 cv=folder, refit=True, verbose=1)
+    numTestSplits = 10
+    for i in range(len(numTestSplits)):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        regressor.fit(X_train, y_train)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-    regressor.fit(X_train, y_train)
-    cvResults = regressor.cv_results
-    bestPerf = regressor.best_score_
-    bestRidge = regressor.best_estimator_
-    bestAlpha = regressor.best_params_['alpha']
-    bestSolver = regressor.best_params_['solver']
-    (point, lower, upper) = performance_CI(bestRidge, X_test, y_test, RMSE):
+        cvResults = regressor.cv_results
+        bestPerf = regressor.best_score_
+        bestRidge = regressor.best_estimator_
+        bestRidge.fit(X_train, y_train) #NOT SURE IF THIS IS NECESSARY
+        bestAlpha = regressor.best_params_['alpha']
+        bestSolver = regressor.best_params_['solver']
+        (point, lower, upper) = performance_CI(bestRidge, X_test, y_test, RMSE)
+        print('----------------------------------------------------------------')
+        print('----------------------TEST SPLIT ' + str(i) + '-----------------------')
+        print('----------------------------------------------------------------')
+        print(cvResults)
+        print("Best Alpha: " + str(bestAlpha))
+        print("Best Solver: " + str(bestSolver))
+        print("Performance on Test Set: " + '%f' % point + '(' + '%f' % lower + ',' + '%f' % upper + ')')
