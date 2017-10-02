@@ -26,7 +26,7 @@ def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, 
         trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
         testFeedDict = DefineFeedDict(splitTestSet, imagesPL, labelsPL)
         validationLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
-        print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f', (step, trainingLoss, validationLoss))
+        print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f' % (step, trainingLoss, validationLoss))
 
 def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperation, lossFunction):
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
@@ -37,7 +37,7 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperatio
         batch_images, batch_labels = splitTrainSet.next_batch(
             get('TRAIN.CNN.BATCH_SIZE'))
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
-        sess.run(trainingOperation, feed_dict=feed_dict)
+        sess.run(trainOperation, feed_dict=feed_dict)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
 
 if __name__ == '__main__':
