@@ -11,6 +11,11 @@ class DataHolder(object):
         self.matrices = []
         self.numSubjects = df.shape[0]
 
+    def getBinaryColumn(self, columnName, firstValue, secondValue):
+        labels = np.zeros(self._df[columnName].shape)
+        labels[self._df[columnName] == secondValue] == 1
+        return labels
+
     def getMatricesFromPath(self, path):
         self.matrices = []
         if path[-1] != '/':
