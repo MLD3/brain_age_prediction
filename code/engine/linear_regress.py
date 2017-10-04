@@ -7,8 +7,8 @@ from sklearn.model_selection import RepeatedKFold, GridSearchCV, train_test_spli
 from sklearn.metrics import mean_squared_error
 from utils.config import get, is_file_prefix
 
-def RMSE(y_true, y_pred):
-    return np.sqrt(mean_squared_error(y_true, y_pred))
+def MSE(y_true, y_pred):
+    return mean_squared_error(y_true, y_pred)
 
 def performance_CI(regressor, X_test, y_test, loss_func):
     N = 1000
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         bestRidge.fit(X_train, y_train) #NOT SURE IF THIS IS NECESSARY
         bestAlpha = regressor.best_params_['alpha']
         bestSolver = regressor.best_params_['solver']
-        (point, lower, upper) = performance_CI(bestRidge, X_test, y_test, RMSE)
+        (point, lower, upper) = performance_CI(bestRidge, X_test, y_test, MSE)
         print('----------------------------------------------------------------')
         print('----------------------TEST SPLIT ' + str(i) + '-----------------------')
         print('----------------------------------------------------------------')
