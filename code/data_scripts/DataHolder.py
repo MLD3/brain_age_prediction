@@ -13,7 +13,7 @@ class DataHolder(object):
 
     def getBinaryColumn(self, columnName, firstValue, secondValue):
         labels = np.zeros(self._df[columnName].shape)
-        labels[self._df[columnName] == secondValue] == 1
+        labels[self._df[columnName] == secondValue] = 1
         return labels
 
     def getMatricesFromPath(self, path):
