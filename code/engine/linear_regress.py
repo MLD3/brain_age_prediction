@@ -42,7 +42,7 @@ if __name__ == '__main__':
     param_grid = {'alpha': alphas, 'solver': solvers}
     folder = RepeatedKFold(n_splits=5, n_repeats=20)
     regressor = GridSearchCV(ridgeModel,
-                param_grid, scoring='neg_mean_squared_error', n_jobs=20,
+                param_grid, scoring='neg_mean_squared_error', n_jobs=10,
                 cv=folder, refit=True, verbose=1)
     numTestSplits = 10
     for i in range(numTestSplits):
