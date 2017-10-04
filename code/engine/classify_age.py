@@ -40,7 +40,7 @@ if __name__ == '__main__':
     param_grid = {'C': cValues, 'gamma': gammaValues}
     folder = RepeatedKFold(n_splits=5, n_repeats=20)
     clf = GridSearchCV(svmModel,
-                paramGrid, scoring='roc_auc', n_jobs=10,
+                param_grid, scoring='roc_auc', n_jobs=10,
                 cv=folder, refit=True, verbose=1)
 
     numTestSplits = 10
