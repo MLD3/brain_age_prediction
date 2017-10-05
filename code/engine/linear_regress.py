@@ -38,8 +38,8 @@ if __name__ == '__main__':
     Y = dataHolder._df['AgeYears'].values.copy()
     ridgeModel = Ridge(normalize=True)
 
-    alphas = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0]
-    solvers = ['cholesky', 'lsqr', 'sparse_cg', 'svd']
+    alphas = [0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001] #, 0.001, 0.01, 0.1, 1.0]
+    solvers = ['cholesky']#, 'lsqr', 'sparse_cg', 'svd']
     param_grid = {'alpha': alphas, 'solver': solvers}
     folder = RepeatedKFold(n_splits=5, n_repeats=20)
     regressor = GridSearchCV(ridgeModel,
