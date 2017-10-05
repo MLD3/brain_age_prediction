@@ -60,16 +60,38 @@ def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lo
     print("Mean Evaluated Test Loss: %f" % np.mean(testLosses))
     print("SD   Evaluated Test Loss: %f" % np.std(testLosses))
 
-if __name__ == '__main__':
-    dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
-    dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
-    dataHolder.matricesToImages()
-    dataSet = dataHolder.returnDataSet()
-
+def test1(dataSet):
     imagesPL, predictionLayer = cnnDefault()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
-    
+
     RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
+
+def test2(dataSet):
+    imagesPL, predictionLayer = cnnSmall()
+    labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
+    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+
+    RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
+
+def test3(dataSet):
+    imagesPL, predictionLayer = cnnNeural()
+    labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
+    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+
+    RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
+
+if __name__ == '__main__':
+    dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
+    dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
+    dataHolder.matricesToImages()
+    dataSet = dataHolder.returnDataSet()
+    test1(dataSet)
+    test2(dataSet)
+    test3(dataSet)
