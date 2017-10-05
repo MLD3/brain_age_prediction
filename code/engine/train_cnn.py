@@ -28,7 +28,7 @@ def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, 
         validationLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
         print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f' % (step, trainingLoss, validationLoss))
 
-def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperation, lossFunction):
+def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
@@ -39,6 +39,26 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predicitonLayer, trainOperatio
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         sess.run(trainOperation, feed_dict=feed_dict)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
+
+    trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
+    testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
+    return (trainingLoss, testLoss)
+
+def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
+    trainingLosses = []
+    testLosses = []
+    hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
+    for i in range(numRepeats):
+        with tf.train.MonitoredSession(
+            hooks=hooks
+        ) as sess:
+            (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
+            trainingLosses.append(trainingLoss)
+            testLosses.append(testLoss)
+    print("Mean Evaluated Training Loss: %f" % np.mean(trainingLosses))
+    print("SD   Evaluated Training Loss: %f" % np.std(trainingLosses))
+    print("Mean Evaluated Test Loss: %f" % np.mean(testLosses))
+    print("SD   Evaluated Test Loss: %f" % np.std(testLosses))
 
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
@@ -51,9 +71,5 @@ if __name__ == '__main__':
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
-
-    hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
-    with tf.train.MonitoredSession(
-            hooks=hooks
-    ) as sess:
-        TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
+    
+    RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
