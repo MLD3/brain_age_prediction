@@ -4,7 +4,7 @@ from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from sklearn.svm import SVC
 from sklearn.model_selection import RepeatedKFold, GridSearchCV, train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import roc_auc_score
 from utils.config import get, is_file_prefix
 
 def performance_CI(clf, X_test, y_test, loss_func):
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         bestCLF.fit(X_train, y_train) #NOT SURE IF THIS IS NECESSARY
         bestC = clf.best_params_['C']
         bestGamma = clf.best_params_['gamma']
-        (point, lower, upper) = performance_CI(bestCLF, X_test, y_test, LOSSFUNCTIONHERE)
+        (point, lower, upper) = performance_CI(bestCLF, X_test, y_test, roc_auc_score)
         print('----------------------------------------------------------------')
         print('----------------------TEST SPLIT ' + str(i) + '-----------------------')
         print('----------------------------------------------------------------')
