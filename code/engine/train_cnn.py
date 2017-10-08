@@ -47,8 +47,9 @@ def TrainModelXY(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation
 def RepeatModelXY(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
     for i in range(numRepeats):
-        with tf.Session() as sess:
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.global_variables_initializer()
             sess.run(init)
             (trainingLoss, testLoss) = TrainModelXY(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
@@ -78,8 +79,9 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
     for i in range(numRepeats):
-        with tf.Session() as sess:
+        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.global_variables_initializer()
             sess.run(init)
             (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
