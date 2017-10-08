@@ -28,7 +28,7 @@ def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, 
         validationLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
         print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f' % (step, trainingLoss, validationLoss))
 
-def TrainModel(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
+def TrainModelXY(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
@@ -44,14 +44,14 @@ def TrainModel(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, 
     testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, imagesPL, labelsPL)
     return (trainingLoss, testLoss)
 
-def RepeatModel(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
+def RepeatModelXY(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
     for i in range(numRepeats):
         with tf.Session() as sess:
             init = tf.global_variables_initializer()
             sess.run(init)
-            (trainingLoss, testLoss) = TrainModel(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
+            (trainingLoss, testLoss) = TrainModelXY(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
             trainingLosses.append(trainingLoss)
             testLosses.append(testLoss)
     print("Mean Evaluated Training Loss: %f" % np.mean(trainingLosses))
@@ -115,7 +115,7 @@ def test2(dataSet):
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
-    RepeatModel(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
+    RepeatModelXY(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
 
 def test3(dataSet):
     print('----------------------------------------------------------------')
