@@ -47,8 +47,8 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
-    hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
     for i in range(numRepeats):
+        hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
         with tf.train.MonitoredSession(
             hooks=hooks
         ) as sess:
