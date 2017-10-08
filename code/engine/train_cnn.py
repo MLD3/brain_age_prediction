@@ -91,10 +91,7 @@ def test4(dataSet):
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
-    hooks  = [tf.train.StopAtStepHook(last_step=get('TRAIN.CNN.NB_STEPS'))]
-    with tf.train.MonitoredSession(
-        hooks=hooks
-    ) as sess:
+    with tf.train.MonitoredSession() as sess:
         (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
     print("Training loss is ", trainingLoss)
     print("Test loss is ", testLoss)
