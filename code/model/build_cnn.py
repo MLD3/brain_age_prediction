@@ -92,3 +92,34 @@ def cnnNeural(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1, act_type='relu')
     fn3 = fully_connected_layer(fn2, shape=[32 * 32, 8*8], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
     fn4 = fully_connected_layer(fn3, shape=[8*8, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     return (input_layer, fn4)
+
+def cnn_larger_klength(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
+    input_layer = tf.placeholder(tf.float32, shape=[None, 264*264])
+    # 264*264 -> 66*66*8
+    conv1 = conv_layer(x=input_layer, input_size=264, input_channels=1,
+                        filter_size=11, output_channels=8, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=4)
+    # 66*66*8 -> 33*33*8
+    pool1 = pool_layer(x=conv1, input_size=66, input_channels=8, k_length=2, stride=2, padding='SAME')
+    # 33*33*8 -> 33*33*32
+    conv2 = conv_layer(x=pool1, input_size=33, input_channels=8,
+                        filter_size=5, output_channels=32, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 33*33*32 -> 11*11*32
+    pool2 = pool_layer(x=conv2, input_size=33, input_channels=32, k_length=3, stride=3, padding='SAME')
+    # 11*11*32 -> 11*11*64
+    conv3 = conv_layer(x=pool2, input_size=11, input_channels=32,
+                        filter_size=3, output_channels=64, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 11*11*64 -> 6*6*64
+    pool3 = pool_layer(x=conv3, input_size=11, input_channels=64, k_length=3, stride=2, padding='SAME')
+    # 6*6*64 -> 6*6*128
+    conv4 = conv_layer(x=pool3, input_size=6, input_channels=64,
+                        filter_size=3, output_channels=128, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 6*6*128 -> 3*3*128
+    pool4 = pool_layer(x=conv4, input_size=6, input_channels=128, k_length=2, stride=2, padding='SAME')
+    # fully connected
+    fn1 = fully_connected_layer(pool4, shape=[3 * 3 * 128, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    return (input_layer, fn1)
+
