@@ -4,7 +4,7 @@ from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from sklearn.svm import SVC
 from sklearn.model_selection import RepeatedKFold, GridSearchCV, train_test_split
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, accuracy_score
 from utils.config import get, is_file_prefix
 
 def performance_CI(clf, X_test, y_test, loss_func):
@@ -18,7 +18,10 @@ def performance_CI(clf, X_test, y_test, loss_func):
         test_data = X_test[sample_indices]
         test_labels = y_test[sample_indices]
 
-        y_pred = clf.decision_function(test_data)
+        if (loss_func == roc_auc_score):
+            y_pred = clf.decision_function(test_data)
+        else:
+            y_pred = clf.predict(test_data)
 
         bootstrap_performances[i] = loss_func(test_labels, y_pred)
 
@@ -26,6 +29,8 @@ def performance_CI(clf, X_test, y_test, loss_func):
     point_performance = np.mean(bootstrap_performances)
 
     return (point_performance, bootstrap_performances[25], bootstrap_performances[975])
+
+
 
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
@@ -35,8 +40,8 @@ if __name__ == '__main__':
     Y = dataHolder.getBinaryColumn('Sex', 'F', 'M')
     svmModel = SVC(kernel='rbf', class_weight='balanced')
 
-    cValues = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
-    gammaValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0]
+    cValues = [10.0, 100.0, 1000.0]#[0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+    gammaValues = [0.000001, 0.00001, 0.0001]#, 0.001, 0.01, 0.1, 1.0]
     param_grid = {'C': cValues, 'gamma': gammaValues}
     folder = RepeatedKFold(n_splits=5, n_repeats=20)
     clf = GridSearchCV(svmModel,
@@ -55,12 +60,12 @@ if __name__ == '__main__':
         bestC = clf.best_params_['C']
         bestGamma = clf.best_params_['gamma']
         (point, lower, upper) = performance_CI(bestCLF, X_test, y_test, roc_auc_score)
+        (pointAccuracy, lowerAccuracy, upperAccuracy) = performance_CI(bestCLF, X_test, y_test, accuracy_score)
         print('----------------------------------------------------------------')
         print('----------------------TEST SPLIT ' + str(i) + '-----------------------')
         print('----------------------------------------------------------------')
-        cvResults['mean_test_score'] = -1.0 * cvResults['mean_test_score']
-        cvResults['mean_train_score'] = -1.0 * cvResults['mean_train_score']
         print(cvResults[['param_C', 'param_gamma', 'mean_test_score', 'std_test_score', 'mean_train_score', 'std_train_score']])
         print("Best C: " + str(bestC))
         print("Best Gamma: " + str(bestGamma))
-        print("Performance on Test Set: " + '%f' % point + '(' + '%f' % lower + ',' + '%f' % upper + ')')
+        print("AUROC Performance on Test Set: " + '%f' % point + '(' + '%f' % lower + ',' + '%f' % upper + ')')
+        print("Accuracy Performance on Test Set: " + '%f' % pointAccuracy + '(' + '%f' % lowerAccuracy + ',' + '%f' % upperAccuracy + ')')
