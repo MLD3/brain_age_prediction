@@ -21,7 +21,7 @@ def GetEvaluatedLoss(sess, dataSet, lossFunction, imagesPL, labelsPL):
     return sess.run(lossFunction, feed_dict=feed_dict)
 
 def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet):
-    if step % 100 == 0:
+    if step % 10 == 0:
         trainFeedDict = DefineFeedDict(splitTrainSet, imagesPL, labelsPL)
         trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
         testFeedDict = DefineFeedDict(splitTestSet, imagesPL, labelsPL)
@@ -84,11 +84,24 @@ def test3(dataSet):
 
     RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
 
+def test4(dataSet):
+    imagesPL, predictionLayer = cnn_larger_klength()
+    labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
+    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+
+    with tf.train.MonitoredSession() as sess:
+        (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
+    print("Training loss is ", trainingLoss)
+    print("Test loss is ", testLoss)
+
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
     dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
     dataHolder.matricesToImages()
     dataSet = dataHolder.returnDataSet()
-    test1(dataSet)
-    test2(dataSet)
-    test3(dataSet)
+    # test1(dataSet)
+    # test2(dataSet)
+    # test3(dataSet)
+    test4(dataSet)
