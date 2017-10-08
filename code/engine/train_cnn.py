@@ -48,7 +48,9 @@ def RepeatModel(X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossF
     trainingLosses = []
     testLosses = []
     for i in range(numRepeats):
-        with tf.train.MonitoredSession() as sess:
+        with tf.Session() as sess:
+            init = tf.global_variables_initializer()
+            sess.run(init)
             (trainingLoss, testLoss) = TrainModel(sess, X, Y, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
             trainingLosses.append(trainingLoss)
             testLosses.append(testLoss)
@@ -77,7 +79,9 @@ def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lo
     trainingLosses = []
     testLosses = []
     for i in range(numRepeats):
-        with tf.train.MonitoredSession() as sess:
+        with tf.Session() as sess:
+            init = tf.global_variables_initializer()
+            sess.run(init)
             (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
             trainingLosses.append(trainingLoss)
             testLosses.append(testLoss)
