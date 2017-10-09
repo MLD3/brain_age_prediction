@@ -111,7 +111,7 @@ def test2(dataSet):
     X = np.array([mat[np.tril_indices(mat.shape[0], k=-1)] for mat in dataSet.matrices])
     Y = dataSet._df['AgeYears'].values.copy()
 
-    imagesPL, predictionLayer = cnnSmall()
+    imagesPL, predictionLayer = cnnNeural()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -121,9 +121,9 @@ def test2(dataSet):
 
 def test3(dataSet):
     print('----------------------------------------------------------------')
-    print('----------------------------TEST 1------------------------------')
+    print('----------------------------TEST 3------------------------------')
     print('----------------------------------------------------------------')
-    imagesPL, predictionLayer = cnnNeural()
+    imagesPL, predictionLayer = cnnSmall()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
     dataHolder.matricesToImages()
     dataSet = dataHolder.returnDataSet()
-    test1(dataSet)
+    # test1(dataSet)
     test2(dataHolder)
     test3(dataSet)
     test4(dataSet)
