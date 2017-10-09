@@ -151,5 +151,5 @@ if __name__ == '__main__':
     dataSet = dataHolder.returnDataSet()
     # test1(dataSet)
     test2(dataHolder)
-    test3(dataSet)
+    # test3(dataSet)
     test4(dataSet)
