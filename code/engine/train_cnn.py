@@ -109,7 +109,8 @@ def test2(dataSet):
     print('----------------------------TEST 2------------------------------')
     print('----------------------------------------------------------------')
     X = np.array([mat[np.tril_indices(mat.shape[0], k=-1)] for mat in dataSet.matrices])
-    Y = dataSet._df['AgeYears'].values.copy()
+    Y = np.array(dataSet._df['AgeYears'].values.copy())
+    Y = np.reshape(Y, [Y.shape[0], 1])
 
     imagesPL, predictionLayer = cnnNeural()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
