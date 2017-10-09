@@ -88,9 +88,12 @@ def cnnSmall(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
 def cnnNeural(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1, act_type='relu'):
     input_layer = tf.placeholder(tf.float32, shape=[None, 34716])
     fn1 = fully_connected_layer(input_layer, shape=[34716, 64*64], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
-    fn2 = fully_connected_layer(fn1, shape=[64*64, 32*32], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
-    fn3 = fully_connected_layer(fn2, shape=[32 * 32, 8*8], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
-    fn4 = fully_connected_layer(fn3, shape=[8*8, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    dp1 = tf.nn.dropout(fn1, keep_prob=0.5)
+    fn2 = fully_connected_layer(dp1, shape=[64*64, 32*32], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    dp2 = tf.nn.dropout(fn2, keep_prob=0.5)
+    fn3 = fully_connected_layer(dp2, shape=[32 * 32, 8*8], act_type=act_type, mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    dp3 = tf.nn.dropout(fn3, keep_prob=0.5)
+    fn4 = fully_connected_layer(dp3, shape=[8*8, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     return (input_layer, fn4)
 
 def cnn_larger_klength(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
