@@ -20,6 +20,13 @@
             "MOMENTUM": 0.9,
             "NB_STEPS": 4000,
             "BATCH_SIZE": 128
+        },
+        "ROI_BASELINE": {
+            "CHECKPOINT": "../checkpoints/roi_basekline.ckpt",
+            "LEARNING_RATE": 0.0005,
+            "MOMENTUM": 0.9,
+            "NB_STEPS": 1000,
+            "BATCH_SIZE": 128,
         }
     }
 }
