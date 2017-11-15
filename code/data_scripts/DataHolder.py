@@ -27,7 +27,7 @@ class DataHolder(object):
 
     def matricesToImages(self):
         for index in range(self.numSubjects):
-            np.fill_diagonal(self.matrices[index], 0)
+            np.fill_diagonal(self.matrices[index], 1)
 
     def returnDataSet(self):
         mats = np.array(self.matrices)

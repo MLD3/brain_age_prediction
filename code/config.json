@@ -9,7 +9,8 @@
             "PATH": "../Data/PNC_519_phenotypics.csv"
         },
         "MATRICES": {
-            "PATH": "../Data/Matrices"
+            "PATH": "../Data/Matrices",
+            "DIMENSION": 264
         }
     },
     "TRAIN": {
