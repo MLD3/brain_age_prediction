@@ -15,7 +15,7 @@
     },
     "TRAIN": {
         "CNN": {
-            "CHECKPOINT": "../checkpoints/cnn.ckpt",
+            "CHECKPOINT_DIR": "../checkpoints/cnn/",
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
@@ -23,7 +23,7 @@
             "BATCH_SIZE": 128
         },
         "ROI_BASELINE": {
-            "CHECKPOINT": "../checkpoints/roi_basekline.ckpt",
+            "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
             "NB_STEPS": 1000,
