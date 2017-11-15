@@ -26,7 +26,7 @@
             "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 1000,
+            "NB_STEPS": 100,
             "BATCH_SIZE": 128,
         }
     }

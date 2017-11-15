@@ -28,13 +28,14 @@ class DataHolder(object):
     def matricesToImages(self):
         for index in range(self.numSubjects):
             np.fill_diagonal(self.matrices[index], 1)
+            self.matrices[index] = np.reshape(self.matrices[index], (get('DATA.MATRICES.DIMENSION'), get('DATA.MATRICES.DIMENSION'), 1))
 
     def returnDataSet(self):
         mats = np.array(self.matrices)
         mats = np.reshape(mats, (mats.shape[0], mats.shape[1], mats.shape[2], 1))
         labels = np.array(self._df['AgeYears'].values.copy())
         labels = np.reshape(labels, (labels.shape[0], 1))
-        return DataSet(mats, labels, reshape=True)
+        return DataSet(mats, labels)
 
     def filterByColumn(self, columnName, equalValue):
         return self._df[self._df[columnName] == equalValue]

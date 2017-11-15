@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from utils import get
+from utils.config import get
 
 def TrainingPlaceholder():
     """
@@ -14,7 +14,7 @@ def MatrixPlaceholders():
     Returns input and output placeholders for the connectivity matrices in the data file,
     """
     matricesPL = tf.placeholder(dtype=tf.float32, shape=(None, get('DATA.MATRICES.DIMENSION'), get('DATA.MATRICES.DIMENSION'), 1), name='matricesPL')
-    labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,), name='labelsPL')
+    labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
     return (matricesPL, labelsPL)
 
 def AdamOptimizer(loss, learningRate):
