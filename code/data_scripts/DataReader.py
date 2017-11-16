@@ -1,5 +1,4 @@
 import pandas as pd
-<<<<<<< HEAD
 from os import listdir
 from os.path import join, isfile
 import nibabel as nib

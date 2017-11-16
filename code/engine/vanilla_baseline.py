@@ -50,7 +50,7 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
-    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
     for i in range(numRepeats):
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             init = tf.global_variables_initializer()
