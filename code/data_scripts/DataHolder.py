@@ -4,6 +4,9 @@ from data_scripts.DataReader import *
 from data_scripts.DataPlotter import plotHist
 from data_scripts.DataSet import DataSet
 from utils.config import get, is_file_prefix
+import nibabel as nib
+import os
+
 
 class DataHolder(object):
     def __init__(self, df):
@@ -24,6 +27,38 @@ class DataHolder(object):
             matrixPath = path + str(subjectID) + '.csv'
             matrix = readMatrix(matrixPath)
             self.matrices.append(matrix)
+
+    def get_independent_image(self, image):
+        image_set = []
+        for i in range(120):
+            self.matrices.append(image.get_data()[:,:,:,i])
+
+    def getNIIImagesFromPath(self, path):
+        self.matrices = []
+        if path[-1] != '/':
+            path += '/'
+
+        for subjectID in self._df['Subject']:
+            image_path = path + "s6_" + str(subjectID) + ".nii"
+            if os.path.isfile(image_path):
+                image = nib.load(image_path)
+                self.get_independent_image(image)
+                # self.matrices.append(image.get_data())
+
+    def copy_labels(self, labels):
+        copied_label = np.zeros((labels.shape[0] * 120, 1))
+        for i in range(labels.shape[0]):
+            for j in range(120):
+                copied_label[120 * i + j, 0] = labels[i]
+        return copied_label
+
+    def returnNIIDataset(self):
+        mats = np.array(self.matrices)
+        mats = np.reshape(mats, (mats.shape[0], mats.shape[1], mats.shape[2], mats.shape[3], 1))
+        labels = np.array(self._df['AgeYears'].values.copy())
+        labels = self.copy_labels(labels)
+        return DataSet(mats, labels, reshape=True, fMRI=True)
+
 
     def matricesToImages(self):
         for index in range(self.numSubjects):

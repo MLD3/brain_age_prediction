@@ -10,6 +10,15 @@
         },
         "MATRICES": {
             "PATH": "../Data/Matrices"
+        },
+        "IMAGES":{
+            "PATH": "../Data/Images"
+        },
+        "fMRI_PHENOTYPICS": {
+            "PATH" : "../Data/PNC_724_phenotypics.csv"
+        },
+        "SAMPLE": {
+            "PATH": "../Data/sample.csv"
         }
     },
     "TRAIN": {
@@ -18,8 +27,8 @@
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 4000,
-            "BATCH_SIZE": 128
+            "NB_STEPS": 10,
+            "BATCH_SIZE": 1
         }
     }
 }

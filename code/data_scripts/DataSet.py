@@ -13,7 +13,8 @@ class DataSet(object):
                  numClasses=2,
                  fake_data=False,
                  dtype=dtypes.uint8,
-                 reshape=False):
+                 reshape=False,
+                 fMRI=False):
         """Construct a DataSet.
         """
         dtype = dtypes.as_dtype(dtype).base_dtype
@@ -28,8 +29,10 @@ class DataSet(object):
             # Convert shape from [num examples, rows, columns, depth]
             # to [num examples, rows*columns] (assuming depth == 1)
             if reshape:
-                images = images.reshape(images.shape[0],
-                                        images.shape[1] * images.shape[2] * images.shape[3])
+                if fMRI:
+                    images = images.reshape(images.shape[0], images.shape[1] * images.shape[2] * images.shape[3] * images.shape[4])
+                else:
+                    images = images.reshape(images.shape[0], images.shape[1] * images.shape[2] * images.shape[3])
             if oneHot:
                 labels = self.convert_to_one_hot(labels, numClasses=numClasses)
         self._images = images
