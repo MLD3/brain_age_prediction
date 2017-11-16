@@ -4,6 +4,30 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
+def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationLosses, title, savePath, defaultBatchIndexSpacing=50):
+    """
+    Saves a plot of the training loss and validation loss for a single run of training.
+    """
+    numberOfFolds, numberOfSteps = accumulatedTrainingLosses.shape
+
+    batchX = np.linspace(0, len(numberOfSteps - 1) * defaultBatchIndexSpacing, len(numberOfSteps))
+
+    plt.title(title)
+    plt.subplot(1, 2, 1)
+    plt.xlabel('Batch Index')
+    plt.ylabel('Training Loss')
+    for k in range(numberOfFolds):
+        plt.scatter(batchX, accumulatedTrainingLoss[k, :], c=(0.5 * k/numberOfFolds, 0.7 * k / numberOfFolds, 1.0))
+
+    plt.subplot(1, 2, 2)
+    plt.xlabel('Batch Index')
+    plt.ylabel('Validation Loss')
+    for k in range(numberOfFolds):
+        plt.scatter(batchX, accumulatedValidationLoss[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
+
+    plt.savefig(savePath, bbox_inches='tight')
+
+
 def plotHist(X, saveName='', title='Histogram of X'):
     fig, ax = plt.subplots()
     counts, bins, patches = ax.hist(X, facecolor='mediumseagreen', edgecolor='black')

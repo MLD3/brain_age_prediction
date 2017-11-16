@@ -9,7 +9,8 @@
             "PATH": "../Data/PNC_519_phenotypics.csv"
         },
         "MATRICES": {
-            "PATH": "../Data/Matrices"
+            "PATH": "../Data/Matrices",
+            "DIMENSION": 264
         },
         "IMAGES":{
             "PATH": "../Data/Images"
@@ -23,7 +24,22 @@
     },
     "TRAIN": {
         "CNN": {
-            "CHECKPOINT": "../checkpoints/cnn.ckpt",
+            "CHECKPOINT_DIR": "../checkpoints/cnn/",
+            "LEARNING_RATE": 0.0005,
+            "LEARNING_RATE_LARGE": 0.01,
+            "MOMENTUM": 0.9,
+            "NB_STEPS": 4000,
+            "BATCH_SIZE": 128
+        },
+        "ROI_BASELINE": {
+            "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
+            "LEARNING_RATE": 0.0005,
+            "MOMENTUM": 0.9,
+            "NB_STEPS": 100,
+            "BATCH_SIZE": 128,
+        },
+        "VINILLA_BASELINE": {
+            "CHECKPOINT_DIR": "../checkpoints/cnn/",
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
