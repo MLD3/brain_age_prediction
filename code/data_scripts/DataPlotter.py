@@ -19,13 +19,13 @@ def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationL
     plt.xlabel('Batch Index')
     plt.ylabel('Training Loss')
     for k in range(numberOfFolds):
-        plt.scatter(batchX, accumulatedTrainingLoss[k, :], c=(0.5 * k/numberOfFolds, 0.7 * k / numberOfFolds, 1.0))
+        plt.scatter(batchX, accumulatedTrainingLosses[k, :], c=(0.5 * k/numberOfFolds, 0.7 * k / numberOfFolds, 1.0))
 
     plt.subplot(1, 2, 2)
     plt.xlabel('Batch Index')
     plt.ylabel('Validation Loss')
     for k in range(numberOfFolds):
-        plt.scatter(batchX, accumulatedValidationLoss[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
+        plt.scatter(batchX, accumulatedValidationLosses[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
 
     plt.savefig(savePath, bbox_inches='tight')
 
