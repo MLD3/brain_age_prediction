@@ -50,7 +50,7 @@ def SaveModel(sess, step, saver, path, stepSize=100):
     """
     if step % stepSize == 0:
         saver.save(sess, path)
-        print('step: %d, saved model to path  %s' % (step, path))
+        print('Step: %d, Saved model to path  %s' % (step, path))
 
 def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
                numberOfSteps=get('TRAIN.ROI_BASELINE.NB_STEPS'), batchSize=get('TRAIN.ROI_BASELINE.BATCH_SIZE')):
@@ -154,7 +154,7 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
         saveName = saveNames[i]
         print('Model %s had validation performance: %f' % (saveName, finalValidationPerformances[i]))
     print('===================BEST MODEL===================')
-    print('Best model was %s with validation performance of %f', (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
+    print('Best model was %s with validation performance of %f' % (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
 
     index = 0
     for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfSteps, batchSizes):
