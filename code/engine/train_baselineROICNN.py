@@ -67,7 +67,6 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     accumulatedValidationLoss = []
 
     for batch_index in range(numberOfSteps):
-        print(batch_index)
         ############# RUN TRAINING OPERATIONS #############
         batch_images, batch_labels = splitTrainSet.next_batch(batchSize)
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), matricesPL, labelsPL, trainingPL, isTraining=True)
