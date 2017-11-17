@@ -123,7 +123,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     return averageFinalValidationPerformance
 
 def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations,
-                                 lossFunction, trainingPL, numberOfSteps, batchSizes, saveNames):
+                                 lossFunction, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
@@ -132,8 +132,7 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     bestIndex = -1
     lowestLoss = math.inf
     finalValidationPerformances = []
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfSteps, batchSizes):
-
+    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
         saveName = saveNames[index]
         print('===================%s===================' % saveName)
         savePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName
@@ -157,10 +156,10 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     print('Best model was %s with validation performance of %f' % (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
 
     index = 0
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfSteps, batchSizes):
+    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
         if (index == bestIndex):
             print('bestIndex: %i' % index)
-
+        index += 1
 
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
