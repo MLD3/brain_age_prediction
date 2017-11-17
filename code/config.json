@@ -36,7 +36,7 @@
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
             "NB_STEPS": 100,
-            "BATCH_SIZE": 16,
+            "BATCH_SIZE": 32,
         },
         "VINILLA_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/cnn/",
