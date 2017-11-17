@@ -3,6 +3,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+matplotlib.use('agg')
 
 def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationLosses, title, savePath, defaultBatchIndexSpacing=50):
     """
