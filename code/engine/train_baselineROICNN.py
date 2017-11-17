@@ -40,7 +40,9 @@ def ReportProgress(sess, step, lossFunction, matricesPL, labelsPL, splitTrainSet
         trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, matricesPL, labelsPL, trainingPL)
         validationLoss = GetEvaluatedLoss(sess, splitValdSet, lossFunction, matricesPL, labelsPL, trainingPL)
         print('Step: %d, Evaluated Training Loss: %f, Evaluated Validation Loss: %f' % (step, trainingLoss, validationLoss))
-    return (trainingLoss, validationLoss, step % stepSize == 0)
+        return (trainingLoss, validationLoss, True)
+    else
+        return (None, None, False)
 
 def SaveModel(sess, step, saver, path, stepSize=100):
     """
