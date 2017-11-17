@@ -10,7 +10,7 @@ def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationL
     """
     numberOfFolds, numberOfSteps = accumulatedTrainingLosses.shape
 
-    batchX = np.linspace(0, len(numberOfSteps - 1) * defaultBatchIndexSpacing, len(numberOfSteps))
+    batchX = np.linspace(0, (numberOfSteps - 1) * defaultBatchIndexSpacing, numberOfSteps)
 
     plt.title(title)
     plt.subplot(1, 2, 1)
