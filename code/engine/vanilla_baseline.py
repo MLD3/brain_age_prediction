@@ -22,7 +22,7 @@ def GetEvaluatedLoss(sess, dataSet, lossFunction, imagesPL, labelsPL):
     return sess.run(lossFunction, feed_dict=feed_dict)
 
 def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet):
-    if step % 1 == 0:
+    if step % 10 == 0:
         trainFeedDict = DefineFeedDict(splitTrainSet, imagesPL, labelsPL)
         trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
         testFeedDict = DefineFeedDict(splitTestSet, imagesPL, labelsPL)
@@ -81,5 +81,5 @@ if __name__ == '__main__':
     dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.PATH'))
     # print(len(dataHolder.matrices))
     dataSet = dataHolder.returnNIIDataset()
-
+    # print(dataSet.images.shape)
     test(dataSet)

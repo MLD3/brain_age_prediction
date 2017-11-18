@@ -1,6 +1,6 @@
 .DS_Store
 *.pyc
 [Dd]ata/*
-*.png
 checkpoints/*
 *_out
+summary/*

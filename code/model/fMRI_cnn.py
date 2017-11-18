@@ -43,32 +43,25 @@ def fully_connected_layer(x, shape, act_type, mean, sd, bias):
 
 def fMRI_4D_CNN(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
     input_layer = tf.placeholder(tf.float32, shape=[None, 52*62*45])
-    # 52*62*45 -> 52*62*45*8
+    # 52*62*45 -> 52*62*45*2
     conv1 = conv_layer(x = input_layer, input_height = 52, input_width = 62, 
-                        input_depth = 45, input_channels = 1, filter_size = 11, 
-                        output_channels=8, padding='SAME', act_type='relu', 
+                        input_depth = 45, input_channels = 1, filter_size = 7, 
+                        output_channels=2, padding='SAME', act_type='relu', 
                         mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-    print(conv1.shape)
-    # 52*62*45*8 -> 26*31*23*8
-    pool1 = pool_layer(x=conv1, input_height = 52, input_width = 62, input_depth = 45, input_channels=8, k_length=2, stride=2, padding='SAME')
-    print(pool1.shape)
-    # 26*31*23*8 -> 26*31*23*32
-    conv2 = conv_layer(x=pool1, input_height = 26, input_width = 31, input_depth = 23, input_channels=8,
-                        filter_size=5, output_channels=32, padding='SAME',
+    # 52*62*45*2 -> 26*31*23*2
+    pool1 = pool_layer(x=conv1, input_height = 52, input_width = 62, input_depth = 45, input_channels=2, k_length=2, stride=2, padding='SAME')
+    # 26*31*23*2 -> 26*31*23*8
+    conv2 = conv_layer(x=pool1, input_height = 26, input_width = 31, input_depth = 23, input_channels=2,
+                        filter_size=5, output_channels=8, padding='SAME',
                         act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-    print(conv2.shape)
-    # 26*31*23*32 -> 13*16*12*32
-    pool2 = pool_layer(x=conv2, input_height = 26, input_width = 31, input_depth = 23, input_channels=32, k_length=2, stride=2, padding='SAME')
-    print(pool2.shape)
-    # 13*16*12*32 -> 13*16*12*128
-    conv3 = conv_layer(x=pool2, input_height = 13, input_width = 16, input_depth = 12, input_channels=32,
-                        filter_size=3, output_channels=128, padding='SAME',
+    # 26*31*23*8 -> 13*16*12*8
+    pool2 = pool_layer(x=conv2, input_height = 26, input_width = 31, input_depth = 23, input_channels=8, k_length=2, stride=2, padding='SAME')
+    # 13*16*12*8 -> 13*16*12*16
+    conv3 = conv_layer(x=pool2, input_height = 13, input_width = 16, input_depth = 12, input_channels=8,
+                        filter_size=3, output_channels=16, padding='SAME',
                         act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-    print(conv3.shape)
-    # 13*16*12*128 -> 7*8*6*128
-    pool3 = pool_layer(x=conv3, input_height = 13, input_width = 16, input_depth = 12, input_channels=128, k_length=3, stride=2, padding='SAME')
-    print(pool3.shape)
+    # 13*16*12*16 -> 7*8*6*16
+    pool3 = pool_layer(x=conv3, input_height = 13, input_width = 16, input_depth = 12, input_channels=16, k_length=3, stride=2, padding='SAME')
     # fully connected
-    fn1 = fully_connected_layer(pool3, shape=[7 * 8 * 6 * 128, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
-    print(fn1.shape)
+    fn1 = fully_connected_layer(pool3, shape=[7 * 8 * 6 * 16, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
     return input_layer, fn1

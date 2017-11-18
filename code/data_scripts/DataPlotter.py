@@ -1,8 +1,21 @@
 import numpy as np
 import pandas as pd
 
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+
+def PlotComparisonBarChart(performances, names, savePath, title='Final Validation Loss Of Models Compared', yLabel='Evaluated Loss Function on Validation Set'):
+    y_pos = np.arange(len(names))
+
+    plt.bar(y_pos, performances, align='center', alpha=0.5)
+    plt.xticks(y_pos, names, rotation=45)
+    plt.ylabel(yLabel)
+    plt.title(title)
+
+    plt.savefig(savePath, bbox_inches='tight')
+    plt.close()
 
 def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationLosses, title, savePath, defaultBatchIndexSpacing=50):
     """
@@ -10,23 +23,23 @@ def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationL
     """
     numberOfFolds, numberOfSteps = accumulatedTrainingLosses.shape
 
-    batchX = np.linspace(0, len(numberOfSteps - 1) * defaultBatchIndexSpacing, len(numberOfSteps))
+    batchX = np.linspace(0, (numberOfSteps - 1) * defaultBatchIndexSpacing, numberOfSteps)
 
     plt.title(title)
     plt.subplot(1, 2, 1)
     plt.xlabel('Batch Index')
     plt.ylabel('Training Loss')
     for k in range(numberOfFolds):
-        plt.scatter(batchX, accumulatedTrainingLoss[k, :], c=(0.5 * k/numberOfFolds, 0.7 * k / numberOfFolds, 1.0))
+        plt.scatter(batchX, accumulatedTrainingLosses[k, :], c=(0.5 * k/numberOfFolds, 0.7 * k / numberOfFolds, 1.0))
 
     plt.subplot(1, 2, 2)
     plt.xlabel('Batch Index')
     plt.ylabel('Validation Loss')
     for k in range(numberOfFolds):
-        plt.scatter(batchX, accumulatedValidationLoss[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
+        plt.scatter(batchX, accumulatedValidationLosses[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
 
     plt.savefig(savePath, bbox_inches='tight')
-
+    plt.close()
 
 def plotHist(X, saveName='', title='Histogram of X'):
     fig, ax = plt.subplots()
@@ -65,3 +78,4 @@ def plotHist(X, saveName='', title='Histogram of X'):
         plt.show()
     else:
         plt.savefig(saveName, bbox_inches='tight')
+        plt.close()
