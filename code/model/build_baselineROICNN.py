@@ -1,13 +1,14 @@
 import tensorflow as tf
 import numpy as np
 from utils.config import get
+from placeholders.shared_placeholders import *
 
 def standardBatchNorm(inputs, trainingPL, momentum=0.9):
     return tf.layers.batch_normalization(inputs, training=trainingPL, momentum=momentum)
 
 def standardConvolution(inputs, filters, kernel_size, strides=(1,1), name=None):
     return tf.layers.conv2d(inputs=inputs, filters=filters, kernel_size=kernel_size,
-                            strides=strides, padding='SAME', activation=tf.nn.elu,
+                            strides=strides, padding='valid', activation=tf.nn.elu,
                             use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer(),
                             bias_initializer=tf.zeros_initializer(), name=name)
 
@@ -29,8 +30,8 @@ def baselineROICNN(matricesPL, trainingPL):
     numberOfUnitsInHiddenLayer = 96
     numberOfUnitsInOutputLayer = 1
 
-    kernelSizeOfFirstConvolution = (1, matrixDim)
-    kernelSizeOfSecondConvolution = (matrixDim, 1)
+    kernelSizeOfFirstConvolution = [1, matrixDim]
+    kernelSizeOfSecondConvolution = [matrixDim, 1]
 
     dropoutKeepProbability = 0.6
 
@@ -40,7 +41,7 @@ def baselineROICNN(matricesPL, trainingPL):
     rowNormalized = standardBatchNorm(inputs=rowConvolution, trainingPL=trainingPL)
 
     ########## SECOND CONVOLUTIONAL LAYER: (matrixDim, 1) ##########
-    columnConvolution = tf.layers.conv2d(inputs=rowNormalized, filters=filtersInSecondConvolution,
+    columnConvolution = standardConvolution(inputs=rowNormalized, filters=filtersInSecondConvolution,
                                          kernel_size=kernelSizeOfSecondConvolution, name='columnConvolution')
     columnNormalized = standardBatchNorm(inputs=columnConvolution, trainingPL=trainingPL)
 
@@ -52,3 +53,8 @@ def baselineROICNN(matricesPL, trainingPL):
     ########## OUTPUT LAYER: 1 UNIT (REGRESSION)         ##########
     outputLayer = standardDense(inputs=droppedOutHiddenLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
+
+if __name__ == '__main__':
+    matricesPL, labelsPL = MatrixPlaceholders()
+    trainingPL = TrainingPlaceholder()
+    outputLayer = baselineROICNN(matricesPL, trainingPL)
