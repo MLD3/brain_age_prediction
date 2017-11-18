@@ -6,6 +6,16 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
+def PlotComparisonBarChart(performances, names, savePath, title='Final Validation Loss Of Models Compared', yLabel='Evaluated Loss Function on Validation Set'):
+    y_pos = np.arange(len(names))
+
+    plt.bar(y_pos, performances, align='center', alpha=0.5)
+    plt.xticks(y_pos, names, rotation=45)
+    plt.ylabel(yLabel)
+    plt.title(title)
+
+    plt.savefig(savePath, bbox_inches='tight')
+
 def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationLosses, title, savePath, defaultBatchIndexSpacing=50):
     """
     Saves a plot of the training loss and validation loss for a single run of training.

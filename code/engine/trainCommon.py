@@ -4,7 +4,7 @@ import pandas as pd
 import math
 from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
-from data_scripts.DataPlotter import PlotTrainingValidationLoss
+from data_scripts.DataPlotter import PlotTrainingValidationLoss, PlotComparisonBarChart
 from data_scripts.DataSet import DataSet
 from sklearn.model_selection import train_test_split, KFold
 from model.build_baselineROICNN import baselineROICNN
@@ -169,6 +169,7 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
         index += 1
+    PlotComparisonBarChart(performances=averageFinalValidationPerformance, names=saveNames, 'plots/barChartModelComparison.png')
 
 def CreateNameArray(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
     saveNames = []
