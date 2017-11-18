@@ -29,6 +29,6 @@ if __name__ == '__main__':
     stepCount = get('TRAIN.ROI_BASELINE.NB_STEPS')
     batchSize = get('TRAIN.ROI_BASELINE.BATCH_SIZE')
 
-    saveNames = CreateNameArray(['MatrixTest'], ['MatrixLabel'], ['roiBaseline'], ['ADAM'], ['100'], ['32'])
+    saveNames = CreateNameArray(['MatrixTest'], ['MatrixLabel'], ['roiBaseline'], ['ADAM'], ['100'], ['32', '128'])
     RunCrossValidation(dataSet, [matricesPL], [labelsPL], [predictionLayer], [trainOperation],
-                                     lossFunction, trainingPL, [stepCount], [batchSize], saveNames)
+                                     lossFunction, trainingPL, [stepCount], [batchSize, 128], saveNames)
