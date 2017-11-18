@@ -169,7 +169,7 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
         index += 1
-    PlotComparisonBarChart(performances=averageFinalValidationPerformance, names=saveNames, savePath='plots/barChartModelComparison.png')
+    PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath='plots/barChartModelComparison.png')
 
 def CreateNameArray(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
     saveNames = []
