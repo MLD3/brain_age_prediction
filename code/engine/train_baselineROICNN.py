@@ -12,7 +12,7 @@ from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
 from itertools import product
-from trainCommon import *
+from engine.trainCommon import *
 
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
