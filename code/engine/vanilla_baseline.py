@@ -22,7 +22,7 @@ def GetEvaluatedLoss(sess, dataSet, lossFunction, imagesPL, labelsPL):
     return sess.run(lossFunction, feed_dict=feed_dict)
 
 def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet):
-    if step % 1 == 0:
+    if step % 10 == 0:
         trainFeedDict = DefineFeedDict(splitTrainSet, imagesPL, labelsPL)
         trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, imagesPL, labelsPL)
         testFeedDict = DefineFeedDict(splitTestSet, imagesPL, labelsPL)
@@ -35,9 +35,9 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
 
-    for batch_index in range(get('TRAIN.CNN.NB_STEPS')):
+    for batch_index in range(get('TRAIN.VINILLA_BASELINE.NB_STEPS')):
         batch_images, batch_labels = splitTrainSet.next_batch(
-            get('TRAIN.CNN.BATCH_SIZE'))
+            get('TRAIN.VINILLA_BASELINE.BATCH_SIZE'))
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         sess.run(trainOperation, feed_dict=feed_dict)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
@@ -72,7 +72,7 @@ def test(dataSet):
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
-    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VINILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
 
@@ -81,5 +81,5 @@ if __name__ == '__main__':
     dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.PATH'))
     # print(len(dataHolder.matrices))
     dataSet = dataHolder.returnNIIDataset()
-
+    # print(dataSet.images.shape)
     test(dataSet)
