@@ -163,9 +163,10 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
         if (index == bestIndex):
             with tf.Session() as sess:
+                sess.run(tf.global_variables_initializer())
                 fileSavePath = savePath + '_split1.ckpt'
                 saver = saveModel.restore(sess, fileSavePath)
-                testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL):
+                testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
         index += 1
 
