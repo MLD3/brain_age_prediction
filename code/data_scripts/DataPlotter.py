@@ -15,6 +15,7 @@ def PlotComparisonBarChart(performances, names, savePath, title='Final Validatio
     plt.title(title)
 
     plt.savefig(savePath, bbox_inches='tight')
+    plt.close()
 
 def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationLosses, title, savePath, defaultBatchIndexSpacing=50):
     """
@@ -38,7 +39,7 @@ def PlotTrainingValidationLoss(accumulatedTrainingLosses, accumulatedValidationL
         plt.scatter(batchX, accumulatedValidationLosses[k, :], c=(1.0 * k / numberOfFolds, 0.0, 0.0))
 
     plt.savefig(savePath, bbox_inches='tight')
-
+    plt.close()
 
 def plotHist(X, saveName='', title='Histogram of X'):
     fig, ax = plt.subplots()
@@ -77,3 +78,4 @@ def plotHist(X, saveName='', title='Histogram of X'):
         plt.show()
     else:
         plt.savefig(saveName, bbox_inches='tight')
+        plt.close()
