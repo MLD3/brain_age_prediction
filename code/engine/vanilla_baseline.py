@@ -35,9 +35,9 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
 
-    for batch_index in range(get('TRAIN.CNN.NB_STEPS')):
+    for batch_index in range(get('TRAIN.VINILLA_BASELINE.NB_STEPS')):
         batch_images, batch_labels = splitTrainSet.next_batch(
-            get('TRAIN.CNN.BATCH_SIZE'))
+            get('TRAIN.VINILLA_BASELINE.BATCH_SIZE'))
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         sess.run(trainOperation, feed_dict=feed_dict)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
@@ -72,7 +72,7 @@ def test(dataSet):
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
-    trainOperation = tf.train.AdamOptimizer(get('TRAIN.CNN.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VINILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
 
