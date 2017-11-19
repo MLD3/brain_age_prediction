@@ -33,9 +33,10 @@
         },
         "ROI_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
-            "LARGE_LEARNING_RATE": 0.05,
+            "LARGE_LEARNING_RATE": 0.001,
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
+            "SMALL_NB_STEPS": 200,
             "NB_STEPS": 5000,
             "LARGE_NB_STEPS": 10000,
             "BATCH_SIZE": 32,
