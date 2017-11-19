@@ -23,7 +23,7 @@ def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None)
                            use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer(),
                            bias_initializer=tf.zeros_initializer(), name=name)
 
-def baselineROICNN(matricesPL, trainingPL):
+def baselineROICNN(matricesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB')):
     matrixDim = get('DATA.MATRICES.DIMENSION')
     filtersInFirstConvolution = 64
     filtersInSecondConvolution = 128
@@ -33,7 +33,7 @@ def baselineROICNN(matricesPL, trainingPL):
     kernelSizeOfFirstConvolution = [1, matrixDim]
     kernelSizeOfSecondConvolution = [matrixDim, 1]
 
-    dropoutKeepProbability = 0.6
+    dropoutKeepProbability = keepProbability
 
     ########## FIRST CONVOLUTIONAL LAYER: (1, matrixDim)  ##########
     rowConvolution = standardConvolution(inputs=matricesPL, filters=filtersInFirstConvolution,

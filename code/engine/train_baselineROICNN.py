@@ -14,13 +14,19 @@ from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommon import *
 
-def GetROIBaselineModel(learningRateName='LEARNING_RATE', stepCountName='NB_STEPS', batchSizeName='BATCH_SIZE'):
-    ############ DEFINE PLACEHOLDERS, OPERATIONS ############
-
+def GetROIBaselineModel(learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM'):
+    ############ DEFINE PLACEHOLDERS, LOSS ############
     predictionLayer = baselineROICNN(matricesPL, trainingPL)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
-    trainOperation = AdamOptimizer(lossFunction, get('TRAIN.ROI_BASELINE.%s' % learningRateName))
+    ############ DEFINE OPTIMIZER ############
+    if optimizer == 'ADAM':
+        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.ROI_BASELINE.%s' % learningRateName))
+    elif optimizer == 'GRAD_DECAY':
+        trainOperation = ScheduledGradOptimizer(lossFunction, baseLearningRate=get('TRAIN.ROI_BASELINE.%s' % learningRateName))
+
+    ############ DEFINE LEARNING PARAMETERS ############
     stepCount = get('TRAIN.ROI_BASELINE.%s' % stepCountName)
     batchSize = get('TRAIN.ROI_BASELINE.%s' % batchSizeName)
 
@@ -50,32 +56,33 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append('DefaultSettings')
 
-    with tf.variable_scope('LargeLearningRate'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(learningRateName='LARGE_LEARNING_RATE')
+    with tf.variable_scope('HeavyDropout'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB_SMALL', stepCountName='LARGE_NB_STEPS')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
-        saveNames.append('LargeLearningRate')
+        saveNames.append('HeavyDropout')
 
-    with tf.variable_scope('LargeBatchSize'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(batchSizeName='LARGE_BATCH_SIZE')
+    with tf.variable_scope('ExponentialDecay'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(learningRateName='LEARNING_RATE_LARGE', stepCountName='LARGE_NB_STEPS', optimizer='GRAD_DECAY')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
-        saveNames.append('LargeBatchSize')
+        saveNames.append('ExponentialDecay')
 
-    with tf.variable_scope('LargeNumberOfIterations'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(stepCountName='LARGE_NB_STEPS')
+    with tf.variable_scope('DecayAndHeavyDropout'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB_SMALL', learningRateName='LEARNING_RATE_LARGE', stepCountName='LARGE_NB_STEPS', optimizer='GRAD_DECAY')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
-        saveNames.append('LargeNumberOfIterations')
+        saveNames.append('DecayAndHeavyDropout')
+
 
     RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)

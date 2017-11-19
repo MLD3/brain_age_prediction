@@ -33,13 +33,15 @@
         },
         "ROI_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
-            "LARGE_LEARNING_RATE": 0.001,
+            "LARGE_LEARNING_RATE": 0.05,
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 1000,
-            "LARGE_NB_STEPS": 5000,
+            "NB_STEPS": 5000,
+            "LARGE_NB_STEPS": 10000,
             "BATCH_SIZE": 32,
-            "LARGE_BATCH_SIZE": 128
+            "LARGE_BATCH_SIZE": 128,
+            "KEEP_PROB": 0.6,
+            "KEEP_PROB_SMALL": 0.3
         },
         "VINILLA_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/cnn/",
