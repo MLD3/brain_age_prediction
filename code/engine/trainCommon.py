@@ -120,7 +120,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
     return averageFinalValidationPerformance
 
-def RunCrossValidation(dataSet, matrixPL, labelsaPL, predictionLayers, trainOperations,
+def RunCrossValidation(dataSet, matricesPL, labelsaPL, predictionLayers, trainOperations,
                                  lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)

@@ -77,5 +77,5 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append('LargeNumberOfIterations')
 
-    RunCrossValidation(dataSet, matrixPL, labelPL, predictionLayers, trainOperations,
+    RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
