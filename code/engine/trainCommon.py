@@ -16,6 +16,7 @@ def DefineFeedDict(dataSet, matricesPL, labelsPL, trainingPL, isTraining=False):
     """
     Defines a tensorflow feed dict for running operations
     """
+    print(dataSet.images.shape)
     feed_dict = {
         matricesPL: dataSet.images,
         labelsPL: dataSet.labels,
