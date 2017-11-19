@@ -51,7 +51,7 @@ def SaveModel(sess, step, saver, path, stepSize=100):
         print('Step: %d, Saved model to path  %s' % (step, path))
 
 def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
-               numberOfSteps=get('TRAIN.ROI_BASELINE.NB_STEPS'), batchSize=get('TRAIN.ROI_BASELINE.BATCH_SIZE')):
+               numberOfSteps, batchSize):
     """
     Trains a model defined by matricesPL, labelsPL, predictionLayer, trainOperation and lossFunction
     over numberOfSteps steps with batch size batchSize. Uses savePath to save the model.
@@ -82,7 +82,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
 def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
-                                 numberOfSteps=get('TRAIN.ROI_BASELINE.NB_STEPS'), batchSize=get('TRAIN.ROI_BASELINE.BATCH_SIZE')):
+                                 numberOfSteps, batchSize):
     """
     Trains a model using 5-fold cross validation on the given data set.
     Puts a plot of the results in the ../plots/ directory, and returns
