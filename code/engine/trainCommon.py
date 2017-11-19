@@ -11,7 +11,6 @@ from model.build_baselineROICNN import baselineROICNN
 from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
-from itertools import product
 
 def DefineFeedDict(dataSet, matricesPL, labelsPL, trainingPL, isTraining=False):
     """
@@ -133,7 +132,13 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     bestIndex = -1
     lowestLoss = math.inf
     finalValidationPerformances = []
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
+    for index in range(len(saveNames)):
+        matricesPL = matrixPlaceholders[index]
+        labelsPL = labelPlaceholders[index]
+        predictionLayer = predictionLayers[index]
+        trainOperation = trainOperations[index]
+        numberOfSteps = numberOfStepsArray[index]
+        batchSize = batchSizes[index]
         saveName = saveNames[index]
         print('===================%s===================' % saveName)
         savePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName
@@ -160,7 +165,16 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     print('Best model was %s with validation performance of %f' % (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
 
     index = 0
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
+
+    for index in range(len(saveNames)):
+        matricesPL = matrixPlaceholders[index]
+        labelsPL = labelPlaceholders[index]
+        predictionLayer = predictionLayers[index]
+        trainOperation = trainOperations[index]
+        numberOfSteps = numberOfStepsArray[index]
+        batchSize = batchSizes[index]
+        saveName = saveNames[index]
+
         if (index == bestIndex):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
@@ -170,10 +184,3 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
                 print('Best model had test loss: %f' % testLoss)
         index += 1
     PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath='plots/barChartModelComparison.png')
-
-def CreateNameArray(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
-    saveNames = []
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
-        names = matricesPL + '_' + labelsPL + '_' +  predictionLayer + '_' + trainOperation + '_' + numberOfSteps + '_' + batchSize
-        saveNames.append(names)
-    return saveNames
