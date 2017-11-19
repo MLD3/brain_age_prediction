@@ -121,7 +121,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     return averageFinalValidationPerformance
 
 def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations,
-                                 lossFunction, trainingPL, numberOfStepsArray, batchSizes, saveNames):
+                                 lossFunctions, trainingPlaceholders, numberOfStepsArray, batchSizes, saveNames):
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
@@ -136,10 +136,13 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
         matricesPL = matrixPlaceholders[index]
         labelsPL = labelPlaceholders[index]
         predictionLayer = predictionLayers[index]
+        lossFunction = lossFunctions[index]
+        trainingPL = trainingPlaceholders[index]
         trainOperation = trainOperations[index]
         numberOfSteps = numberOfStepsArray[index]
         batchSize = batchSizes[index]
         saveName = saveNames[index]
+
         print('===================%s===================' % saveName)
         savePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName
 
@@ -170,6 +173,8 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
         matricesPL = matrixPlaceholders[index]
         labelsPL = labelPlaceholders[index]
         predictionLayer = predictionLayers[index]
+        lossFunction = lossFunctions[index]
+        trainingPL = trainingPlaceholders[index]
         trainOperation = trainOperations[index]
         numberOfSteps = numberOfStepsArray[index]
         batchSize = batchSizes[index]
