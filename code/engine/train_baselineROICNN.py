@@ -14,21 +14,75 @@ from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommon import *
 
+def GetROIBaselineModel(learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM'):
+    ############ DEFINE PLACEHOLDERS, LOSS ############
+    predictionLayer = baselineROICNN(matricesPL, trainingPL)
+    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+
+    ############ DEFINE OPTIMIZER ############
+    if optimizer == 'ADAM':
+        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.ROI_BASELINE.%s' % learningRateName))
+    elif optimizer == 'GRAD_DECAY':
+        trainOperation = ScheduledGradOptimizer(lossFunction, baseLearningRate=get('TRAIN.ROI_BASELINE.%s' % learningRateName))
+
+    ############ DEFINE LEARNING PARAMETERS ############
+    stepCount = get('TRAIN.ROI_BASELINE.%s' % stepCountName)
+    batchSize = get('TRAIN.ROI_BASELINE.%s' % batchSizeName)
+
+    return predictionLayer, lossFunction, trainOperation, stepCount, batchSize
+
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.PHENOTYPICS.PATH')))
     dataHolder.getMatricesFromPath(get('DATA.MATRICES.PATH'))
     dataHolder.matricesToImages()
     dataSet = dataHolder.returnDataSet()
-
-    ############ DEFINE PLACEHOLDERS, OPERATIONS ############
     trainingPL = TrainingPlaceholder()
     matricesPL, labelsPL = MatrixPlaceholders()
-    predictionLayer = baselineROICNN(matricesPL, trainingPL)
-    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
-    trainOperation = AdamOptimizer(lossFunction, get('TRAIN.ROI_BASELINE.LEARNING_RATE'))
-    stepCount = get('TRAIN.ROI_BASELINE.NB_STEPS')
-    batchSize = get('TRAIN.ROI_BASELINE.BATCH_SIZE')
 
-    saveNames = CreateNameArray(['MatrixTest'], ['MatrixLabel'], ['roiBaseline'], ['ADAM'], ['100'], ['32', '128'])
-    RunCrossValidation(dataSet, [matricesPL], [labelsPL], [predictionLayer], [trainOperation],
-                                     lossFunction, trainingPL, [stepCount], [batchSize, 128], saveNames)
+    predictionLayers = []
+    trainOperations = []
+    lossFunctions = []
+    stepCountArray = []
+    batchSizeArray = []
+    saveNames = []
+
+    with tf.variable_scope('HeavyDropout'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('HeavyDropout')
+
+    with tf.variable_scope('ExtraHeavyDropout'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('ExtraHeavyDropout')
+
+
+    with tf.variable_scope('HeavyDropoutAndSmallLearningRate'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', learningRateName='SMALL_LEARNING_RATE', stepCountName='LARGE_NB_STEPS')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('HeavyDropoutAndSmallLearningRate')
+
+    with tf.variable_scope('ExtraHeavyDropoutAndSmallLearningRate'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', learningRateName='SMALL_LEARNING_RATE' ,stepCountName='LARGE_NB_STEPS')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('ExtraHeavyDropoutAndSmallLearningRate')
+
+    RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
+                                     lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)

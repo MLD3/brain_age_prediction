@@ -20,7 +20,7 @@ def MatrixPlaceholders():
 def AdamOptimizer(loss, learningRate):
     """
     Given the network loss, constructs the training op needed to train the
-    network.
+    network using adam optimization.
 
     Returns:
         the operation that begins the backpropogation through the network
@@ -28,4 +28,19 @@ def AdamOptimizer(loss, learningRate):
     """
     optimizer = tf.train.AdamOptimizer(learningRate)
     trainOperation = optimizer.minimize(loss)
+    return trainOperation
+
+def ScheduledGradOptimizer(loss, baseLearningRate, momentum=0.9, decaySteps=1000, decayRate=0.5):
+    """
+    Given the network loss, constructs the training op needed to train the
+    network using exponential learning rate decay and Nesterov Accelerated Gradient Descent with momentum.
+
+    Returns:
+        the operation that begins the backpropogation through the network
+        (i.e., the operation that minimizes the loss function).
+    """
+    globalStep = tf.Variable(0, trainable=False, name='GlobalStep')
+    learningRateTensor = tf.train.exponential_decay(baseLearningRate, globalStep, decaySteps, decayRate)
+    optimizer = tf.train.MomentumOptimizer(learningRateTensor, momentum=momentum, use_nesterov=True)
+    trainOperation = optimizer.minimize(loss, global_step=globalStep)
     return trainOperation

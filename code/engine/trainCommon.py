@@ -11,7 +11,6 @@ from model.build_baselineROICNN import baselineROICNN
 from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
-from itertools import product
 
 def DefineFeedDict(dataSet, matricesPL, labelsPL, trainingPL, isTraining=False):
     """
@@ -52,7 +51,7 @@ def SaveModel(sess, step, saver, path, stepSize=100):
         print('Step: %d, Saved model to path  %s' % (step, path))
 
 def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
-               numberOfSteps=get('TRAIN.ROI_BASELINE.NB_STEPS'), batchSize=get('TRAIN.ROI_BASELINE.BATCH_SIZE')):
+               numberOfSteps, batchSize):
     """
     Trains a model defined by matricesPL, labelsPL, predictionLayer, trainOperation and lossFunction
     over numberOfSteps steps with batch size batchSize. Uses savePath to save the model.
@@ -83,7 +82,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
 def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
-                                 numberOfSteps=get('TRAIN.ROI_BASELINE.NB_STEPS'), batchSize=get('TRAIN.ROI_BASELINE.BATCH_SIZE')):
+                                 numberOfSteps, batchSize):
     """
     Trains a model using 5-fold cross validation on the given data set.
     Puts a plot of the results in the ../plots/ directory, and returns
@@ -117,12 +116,15 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     accumulatedValidationLoss = np.array(accumulatedValidationLoss)
     PlotTrainingValidationLoss(accumulatedTrainingLoss, accumulatedValidationLoss, saveName, 'plots/' + saveName + '.png')
 
+    if numberOfSteps >= 1000:
+        PlotTrainingValidationLoss(accumulatedTrainingLoss[:,-1000:], accumulatedValidationLoss[:,-1000:], saveName, 'plots/' + saveName + 'last1000.png')
+
     ########## GET AVERAGE VALIDATION PERFORMANCE ##########
     averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
     return averageFinalValidationPerformance
 
-def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations,
-                                 lossFunction, trainingPL, numberOfStepsArray, batchSizes, saveNames):
+def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
+                                 lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
     splitTrainSet = DataSet(X_train, y_train)
@@ -133,8 +135,14 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     bestIndex = -1
     lowestLoss = math.inf
     finalValidationPerformances = []
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
+    for index in range(len(saveNames)):
+        predictionLayer = predictionLayers[index]
+        lossFunction = lossFunctions[index]
+        trainOperation = trainOperations[index]
+        numberOfSteps = numberOfStepsArray[index]
+        batchSize = batchSizes[index]
         saveName = saveNames[index]
+
         print('===================%s===================' % saveName)
         savePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName
 
@@ -160,7 +168,15 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
     print('Best model was %s with validation performance of %f' % (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
 
     index = 0
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(matrixPlaceholders, labelPlaceholders, predictionLayers, trainOperations, numberOfStepsArray, batchSizes):
+
+    for index in range(len(saveNames)):
+        predictionLayer = predictionLayers[index]
+        lossFunction = lossFunctions[index]
+        trainOperation = trainOperations[index]
+        numberOfSteps = numberOfStepsArray[index]
+        batchSize = batchSizes[index]
+        saveName = saveNames[index]
+
         if (index == bestIndex):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
@@ -170,10 +186,3 @@ def RunCrossValidation(dataSet, matrixPlaceholders, labelPlaceholders, predictio
                 print('Best model had test loss: %f' % testLoss)
         index += 1
     PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath='plots/barChartModelComparison.png')
-
-def CreateNameArray(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
-    saveNames = []
-    for matricesPL, labelsPL, predictionLayer, trainOperation, numberOfSteps, batchSize in product(inputPLNames, labelsPLNames, predictionLayerNames, trainOperationNames, stepCountNames, batchSizeNames):
-        names = matricesPL + '_' + labelsPL + '_' +  predictionLayer + '_' + trainOperation + '_' + numberOfSteps + '_' + batchSize
-        saveNames.append(names)
-    return saveNames
