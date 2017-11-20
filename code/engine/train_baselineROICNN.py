@@ -47,15 +47,6 @@ if __name__ == '__main__':
     batchSizeArray = []
     saveNames = []
 
-    with tf.variable_scope('DefaultSettings'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel()
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('DefaultSettings')
-
     with tf.variable_scope('HeavyDropout'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
         predictionLayers.append(predictionLayer)
@@ -65,24 +56,33 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append('HeavyDropout')
 
-    with tf.variable_scope('ExponentialDecay'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(learningRateName='LARGE_LEARNING_RATE', stepCountName='LARGE_NB_STEPS', optimizer='GRAD_DECAY')
+    with tf.variable_scope('ExtraHeavyDropout'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
-        saveNames.append('ExponentialDecay')
+        saveNames.append('ExtraHeavyDropout')
 
-    with tf.variable_scope('DecayAndHeavyDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', learningRateName='LARGE_LEARNING_RATE', stepCountName='LARGE_NB_STEPS', optimizer='GRAD_DECAY')
+
+    with tf.variable_scope('HeavyDropoutAndSmallLearningRate'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', learningRateName='SMALL_LEARNING_RATE', stepCountName='LARGE_NB_STEPS')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
-        saveNames.append('DecayAndHeavyDropout')
+        saveNames.append('HeavyDropoutAndSmallLearningRate')
 
+    with tf.variable_scope('ExtraHeavyDropoutAndSmallLearningRate'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', learningRateName='SMALL_LEARNING_RATE' ,stepCountName='LARGE_NB_STEPS')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('ExtraHeavyDropoutAndSmallLearningRate')
 
     RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
