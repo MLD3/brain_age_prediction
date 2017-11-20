@@ -70,7 +70,10 @@ def test(dataSet):
     print('----------------------------------------------------------------')
     imagesPL, predictionLayer = fMRI_4D_CNN()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
-    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    total_error = tf.reduce_sum(tf.square(tf.sub(labelsPL, tf.reduce_mean(labelsPL))))
+    unexplained_error = tf.reduce_sum(tf.square(tf.sub(labelsPL, predictionLayer)))
+    lossFunction = tf.sub(1, tf.div(total_error, unexplained_error))
+    # lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
