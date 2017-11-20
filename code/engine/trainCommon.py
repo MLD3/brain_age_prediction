@@ -116,6 +116,9 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     accumulatedValidationLoss = np.array(accumulatedValidationLoss)
     PlotTrainingValidationLoss(accumulatedTrainingLoss, accumulatedValidationLoss, saveName, 'plots/' + saveName + '.png')
 
+    if numberOfSteps >= 1000:
+        PlotTrainingValidationLoss(accumulatedTrainingLoss[:,-1000:], accumulatedValidationLoss[:,-1000:], saveName, 'plots/' + saveName + 'last1000.png')
+
     ########## GET AVERAGE VALIDATION PERFORMANCE ##########
     averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
     return averageFinalValidationPerformance
