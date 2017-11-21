@@ -35,9 +35,9 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
 
-    for batch_index in range(get('TRAIN.VINILLA_BASELINE.NB_STEPS')):
+    for batch_index in range(get('TRAIN.VANILLA_BASELINE.NB_STEPS')):
         batch_images, batch_labels = splitTrainSet.next_batch(
-            get('TRAIN.VINILLA_BASELINE.BATCH_SIZE'))
+            get('TRAIN.VANILLA_BASELINE.BATCH_SIZE'))
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         sess.run(trainOperation, feed_dict=feed_dict)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, splitTrainSet, splitTestSet)
@@ -50,9 +50,9 @@ def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperatio
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
     testLosses = []
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
     for i in range(numRepeats):
-        with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+        with tf.Session() as sess:
             init = tf.global_variables_initializer()
             sess.run(init)
             (trainingLoss, testLoss) = TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
@@ -70,9 +70,12 @@ def test(dataSet):
     print('----------------------------------------------------------------')
     imagesPL, predictionLayer = fMRI_4D_CNN()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
-    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+    total_error = tf.reduce_sum(tf.square(tf.sub(labelsPL, tf.reduce_mean(labelsPL))))
+    unexplained_error = tf.reduce_sum(tf.square(tf.sub(labelsPL, predictionLayer)))
+    lossFunction = tf.sub(1, tf.div(total_error, unexplained_error))
+    # lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
-    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VINILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10)
 

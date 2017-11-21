@@ -46,13 +46,13 @@
             "SMALL_KEEP_PROB": 0.3,
             "TINY_KEEP_PROB": 0.1
         },
-        "VINILLA_BASELINE": {
-            "CHECKPOINT_DIR": "../checkpoints/cnn/",
+        "VANILLA_BASELINE": {
+            "CHECKPOINT_DIR": "../checkpoints/vanilla_baseline/",
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 1000,
-            "BATCH_SIZE": 1
+            "NB_STEPS": 800,
+            "BATCH_SIZE": 10
         }
     }
 }
