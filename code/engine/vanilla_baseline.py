@@ -34,8 +34,13 @@ def ReportProgress(sess, step, lossFunction, trainOperation):
 
 
 # def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
-def TrainModel(dataSet):    
-    X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
+def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):    
+    X_train, _, y_train, _ = train_test_split(train_dataSet.images, train_dataSet.labels, test_size=0)
+    # X_train = train_dataSet.images
+    # y_train = train_dataSet.labels
+
+    X_test = test_dataSet.images
+    y_test = test_dataSet.labels
     # splitTrainSet = DataSet(X_train, y_train)
     # splitTestSet = DataSet(X_test, y_test)
 
@@ -74,39 +79,25 @@ def TrainModel(dataSet):
     biasDefault = 0.1
 
     with tf.variable_scope('4D_CNN'):
-        # 52*62*45 -> 52*62*45*2
-        conv1 = conv_layer(x = batch_images, input_height = 52, input_width = 62, 
-                            input_depth = 45, input_channels = 1, filter_size = 7, 
-                            output_channels=2, padding='SAME', act_type='relu', 
-                            mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-        # 52*62*45*2 -> 26*31*23*2
-        pool1 = pool_layer(x=conv1, input_height = 52, input_width = 62, input_depth = 45, input_channels=2, k_length=2, stride=2, padding='SAME')
-        # 26*31*23*2 -> 26*31*23*8
-        conv2 = conv_layer(x=pool1, input_height = 26, input_width = 31, input_depth = 23, input_channels=2,
-                            filter_size=5, output_channels=8, padding='SAME',
-                            act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-        # 26*31*23*8 -> 13*16*12*8
-        pool2 = pool_layer(x=conv2, input_height = 26, input_width = 31, input_depth = 23, input_channels=8, k_length=2, stride=2, padding='SAME')
-        # 13*16*12*8 -> 13*16*12*16
-        conv3 = conv_layer(x=pool2, input_height = 13, input_width = 16, input_depth = 12, input_channels=8,
-                            filter_size=3, output_channels=16, padding='SAME',
-                            act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
-        # 13*16*12*16 -> 7*8*6*16
-        pool3 = pool_layer(x=conv3, input_height = 13, input_width = 16, input_depth = 12, input_channels=16, k_length=3, stride=2, padding='SAME')
-        # fully connected
-        prediction = fully_connected_layer(pool3, shape=[7 * 8 * 6 * 16, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+        prediction = model_architecture(batch_images)
 
     with tf.variable_scope('Loss'):
-        print("Start loss scope")
         lossFunction = tf.losses.mean_squared_error(labels=batch_labels, predictions=prediction)
         print_loss = tf.Print(lossFunction, data = [lossFunction], message = "MSE loss: ")
 
-    print("End loss scope")
+    with tf.variable_scope('4D_CNN', reuse = True):
+        test_prediction = model_architecture(X_test)
+
+    with tf.variable_scope('Test_loss'):
+        test_loss = tf.losses.mean_squared_error(labels = y_test, predictions = test_prediction)
+        # print_test_loss = tf.Print(test_loss, data = [test_loss], message = "Test MSE loss: ")
+
+
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     mse = []
-    numRepeats = 5
+    test_mse = []
     for i in range(numRepeats):
         with tf.Session() as sess:
             print("Start tf session")
@@ -125,12 +116,40 @@ def TrainModel(dataSet):
            
                 if step % 10 == 0:
                     print("At step " + str(step) + " MSE is " + str(sess.run(lossFunction)))
+                    print("At step " + str(step) + " test MSE is " + str(sess.run(test_loss)))
                     # sess.run(print_loss)
                     # print("At step " + str(step) + " training MSE is " + str(loss))
             mse.append(sess.run(lossFunction))
+            test_mse.append(sess.run(test_loss))
             coord.request_stop()
             coord.join(threads)
     print(mse)
+    print(test_mse)
+
+def model_architecture(batch_images):
+    # 52*62*45 -> 52*62*45*2
+    conv1 = conv_layer(x = batch_images, input_height = 52, input_width = 62, 
+                        input_depth = 45, input_channels = 1, filter_size = 7, 
+                        output_channels=2, padding='SAME', act_type='relu', 
+                        mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 52*62*45*2 -> 26*31*23*2
+    pool1 = pool_layer(x=conv1, input_height = 52, input_width = 62, input_depth = 45, input_channels=2, k_length=2, stride=2, padding='SAME')
+    # 26*31*23*2 -> 26*31*23*8
+    conv2 = conv_layer(x=pool1, input_height = 26, input_width = 31, input_depth = 23, input_channels=2,
+                        filter_size=5, output_channels=8, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 26*31*23*8 -> 13*16*12*8
+    pool2 = pool_layer(x=conv2, input_height = 26, input_width = 31, input_depth = 23, input_channels=8, k_length=2, stride=2, padding='SAME')
+    # 13*16*12*8 -> 13*16*12*16
+    conv3 = conv_layer(x=pool2, input_height = 13, input_width = 16, input_depth = 12, input_channels=8,
+                        filter_size=3, output_channels=16, padding='SAME',
+                        act_type='relu', mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=1)
+    # 13*16*12*16 -> 7*8*6*16
+    pool3 = pool_layer(x=conv3, input_height = 13, input_width = 16, input_depth = 12, input_channels=16, k_length=3, stride=2, padding='SAME')
+    # fully connected
+    prediction = fully_connected_layer(pool3, shape=[7 * 8 * 6 * 16, 1], act_type='none', mean=meanDefault, sd=sdDefault, bias=biasDefault)
+    return prediction
+
 
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []
@@ -168,11 +187,15 @@ def test(dataSet):
     TrainModel(dataSet)
 
 if __name__ == '__main__':
-    dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.PATH')))
-    dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.PATH'))
+    train_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
+    train_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
     # print(len(dataHolder.matrices))
-    dataSet = dataHolder.returnNIIDataset()
+    train_dataSet = train_dataHolder.returnNIIDataset()
+
+    test_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TEST_PATH')))
+    test_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TEST_PATH'))
+    test_dataSet = test_dataHolder.returnNIIDataset()
     # print(dataSet.images.shape)
     # test(dataSet)
 
-    TrainModel(dataSet)
+    TrainModel(train_dataSet, test_dataSet, numRepeats = 5)
