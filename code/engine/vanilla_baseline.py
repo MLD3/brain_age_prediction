@@ -105,29 +105,32 @@ def TrainModel(dataSet):
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
-    with tf.Session() as sess:
-        print("Start tf session")
-        init = tf.global_variables_initializer()
-        sess.run(init)
+    mse = []
+    numRepeats = 5
+    for i in range(numRepeats):
+        with tf.Session() as sess:
+            print("Start tf session")
+            init = tf.global_variables_initializer()
+            sess.run(init)
 
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord = coord)
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(coord = coord)
 
-        sess.run(print_loss)
-        # print("Before training, MSE is ", loss)
-        print("Start looping")
-        for step in range(get('TRAIN.VANILLA_BASELINE.NB_STEPS')):
-            loss = sess.run(trainOperation)
-
-
-            if step % 1 == 0:
-                print("At step " + str(step))
-                sess.run(print_loss)
-                # print("At step " + str(step) + " training MSE is " + str(loss))
-
-        coord.request_stop()
-        coord.join(threads)
-
+            sess.run(print_loss)
+            # print("Before training, MSE is ", loss)
+            print("Start looping")
+            for step in range(get('TRAIN.VANILLA_BASELINE.NB_STEPS')):
+                loss = sess.run(trainOperation)
+                # print(sess.run(lossFunction))
+           
+                if step % 10 == 0:
+                    print("At step " + str(step) + " MSE is " + str(sess.run(lossFunction)))
+                    # sess.run(print_loss)
+                    # print("At step " + str(step) + " training MSE is " + str(loss))
+            mse.append(sess.run(lossFunction))
+            coord.request_stop()
+            coord.join(threads)
+    print(mse)
 
 def RepeatModel(dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=10):
     trainingLosses = []

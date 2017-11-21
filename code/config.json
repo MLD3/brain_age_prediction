@@ -53,8 +53,8 @@
             "MOMENTUM": 0.9,
             "CAPACITY": 10,
             "MIN_AFTER_DEQUEUE": 0,
-            "NB_STEPS": 400,
-            "BATCH_SIZE": 20
+            "NB_STEPS": 1000,
+            "BATCH_SIZE":40 
         }
     }
 }
