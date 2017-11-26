@@ -35,7 +35,7 @@ def ReportProgress(sess, step, lossFunction, trainOperation):
 
 # def TrainModel(sess, dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
 def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):    
-    X_train, _, y_train, _ = train_test_split(train_dataSet.images, train_dataSet.labels, test_size=0)
+    X_train, _, y_train, _ = train_test_split(train_dataSet.images, train_dataSet.labels, test_size=0.5)
     # X_train = train_dataSet.images
     # y_train = train_dataSet.labels
 
@@ -88,7 +88,7 @@ def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):
     with tf.variable_scope('4D_CNN', reuse = True):
         test_prediction = model_architecture(X_test)
 
-    with tf.variable_scope('Test_loss'):
+    # with tf.variable_scope('Test_loss'):
         test_loss = tf.losses.mean_squared_error(labels = y_test, predictions = test_prediction)
         # print_test_loss = tf.Print(test_loss, data = [test_loss], message = "Test MSE loss: ")
 
