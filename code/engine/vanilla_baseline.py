@@ -88,7 +88,7 @@ def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):
     with tf.variable_scope('4D_CNN', reuse = True):
         test_prediction = model_architecture(X_test)
 
-    # with tf.variable_scope('Test_loss'):
+    #with tf.variable_scope('Test_loss'):
         test_loss = tf.losses.mean_squared_error(labels = y_test, predictions = test_prediction)
         # print_test_loss = tf.Print(test_loss, data = [test_loss], message = "Test MSE loss: ")
 
@@ -115,7 +115,9 @@ def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):
                 # print(sess.run(lossFunction))
            
                 if step % 10 == 0:
+                    
                     print("At step " + str(step) + " MSE is " + str(sess.run(lossFunction)))
+                    sess.run(test_prediction)
                     print("At step " + str(step) + " test MSE is " + str(sess.run(test_loss)))
                     # sess.run(print_loss)
                     # print("At step " + str(step) + " training MSE is " + str(loss))
@@ -126,7 +128,7 @@ def TrainModel(train_dataSet, test_dataSet, numRepeats = 1):
     print(mse)
     print(test_mse)
 
-def model_architecture(batch_images):
+def model_architecture(batch_images, meanDefault = 0.0, sdDefault = 0.01, biasDefault = 0.1):
     # 52*62*45 -> 52*62*45*2
     conv1 = conv_layer(x = batch_images, input_height = 52, input_width = 62, 
                         input_depth = 45, input_channels = 1, filter_size = 7, 
