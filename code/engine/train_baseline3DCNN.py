@@ -57,7 +57,6 @@ def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, prediction
 def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=5):
     trainingLosses = []
     testLosses = []
-    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
     for i in range(numRepeats):
         with tf.Session() as sess:
             init = tf.global_variables_initializer()
@@ -89,15 +88,20 @@ def test(train_dataSet, test_dataSet):
 
 
 if __name__ == '__main__':
-    train_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
-    train_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
+    dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
+    dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
     # print(len(dataHolder.matrices))
-    train_dataSet = train_dataHolder.returnNIIDataset()
+    train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
 
-    test_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TEST_PATH')))
-    test_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TEST_PATH'))
-    test_dataSet = test_dataHolder.returnNIIDataset()
-    # print(dataSet.images.shape)
-    # test(dataSet)
+    # test_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TEST_PATH')))
+    # test_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TEST_PATH'))
+    # test_dataSet = test_dataHolder.returnNIIDataset()
+    # # print(dataSet.images.shape)
+    # # test(dataSet)
+    # print(train_dataSet.images.shape)
+    # print(test_dataSet.images.shape)
+
+    # dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
+
 
     test(train_dataSet, test_dataSet)
