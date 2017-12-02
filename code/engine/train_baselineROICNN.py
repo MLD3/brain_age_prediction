@@ -15,9 +15,9 @@ from itertools import product
 from engine.trainCommon import *
 
 def GetROIBaselineModel(learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
-                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM'):
+                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', firstHiddenLayerUnits=96, secondHiddenLayerUnits=0):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = baselineROICNN(matricesPL, trainingPL)
+    predictionLayer = baselineROICNN(matricesPL, trainingPL, firstHiddenLayerUnits=firstHiddenLayerUnits, secondHiddenLayerUnits=secondHiddenLayerUnits)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
     ############ DEFINE OPTIMIZER ############
