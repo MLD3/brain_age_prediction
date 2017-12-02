@@ -65,7 +65,6 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append('ExtraHeavyDropout')
 
-
     with tf.variable_scope('HeavyDropoutAndSmallLearningRate'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', learningRateName='SMALL_LEARNING_RATE', stepCountName='LARGE_NB_STEPS')
         predictionLayers.append(predictionLayer)

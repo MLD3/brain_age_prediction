@@ -11,6 +11,7 @@ from model.build_baselineROICNN import baselineROICNN
 from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
+from datetime import datetime
 
 def DefineFeedDict(dataSet, matricesPL, labelsPL, trainingPL, isTraining=False):
     """
@@ -126,7 +127,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
 def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                  lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
-    X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(dataSet.images, dataSet.labels, test_size=0.1)
     splitTrainSet = DataSet(X_train, y_train)
     splitTestSet = DataSet(X_test, y_test)
 
@@ -185,4 +186,5 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
         index += 1
-    PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath='plots/barChartModelComparison.png')
+    savePath = 'plots/modelComparison%s.png' % datetime.now().strftime('%I:%M%p_%B_%d_%Y')
+    PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath=savePath)
