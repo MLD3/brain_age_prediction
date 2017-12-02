@@ -180,7 +180,7 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         if (index == bestIndex):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
-                fileSavePath = savePath + '_split1.ckpt'
+                fileSavePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName + '_split1.ckpt'
                 saver = saveModel.restore(sess, fileSavePath)
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
