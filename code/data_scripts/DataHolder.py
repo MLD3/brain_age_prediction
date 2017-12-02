@@ -5,6 +5,7 @@ from data_scripts.DataPlotter import plotHist
 from data_scripts.DataSet import DataSet
 from utils.config import get, is_file_prefix
 import nibabel as nib
+from sklearn.model_selection import train_test_split
 import os
 
 
@@ -13,6 +14,10 @@ class DataHolder(object):
         self._df = df
         self.matrices = []
         self.numSubjects = df.shape[0]
+        self.train_images = []
+        self.test_images = []
+        self.train_subject = []
+        self.test_subject = []
 
     def getBinaryColumn(self, columnName, firstValue, secondValue):
         labels = np.zeros(self._df[columnName].shape)
@@ -28,21 +33,36 @@ class DataHolder(object):
             matrix = readMatrix(matrixPath)
             self.matrices.append(matrix)
 
-    def get_independent_image(self, image):
-        image_set = []
-        for i in range(120):
-            self.matrices.append(image.get_data()[:,:,:,i])
+    def get_independent_image(self, image, train = True):
+        if train:
+            for i in range(120):
+                self.train_images.append(image.get_data()[:,:,:,i])
+        else:
+            for i in range(120):
+                self.test_images.append(image.get_data()[:,:,:,i])
 
     def getNIIImagesFromPath(self, path):
         self.matrices = []
         if path[-1] != '/':
             path += '/'
 
-        for subjectID in self._df['Subject']:
-            image_path = path + "s6_" + str(subjectID) + ".nii"
+        subjects = []
+        for subject_id in self._df['Subject']:
+            subjects.append(subject_id)
+        
+        self.train_subject, self.test_subject = train_test_split(subjects, test_size = 0.2)
+
+        for subject_id in self.train_subject:
+            image_path = path + "s6_" + str(subject_id) + ".nii"
             if os.path.isfile(image_path):
                 image = nib.load(image_path)
-                self.get_independent_image(image)
+                self.get_independent_image(image, train = True)
+
+        for subject_id in self.test_subject:
+            image_path = path + "s6_" + str(subject_id) + ".nii"
+            if os.path.isfile(image_path):
+                image = nib.load(image_path)
+                self.get_independent_image(image, train = False)
                 # self.matrices.append(image.get_data())
 
     def copy_labels(self, labels):
@@ -53,11 +73,21 @@ class DataHolder(object):
         return copied_label
 
     def returnNIIDataset(self):
-        mats = np.array(self.matrices)
-        mats = np.reshape(mats, (mats.shape[0], mats.shape[1], mats.shape[2], mats.shape[3], 1))
-        labels = np.array(self._df['AgeYears'].values.copy())
-        labels = self.copy_labels(labels)
-        return DataSet(mats, labels, reshape=True, fMRI=True)
+        train_mats = np.array(self.train_images)
+        train_mats = np.reshape(train_mats, (train_mats.shape[0], train_mats.shape[1], train_mats.shape[2], train_mats.shape[3], 1))
+        train_labels = np.zeros((len(self.train_subject)))
+        for idx in range(len(self.train_subject)):
+            train_labels[idx] = self._df.loc[self._df['Subject'] == self.train_subject[idx]]['AgeYears']
+        # labels = np.array(self._df['AgeYears'].values.copy())
+        train_labels = self.copy_labels(train_labels)
+
+        test_mats = np.array(self.test_images)
+        test_mats = np.reshape(test_mats, (test_mats.shape[0], test_mats.shape[1], test_mats.shape[2], test_mats.shape[3], 1))
+        test_labels = np.zeros((len(self.test_subject)))
+        for idx in range(len(self.test_subject)):
+            test_labels[idx] = self._df.loc[self._df['Subject'] == self.test_subject[idx]]['AgeYears']
+        test_labels = self.copy_labels(test_labels)
+        return DataSet(train_mats, train_labels, reshape=True, fMRI=True), DataSet(test_mats, test_labels, reshape=True, fMRI=True)
 
 
     def matricesToImages(self):

@@ -13,13 +13,15 @@
             "DIMENSION": 264
         },
         "IMAGES":{
-            "PATH": "../Data/Images"
+            "TRAIN_PATH": "../Data/Images/Train_Images",
+            "TEST_PATH": "../Data/Images/Test_Images"
         },
         "fMRI_PHENOTYPICS": {
             "PATH" : "../Data/PNC_724_phenotypics.csv"
         },
         "SAMPLE": {
-            "PATH": "../Data/sample.csv"
+            "TRAIN_PATH": "../Data/sample_train.csv",
+            "TEST_PATH": "../Data/sample_test.csv"
         }
     },
     "TRAIN": {
@@ -51,8 +53,9 @@
             "LEARNING_RATE": 0.0005,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 800,
-            "BATCH_SIZE": 10
+            "CAPACITY": 10,
+            "NB_STEPS": 1000,
+            "BATCH_SIZE": 64 
         }
     }
 }
