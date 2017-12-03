@@ -48,23 +48,30 @@ class DataHolder(object):
 
         subjects = []
         for subject_id in self._df['Subject']:
-            subjects.append(subject_id)
-        
+            subjects.append(int(subject_id))
+        print("Subjects")
+        print(len(subjects))
         self.train_subject, self.test_subject = train_test_split(subjects, test_size = 0.2)
-
+        print("Number of subjects in train and test")
+        print(len(self.train_subject))
+        print(len(self.test_subject))
         for subject_id in self.train_subject:
             image_path = path + "s6_" + str(subject_id) + ".nii"
             if os.path.isfile(image_path):
                 image = nib.load(image_path)
                 self.get_independent_image(image, train = True)
-
+            else:
+                print("Train image not exists" + str(subject_id))
+        print("number of images in train")
+        print(len(self.train_images))
         for subject_id in self.test_subject:
             image_path = path + "s6_" + str(subject_id) + ".nii"
             if os.path.isfile(image_path):
                 image = nib.load(image_path)
                 self.get_independent_image(image, train = False)
                 # self.matrices.append(image.get_data())
-
+        print("number of images in test")
+        print(len(self.test_images))
     def copy_labels(self, labels):
         copied_label = np.zeros((labels.shape[0] * 120, 1))
         for i in range(labels.shape[0]):
@@ -74,19 +81,23 @@ class DataHolder(object):
 
     def returnNIIDataset(self):
         train_mats = np.array(self.train_images)
+        print(train_mats.shape)
         train_mats = np.reshape(train_mats, (train_mats.shape[0], train_mats.shape[1], train_mats.shape[2], train_mats.shape[3], 1))
         train_labels = np.zeros((len(self.train_subject)))
         for idx in range(len(self.train_subject)):
             train_labels[idx] = self._df.loc[self._df['Subject'] == self.train_subject[idx]]['AgeYears']
         # labels = np.array(self._df['AgeYears'].values.copy())
         train_labels = self.copy_labels(train_labels)
-
+        print(train_labels.shape)
+        print(train_mats.shape)
         test_mats = np.array(self.test_images)
         test_mats = np.reshape(test_mats, (test_mats.shape[0], test_mats.shape[1], test_mats.shape[2], test_mats.shape[3], 1))
         test_labels = np.zeros((len(self.test_subject)))
         for idx in range(len(self.test_subject)):
             test_labels[idx] = self._df.loc[self._df['Subject'] == self.test_subject[idx]]['AgeYears']
         test_labels = self.copy_labels(test_labels)
+        print(test_labels.shape)
+        print(test_mats.shape)
         return DataSet(train_mats, train_labels, reshape=True, fMRI=True), DataSet(test_mats, test_labels, reshape=True, fMRI=True)
 
 
