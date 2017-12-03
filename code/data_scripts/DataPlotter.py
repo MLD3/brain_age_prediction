@@ -5,10 +5,11 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+from datetime import datetime
 
 def PlotComparisonBarChart(performances, names, savePath, title='Final Validation Loss Of Models Compared', yLabel='Evaluated Loss Function on Validation Set'):
     y_pos = np.arange(len(names))
-
+    title = '%s %s' % (title, datetime.now().strftime('at %I:%M%p on %B %d, %Y'))
     plt.bar(y_pos, performances, align='center', alpha=0.5)
     plt.xticks(y_pos, names, rotation=45)
     plt.ylabel(yLabel)
