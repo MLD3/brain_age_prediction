@@ -90,6 +90,7 @@ def test(train_dataSet, test_dataSet):
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
     dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
+    print(len(dataHolder.train_images))
     # print(len(dataHolder.matrices))
     train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
 
