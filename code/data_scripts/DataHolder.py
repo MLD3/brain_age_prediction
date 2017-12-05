@@ -41,20 +41,29 @@ class DataHolder(object):
             for i in range(120):
                 self.test_images.append(image.get_data()[:,:,:,i])
 
-    def getNIIImagesFromPath(self, path):
+    def getAllsubjects(self):
+        subjects = []
+        for subject_id in self._df['Subject']:
+            subjects.append(int(subject_id))
+        return subjects
+
+    def getNIIImagesFromPath(self, path, train_ids, test_ids):
         self.matrices = []
         if path[-1] != '/':
             path += '/'
 
-        subjects = []
-        for subject_id in self._df['Subject']:
-            subjects.append(int(subject_id))
-        print("Subjects")
-        print(len(subjects))
-        self.train_subject, self.test_subject = train_test_split(subjects, test_size = 0.2)
+        # subjects = []
+        # for subject_id in self._df['Subject']:
+        #     subjects.append(int(subject_id))
+        # print("Subjects")
+        # print(len(subjects))
+        # self.train_subject, self.test_subject = train_test_split(subjects, test_size = 0.2)
         print("Number of subjects in train and test")
-        print(len(self.train_subject))
-        print(len(self.test_subject))
+        print(len(train_ids))
+        print(len(test_ids))
+        self.train_subject = train_ids
+        self.test_subject = test_ids
+
         for subject_id in self.train_subject:
             image_path = path + "s6_" + str(subject_id) + ".nii"
             if os.path.isfile(image_path):
@@ -73,7 +82,7 @@ class DataHolder(object):
         print("number of images in test")
         print(len(self.test_images))
 
-        
+
     def copy_labels(self, labels):
         copied_label = np.zeros((labels.shape[0] * 120, 1))
         for i in range(labels.shape[0]):

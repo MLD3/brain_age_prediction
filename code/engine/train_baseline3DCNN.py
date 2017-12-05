@@ -3,7 +3,7 @@ import pandas as pd
 from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import RepeatedKFold, GridSearchCV, train_test_split
+from sklearn.model_selection import RepeatedKFold, GridSearchCV, train_test_split, KFold
 from sklearn.metrics import mean_squared_error
 from utils.config import get, is_file_prefix
 from model.fMRI_cnn import *
@@ -90,10 +90,27 @@ def test(train_dataSet, test_dataSet):
 
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
-    dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
-    print("Number of images for training data, 120 for each patient, ", len(dataHolder.train_images))
+    subjects_id = dataHolder.getAllsubjects()
+    subjects_id = np.asarray(subjects_id)
+    kf = KFold(n_splits=5, shuffle=True)
+    print(len(subjects_id))
+    print(subjects_id)
+    print(kf)
+
+    for train_index, test_index in kf.split(subjects_id):
+        print(type(train_index[0]))
+        print(test_index)
+        train_ids, test_ids = subjects_id[train_index], subjects_id[test_index]
+        # train_ids = subjects_id[train_index]
+        # test_ids = subjects_id[test_index]
+        dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'), train_ids, test_ids)
+        train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
+        print("Number of images for training data, 120 for each patient, ", len(dataHolder.train_images))
+        test(train_dataSet, test_dataSet)
+    # dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
+    
     # print(len(dataHolder.matrices))
-    train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
+    # train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
 
     # test_dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TEST_PATH')))
     # test_dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TEST_PATH'))
@@ -106,4 +123,4 @@ if __name__ == '__main__':
     # dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
 
 
-    test(train_dataSet, test_dataSet)
+    # test(train_dataSet, test_dataSet)
