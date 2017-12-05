@@ -31,7 +31,7 @@ def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, train_dataSet, 
         validationLoss = GetEvaluatedLoss(sess, test_dataSet, lossFunction, imagesPL, labelsPL)
         print('Step: %d, Evaluated Training Loss: %f, Evaluated Test Loss: %f' % (step, trainingLoss, validationLoss))
 
-def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction):
+def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, eval_function):
     # X_train = train_dataSet.images
     # y_train = train_dataSet.labels
 
@@ -52,23 +52,29 @@ def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, prediction
         # ReportProgress(sess, batch_index, lossFunction, trainOperation)
     trainingLoss = GetEvaluatedLoss(sess, DataSet(batch_images, batch_labels), lossFunction, imagesPL, labelsPL)
     testLoss = GetEvaluatedLoss(sess, test_dataSet, lossFunction, imagesPL, labelsPL)
-    return (trainingLoss, testLoss)
+    eval_value = GetEvaluatedLoss(sess, test_dataSet, eval_function, imagesPL, labelsPL)
+    print("After training, r-squared value is ", eval_value)
+    return (trainingLoss, testLoss, eval_value)
 
 
-def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=3):
+def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, eval_function, numRepeats=3):
     trainingLosses = []
     testLosses = []
+    eval_values = []
     for i in range(numRepeats):
         with tf.Session() as sess:
             init = tf.global_variables_initializer()
             sess.run(init)
-            (trainingLoss, testLoss) = TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction)
+            (trainingLoss, testLoss, eval_value) = TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, eval_function)
             trainingLosses.append(trainingLoss)
             testLosses.append(testLoss)
+            eval_values.append(eval_value)
     print("Mean Evaluated Training Loss: %f" % np.mean(trainingLosses))
     print("SD   Evaluated Training Loss: %f" % np.std(trainingLosses))
     print("Mean Evaluated Test Loss: %f" % np.mean(testLosses))
     print("SD   Evaluated Test Loss: %f" % np.std(testLosses))
+    print("Mean Evaluated r-squared: ", np.mean(eval_values))
+    print("SD   Evaluated r-squared: ", np.std(eval_values))
 
 
 def test(train_dataSet, test_dataSet):
@@ -78,13 +84,13 @@ def test(train_dataSet, test_dataSet):
     imagesPL, predictionLayer = fMRI_4D_CNN()
     labelsPL = tf.placeholder(tf.float32, shape=[None, 1])
     total_error = tf.reduce_sum(tf.square(tf.subtract(labelsPL, tf.reduce_mean(labelsPL))))
-    # unexplained_error = tf.reduce_sum(tf.square(tf.subtract(labelsPL, predictionLayer)))
-    # lossFunction = tf.div(total_error, unexplained_error)
+    unexplained_error = tf.reduce_sum(tf.square(tf.subtract(labelsPL, predictionLayer)))
+    eval_function = tf.div(total_error, unexplained_error)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
     trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
-    RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=5)
+    RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, eval_function, numRepeats=3)
     # TrainModel(dataSet)
 
 
