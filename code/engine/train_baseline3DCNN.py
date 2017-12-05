@@ -42,6 +42,7 @@ def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, prediction
         # batch_images, batch_labels = tf.train.shuffle_batch([X_train, X_test], batch_size = get('TRAIN.VANILLA_BASELINE.BATCH_SIZE'), capacity = get('TRAIN.VANILLA_BASELINE.CAPACITY'), min_after_dequeue = get('TRAIN.VANILLA_BASELINE.MIN_AFTER_DEQUEUE'))
         batch_images, batch_labels = train_dataSet.next_batch(
             get('TRAIN.VANILLA_BASELINE.BATCH_SIZE'))
+        print("Size from next_batch: ", batch_images.shape)
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         # tf.train.start_queue_runners(sess = sess)
         sess.run(trainOperation, feed_dict=feed_dict)
@@ -49,7 +50,7 @@ def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, prediction
         # sess.run(trainOperation)
         ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, train_dataSet, test_dataSet)
         # ReportProgress(sess, batch_index, lossFunction, trainOperation)
-    trainingLoss = GetEvaluatedLoss(sess, train_dataSet, lossFunction, imagesPL, labelsPL)
+    trainingLoss = GetEvaluatedLoss(sess, DataSet(batch_images, batch_labels), lossFunction, imagesPL, labelsPL)
     testLoss = GetEvaluatedLoss(sess, test_dataSet, lossFunction, imagesPL, labelsPL)
     return (trainingLoss, testLoss)
 
@@ -90,7 +91,7 @@ def test(train_dataSet, test_dataSet):
 if __name__ == '__main__':
     dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
     dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
-    print(len(dataHolder.train_images))
+    print("Number of images for training data, 120 for each patient, ", len(dataHolder.train_images))
     # print(len(dataHolder.matrices))
     train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
 
