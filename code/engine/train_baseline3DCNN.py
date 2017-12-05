@@ -73,6 +73,8 @@ def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer
     print("SD   Evaluated Training Loss: %f" % np.std(trainingLosses))
     print("Mean Evaluated Test Loss: %f" % np.mean(testLosses))
     print("SD   Evaluated Test Loss: %f" % np.std(testLosses))
+    print("Mean Evaluated r-squared: ", np.mean(eval_values))
+    print("SD   Evaluated r-squared: ", np.std(eval_values))
 
 
 def test(train_dataSet, test_dataSet):
