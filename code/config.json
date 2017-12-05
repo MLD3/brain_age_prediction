@@ -51,6 +51,7 @@
         "VANILLA_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/vanilla_baseline/",
             "LEARNING_RATE": 0.0005,
+            "LEARNING_RATE_SMALL": 0.0001,
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
             "CAPACITY": 10,
