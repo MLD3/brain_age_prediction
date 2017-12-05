@@ -55,8 +55,8 @@
             "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
             "CAPACITY": 10,
-            "NB_STEPS": 1000,
-            "BATCH_SIZE": 32
+            "NB_STEPS": 800,
+            "BATCH_SIZE": 64
         }
     }
 }
