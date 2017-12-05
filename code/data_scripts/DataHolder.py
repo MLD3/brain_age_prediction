@@ -48,6 +48,8 @@ class DataHolder(object):
         return subjects
 
     def getNIIImagesFromPath(self, path, train_ids, test_ids):
+        self.train_images = []
+        self.test_images = []
         self.matrices = []
         if path[-1] != '/':
             path += '/'
