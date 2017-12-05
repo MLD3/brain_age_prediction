@@ -18,8 +18,7 @@ def performanceCI(sess, dataSet, lossFunction, matricesPL, labelsPL, trainingPL)
     X = dataSet.images
     Y = dataSet.labels
     bootstrap_performances = np.zeros(N)
-    print(X.shape)
-    (n, d) = X.shape
+    n = X.shape[0]
     indices = np.arange(n)
 
     for i in range(N):
