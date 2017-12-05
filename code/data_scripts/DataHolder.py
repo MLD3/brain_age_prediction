@@ -72,6 +72,8 @@ class DataHolder(object):
                 # self.matrices.append(image.get_data())
         print("number of images in test")
         print(len(self.test_images))
+
+        
     def copy_labels(self, labels):
         copied_label = np.zeros((labels.shape[0] * 120, 1))
         for i in range(labels.shape[0]):
