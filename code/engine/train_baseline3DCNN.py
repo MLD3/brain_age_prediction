@@ -42,20 +42,20 @@ def TrainModel(sess, train_dataSet, test_dataSet, imagesPL, labelsPL, prediction
         # batch_images, batch_labels = tf.train.shuffle_batch([X_train, X_test], batch_size = get('TRAIN.VANILLA_BASELINE.BATCH_SIZE'), capacity = get('TRAIN.VANILLA_BASELINE.CAPACITY'), min_after_dequeue = get('TRAIN.VANILLA_BASELINE.MIN_AFTER_DEQUEUE'))
         batch_images, batch_labels = train_dataSet.next_batch(
             get('TRAIN.VANILLA_BASELINE.BATCH_SIZE'))
-        print("Size from next_batch: ", batch_images.shape)
+        # print("Size from next_batch: ", batch_images.shape)
         feed_dict = DefineFeedDict(DataSet(batch_images, batch_labels), imagesPL, labelsPL)
         # tf.train.start_queue_runners(sess = sess)
         sess.run(trainOperation, feed_dict=feed_dict)
         # sess.run([batch_images, batch_labels])
         # sess.run(trainOperation)
-        ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, train_dataSet, test_dataSet)
+        ReportProgress(sess, batch_index, lossFunction, imagesPL, labelsPL, DataSet(batch_images, batch_labels), test_dataSet)
         # ReportProgress(sess, batch_index, lossFunction, trainOperation)
     trainingLoss = GetEvaluatedLoss(sess, DataSet(batch_images, batch_labels), lossFunction, imagesPL, labelsPL)
     testLoss = GetEvaluatedLoss(sess, test_dataSet, lossFunction, imagesPL, labelsPL)
     return (trainingLoss, testLoss)
 
 
-def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=5):
+def RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, numRepeats=3):
     trainingLosses = []
     testLosses = []
     for i in range(numRepeats):
