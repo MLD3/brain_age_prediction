@@ -88,7 +88,7 @@ def test(train_dataSet, test_dataSet):
     eval_function = 1 - tf.divide(unexplained_error, total_error)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
     global_step = tf.Variable(0, name='global_step', trainable=False)
-    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE_SMALL')).minimize(lossFunction, global_step=global_step)
+    trainOperation = tf.train.AdamOptimizer(get('TRAIN.VANILLA_BASELINE.LEARNING_RATE')).minimize(lossFunction, global_step=global_step)
 
     RepeatModel(train_dataSet, test_dataSet, imagesPL, labelsPL, predictionLayer, trainOperation, lossFunction, eval_function, numRepeats=3)
     # TrainModel(dataSet)
