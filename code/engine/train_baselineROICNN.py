@@ -47,62 +47,62 @@ if __name__ == '__main__':
     batchSizeArray = []
     saveNames = []
 
-    with tf.variable_scope('HeavyDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('HeavyDropout')
-
-    with tf.variable_scope('ExtraHeavyDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('ExtraHeavyDropout')
-
-    with tf.variable_scope('ExtraHiddenLayer32Units'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', secondHiddenLayerUnits=32)
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('ExtraHiddenLayer32Units')
-
-    with tf.variable_scope('HiddenLayer128Units'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128)
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('HiddenLayer128Units')
-
-    with tf.variable_scope('TwoHiddenLayers_128_64_Units'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('TwoHiddenLayers_128_64_Units')
-
-    with tf.variable_scope('TwoHiddenLayersExtraHeavyDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('TwoHiddenLayersExtraHeavyDropout')
+    # with tf.variable_scope('HeavyDropout'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('HeavyDropout')
+    #
+    # with tf.variable_scope('ExtraHeavyDropout'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS')
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('ExtraHeavyDropout')
+    #
+    # with tf.variable_scope('ExtraHiddenLayer32Units'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', secondHiddenLayerUnits=32)
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('ExtraHiddenLayer32Units')
+    #
+    # with tf.variable_scope('HiddenLayer128Units'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128)
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('HiddenLayer128Units')
+    #
+    # with tf.variable_scope('TwoHiddenLayers_128_64_Units'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='SMALL_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('TwoHiddenLayers_128_64_Units')
+    #
+    # with tf.variable_scope('TwoHiddenLayersExtraHeavyDropout'):
+    #     predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='TINY_KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
+    #     predictionLayers.append(predictionLayer)
+    #     trainOperations.append(trainOperation)
+    #     lossFunctions.append(lossFunction)
+    #     stepCountArray.append(stepCount)
+    #     batchSizeArray.append(batchSize)
+    #     saveNames.append('TwoHiddenLayersExtraHeavyDropout')
 
     with tf.variable_scope('TwoHiddenLayersSmallDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB', stepCountName='SMALL_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)

@@ -13,6 +13,28 @@ from utils.config import get
 from placeholders.shared_placeholders import *
 from datetime import datetime
 
+def performanceCI(sess, dataSet, lossFunction, matricesPL, labelsPL, trainingPL):
+    N = 1000
+    X = dataSet.images
+    Y = dataSet.labels
+    bootstrap_performances = np.zeros(N)
+    print(X.shape)
+    (n, d) = X.shape
+    indices = np.arange(n)
+
+    for i in range(N):
+        sample_indices = np.random.choice(indices, size=n, replace=True)
+        sampleX = X[sample_indices]
+        sampleY = Y[sample_indices]
+        sampleDataset = DataSet(sampleX, sampleY)
+
+        bootstrap_performances[i] = GetEvaluatedLoss(sess, sampleDataset, lossFunction, matricesPL, labelsPL, trainingPL)
+
+    bootstrap_performances = np.sort(bootstrap_performances)
+    point_performance = np.mean(bootstrap_performances)
+
+    return (point_performance, bootstrap_performances[25], bootstrap_performances[975])
+
 def DefineFeedDict(dataSet, matricesPL, labelsPL, trainingPL, isTraining=False):
     """
     Defines a tensorflow feed dict for running operations
@@ -111,6 +133,9 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
                                                         lossFunction, fileSavePath, numberOfSteps, batchSize)
             accumulatedTrainingLoss.append(foldTrainingLosses)
             accumulatedValidationLoss.append(foldValidationLosses)
+            if splitIndex == 5:
+                (point, lower, upper) = performanceCI(sess, splitValidationSet, lossFunction, matricesPL, labelsPL, trainingPL)
+                print("Confidence Interval Performance: %f (%f, %f)" % (point, lower, upper))
 
     ########## PLOT THE RESULTS OF CROSS VALIDATION ##########
     accumulatedTrainingLoss = np.array(accumulatedTrainingLoss)
