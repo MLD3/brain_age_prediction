@@ -55,7 +55,7 @@
             "MOMENTUM": 0.9,
             "CAPACITY": 10,
             "NB_STEPS": 1000,
-            "BATCH_SIZE": 64 
+            "BATCH_SIZE": 64
         }
     }
 }
