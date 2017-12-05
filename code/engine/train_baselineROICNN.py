@@ -102,7 +102,7 @@ if __name__ == '__main__':
     #     saveNames.append('TwoHiddenLayersExtraHeavyDropout')
 
     with tf.variable_scope('TwoHiddenLayersSmallDropout'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB', stepCountName='SMALL_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetROIBaselineModel(keepProbName='KEEP_PROB', stepCountName='LARGE_NB_STEPS', firstHiddenLayerUnits=128, secondHiddenLayerUnits=64)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
