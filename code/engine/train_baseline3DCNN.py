@@ -89,16 +89,12 @@ def test(train_dataSet, test_dataSet):
 
 
 if __name__ == '__main__':
-    dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
-    subjects_id = dataHolder.getAllsubjects()
-    subjects_id = np.asarray(subjects_id)
-    kf = KFold(n_splits=5, shuffle=True)
-    print(len(subjects_id))
-    print(subjects_id)
-    print(kf)
-
     for train_index, test_index in kf.split(subjects_id):
-        print(type(train_index[0]))
+        dataHolder = DataHolder(readCSVData(get('DATA.SAMPLE.TRAIN_PATH')))
+        subjects_id = dataHolder.getAllsubjects()
+        subjects_id = np.asarray(subjects_id)
+        kf = KFold(n_splits=5, shuffle=True)
+        print(len(subjects_id))
         print(test_index)
         train_ids, test_ids = subjects_id[train_index], subjects_id[test_index]
         # train_ids = subjects_id[train_index]
