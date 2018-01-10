@@ -1,4 +1,3 @@
-import os
 import tensorflow as tf
 
 def restore(sess, savePath):
@@ -7,9 +6,11 @@ def restore(sess, savePath):
     Returns the tensorflow Saver.
     """
     saver = tf.train.Saver()
-    if os.path.exists(savePath):
-        print('Restoring model parameters from {}'.format(savePath))
+    try:
         saver.restore(sess, savePath)
-    else:
-        print('No saved model parameters found. Training from scratch...')
+        print('Restored model from {} successfully'.format(savePath))
+        break
+    except ValueError as error:
+        print('Unable to restore model from path {} with error {}'.format(savePath, error))
+
     return saver
