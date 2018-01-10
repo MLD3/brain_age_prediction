@@ -7,7 +7,6 @@ from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss, PlotComparisonBarChart
 from data_scripts.DataSet import DataSet
 from sklearn.model_selection import train_test_split, KFold
-from model.build_baselineROICNN import baselineROICNN
 from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
@@ -206,6 +205,7 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
                 fileSavePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName + '_split1.ckpt'
+                print(fileSavePath)
                 saver = saveModel.restore(sess, fileSavePath)
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)

@@ -39,7 +39,7 @@
             "LEARNING_RATE": 0.0005,
             "SMALL_LEARNING_RATE": 0.0001,
             "MOMENTUM": 0.9,
-            "SMALL_NB_STEPS": 200,
+            "SMALL_NB_STEPS": 110,
             "NB_STEPS": 5000,
             "LARGE_NB_STEPS": 10000,
             "BATCH_SIZE": 32,
