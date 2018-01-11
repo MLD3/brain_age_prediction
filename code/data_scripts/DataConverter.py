@@ -2,8 +2,7 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
-def ConvertNIItoCSV(inFile, outFile):
-    SubjectDataFrame = pd.read_csv('PNC_724_phenotypics.csv')
+def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
         subject = row['Subject']
         age = row['AgeYears']
@@ -15,11 +14,12 @@ def ConvertNIItoCSV(inFile, outFile):
         np.save(outFileName, imageArray)
 
 if __name__ == '__main__':
+    SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
     inFileStructural = '/data/psturm/structural/niftiImages'
     inFileFunctional = '/data/psturm/functional/niftiImages/s6_'
 
     outFileStructural = '/data/psturm/structral/numpyArrays/'
-    outFileFunctional = '/data/psturm/functional/numpyArrays/'
+    outFileFunctional = '/data/psturm/functional/c/'
 
     ConvertNIItoCSV(inFileStructural, outFileStructural)
     ConvertNIItoCSV(inFileFunctional, outFileFunctional)
