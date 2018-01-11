@@ -5,9 +5,8 @@ import pandas as pd
 def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
         subject = row['Subject']
-        age = row['AgeYears']
         print('Saving Subject {}'.format(subject))
-        fileName = inFile + subject + '.nii'
+        fileName = inFile + str(subject) + '.nii'
         NIIimage = nib.load(fileName)
         imageArray = NIIimage.get_data()
         outFileName = outFile + subject
