@@ -6,13 +6,21 @@
     },
     "DATA": {
         "PHENOTYPICS": {
-            "PATH": "../Data/PNC_519_phenotypics.csv"
+            "PATH": "/data/PNC_724_phenotypics.csv"
         },
         "MATRICES": {
             "PATH": "../Data/Matrices",
             "DIMENSION": 264
         },
-        "IMAGES":{
+        "STRUCTURAL": {
+            "NUMPY_PATH": "/data/psturm/structural/numpyArrays",
+            "NIFTY_PATH": "/data/psturm/structural/niftiImages"
+        },
+        "FUNCTIONAL": {
+            "NUMPY_PATH": "/data/psturm/functional/numpyArrays",
+            "NIFTY_PATH": "/data/psturm/functional/niftiImages"
+        },
+        "IMAGES": {
             "TRAIN_PATH": "../Data/Images/Train_Images",
             "TEST_PATH": "../Data/Images/Test_Images"
         },

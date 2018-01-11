@@ -21,10 +21,10 @@ def weight_var(shape, mean, sd):
     return tf.Variable(tf.truncated_normal(shape, mean=mean, stddev=sd))
 
 def bias_var(shape, value):
-    return tf.Variable(tf.constant(value, shape=shape)) 
+    return tf.Variable(tf.constant(value, shape=shape))
 
-def conv_layer(x, input_height, input_width, input_depth, 
-                input_channels, filter_size, output_channels, 
+def conv_layer(x, input_height, input_width, input_depth,
+                input_channels, filter_size, output_channels,
                 padding, act_type, mean, sd, bias, stride):
     x = tf.reshape(x, [-1, input_height, input_width, input_depth, input_channels])
     filter_W = weight_var([filter_size, filter_size, filter_size, input_channels, output_channels], mean, sd)
@@ -44,9 +44,9 @@ def fully_connected_layer(x, shape, act_type, mean, sd, bias):
 def fMRI_4D_CNN(meanDefault=0.0, sdDefault=0.01, biasDefault=0.1):
     input_layer = tf.placeholder(tf.float32, shape=[None, 52*62*45])
     # 52*62*45 -> 26*31*23*2
-    conv1 = conv_layer(x = input_layer, input_height = 52, input_width = 62, 
-                        input_depth = 45, input_channels = 1, filter_size = 11, 
-                        output_channels=2, padding='SAME', act_type='relu', 
+    conv1 = conv_layer(x = input_layer, input_height = 52, input_width = 62,
+                        input_depth = 45, input_channels = 1, filter_size = 11,
+                        output_channels=2, padding='SAME', act_type='relu',
                         mean=meanDefault, sd=sdDefault, bias=biasDefault, stride=2)
     # 26*31*23*2 -> 13*16*12*2
     pool1 = pool_layer(x=conv1, input_height = 26, input_width = 31, input_depth = 23, input_channels=2, k_length=2, stride=2, padding='SAME')
