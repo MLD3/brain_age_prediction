@@ -21,7 +21,7 @@ def GetEvaluatedLoss(sess, dataSet, lossFunction, imagesPL, labelsPL):
     return sess.run(lossFunction, feed_dict=feed_dict)
 
 
-def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, train_dataSet, test_dataSet):    
+def ReportProgress(sess, step, lossFunction, imagesPL, labelsPL, train_dataSet, test_dataSet):
     if step % 10 == 0:
         # trainFeedDict = DefineFeedDict(train_dataSet, imagesPL, labelsPL)
         trainingLoss = GetEvaluatedLoss(sess, train_dataSet, lossFunction, imagesPL, labelsPL)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     subjects_id = np.asarray(subjects_id)
     kf = KFold(n_splits=5, shuffle=True)
 
-    for train_index, test_index in kf.split(subjects_id):        
+    for train_index, test_index in kf.split(subjects_id):
         print(len(subjects_id))
         print(test_index)
         train_ids, test_ids = subjects_id[train_index], subjects_id[test_index]
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         print("Number of images for training data, 120 for each patient, ", len(dataHolder.train_images))
         test(train_dataSet, test_dataSet)
     # dataHolder.getNIIImagesFromPath(get('DATA.IMAGES.TRAIN_PATH'))
-    
+
     # print(len(dataHolder.matrices))
     # train_dataSet, test_dataSet = dataHolder.returnNIIDataset()
 
