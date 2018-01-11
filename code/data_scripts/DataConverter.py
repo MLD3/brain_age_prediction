@@ -9,7 +9,7 @@ def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
         fileName = inFile + str(subject) + '.nii'
         NIIimage = nib.load(fileName)
         imageArray = NIIimage.get_data()
-        outFileName = outFile + subject
+        outFileName = outFile + str(subject)
         np.save(outFileName, imageArray)
 
 if __name__ == '__main__':
