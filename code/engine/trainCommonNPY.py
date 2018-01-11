@@ -5,7 +5,7 @@ import math
 from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss, PlotComparisonBarChart
-from data_scripts.DataSetNPY import DataSet
+from data_scripts.DataSetNPY import DataSetNPY
 from sklearn.model_selection import train_test_split, KFold
 from utils import saveModel
 from utils.config import get
@@ -110,8 +110,8 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             fileSavePath = savePath + '_split%i.ckpt' % splitIndex
-            splitTrainSet = DataSet(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex])
-            splitValidationSet = DataSet(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], numClasses=1)
+            splitTrainSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex])
+            splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], numClasses=1)
             foldTrainingLosses, foldValidationLosses = TrainModel(sess, splitTrainSet, splitValidationSet,
                                                         matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                         lossFunction, fileSavePath, numberOfSteps, batchSize)
@@ -134,8 +134,8 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
                                  lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
-    splitTrainSet = DataSet(dataSet.numpyDirectory, X_train, y_train)
-    splitTestSet = DataSet(dataSet.numpyDirectory, X_test, y_test)
+    splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train)
+    splitTestSet = DataSetNPY(dataSet.numpyDirectory, X_test, y_test)
 
     ########## ITERATE OVER ALL MODELS ##########
     index = 0

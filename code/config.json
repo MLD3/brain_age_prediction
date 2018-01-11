@@ -13,12 +13,12 @@
             "DIMENSION": 264
         },
         "STRUCTURAL": {
-            "NUMPY_PATH": "/data/psturm/structural/numpyArrays",
-            "NIFTY_PATH": "/data/psturm/structural/niftiImages"
+            "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
+            "NIFTY_PATH": "/data/psturm/structural/niftiImages/"
         },
         "FUNCTIONAL": {
-            "NUMPY_PATH": "/data/psturm/functional/numpyArrays",
-            "NIFTY_PATH": "/data/psturm/functional/niftiImages"
+            "NUMPY_PATH": "/data/psturm/functional/numpyArrays/",
+            "NIFTY_PATH": "/data/psturm/functional/niftiImages/"
         },
         "IMAGES": {
             "TRAIN_PATH": "../Data/Images/Train_Images",
