@@ -17,7 +17,7 @@ if __name__ == '__main__':
     inFileStructural = '/data/psturm/structural/niftiImages/'
     inFileFunctional = '/data/psturm/functional/niftiImages/s6_'
 
-    outFileStructural = '/data/psturm/structral/numpyArrays/'
+    outFileStructural = '/data/psturm/structural/numpyArrays/'
     outFileFunctional = '/data/psturm/functional/numpyArrays/'
 
     ConvertNIItoCSV(inFileStructural, outFileStructural, SubjectDataFrame)
