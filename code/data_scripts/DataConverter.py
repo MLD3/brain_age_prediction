@@ -14,11 +14,11 @@ def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
 
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
-    inFileStructural = '/data/psturm/structural/niftiImages'
+    inFileStructural = '/data/psturm/structural/niftiImages/'
     inFileFunctional = '/data/psturm/functional/niftiImages/s6_'
 
     outFileStructural = '/data/psturm/structral/numpyArrays/'
-    outFileFunctional = '/data/psturm/functional/c/'
+    outFileFunctional = '/data/psturm/functional/numpyArrays/'
 
     ConvertNIItoCSV(inFileStructural, outFileStructural, SubjectDataFrame)
     ConvertNIItoCSV(inFileFunctional, outFileFunctional, SubjectDataFrame)
