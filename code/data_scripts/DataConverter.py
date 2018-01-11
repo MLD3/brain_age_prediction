@@ -21,5 +21,5 @@ if __name__ == '__main__':
     outFileStructural = '/data/psturm/structral/numpyArrays/'
     outFileFunctional = '/data/psturm/functional/c/'
 
-    ConvertNIItoCSV(inFileStructural, outFileStructural)
-    ConvertNIItoCSV(inFileFunctional, outFileFunctional)
+    ConvertNIItoCSV(inFileStructural, outFileStructural, SubjectDataFrame)
+    ConvertNIItoCSV(inFileFunctional, outFileFunctional, SubjectDataFrame)
