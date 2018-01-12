@@ -6,7 +6,7 @@
     },
     "DATA": {
         "PHENOTYPICS": {
-            "PATH": "/data/PNC_724_phenotypics.csv"
+            "PATH": "/data/psturm/PNC_724_phenotypics.csv"
         },
         "MATRICES": {
             "PATH": "../Data/Matrices",
