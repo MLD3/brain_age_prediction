@@ -14,7 +14,10 @@
         },
         "STRUCTURAL": {
             "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
-            "NIFTY_PATH": "/data/psturm/structural/niftiImages/"
+            "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
+            "HEIGHT": 121,
+            "WIDTH": 145,
+            "DEPTH": 121
         },
         "FUNCTIONAL": {
             "NUMPY_PATH": "/data/psturm/functional/numpyArrays/",
@@ -33,13 +36,13 @@
         }
     },
     "TRAIN": {
-        "CNN": {
-            "CHECKPOINT_DIR": "../checkpoints/cnn/",
+        "CNN_BASELINE": {
+            "CHECKPOINT_DIR": "../checkpoints/cnn_baseline/",
             "LEARNING_RATE": 0.0005,
-            "LEARNING_RATE_LARGE": 0.01,
             "MOMENTUM": 0.9,
-            "NB_STEPS": 4000,
-            "BATCH_SIZE": 128
+            "NB_STEPS": 10000,
+            "BATCH_SIZE": 32,
+            "KEEP_PROB": 0.6
         },
         "ROI_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
@@ -55,16 +58,6 @@
             "KEEP_PROB": 0.6,
             "SMALL_KEEP_PROB": 0.3,
             "TINY_KEEP_PROB": 0.1
-        },
-        "VANILLA_BASELINE": {
-            "CHECKPOINT_DIR": "../checkpoints/vanilla_baseline/",
-            "LEARNING_RATE": 0.0005,
-            "LEARNING_RATE_SMALL": 0.0001,
-            "LEARNING_RATE_LARGE": 0.01,
-            "MOMENTUM": 0.9,
-            "CAPACITY": 10,
-            "NB_STEPS": 1000,
-            "BATCH_SIZE": 64
         }
     }
 }

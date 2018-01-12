@@ -72,7 +72,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
 
     for batch_index in range(numberOfSteps):
         ############# RUN TRAINING OPERATIONS #############
-        batchArrays, batchLabels = splitTrainSet.next_batch(batchSize)
+        batchArrays, batchLabels = splitTrainSet.NextBatch(batchSize)
         feed_dict = DefineFeedDict(batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=True)
         sess.run([trainOperation, extraUpdateOps], feed_dict=feed_dict)
 
