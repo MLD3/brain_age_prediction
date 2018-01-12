@@ -64,6 +64,7 @@ class DataSetNPY(object):
 
             fileList = np.concatenate((leftOverFiles, newFiles), axis=0)
             batchArrays = self.GetNumpyBatch(fileList)
+            batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = np.concatenate((leftOverLabels, newLabels), axis=0)
 
             return batchArrays, batchLabels
@@ -71,9 +72,10 @@ class DataSetNPY(object):
             self.currentStartIndex += batchSize
             endIndex = self.currentStartIndex
             fileList = self.numpyFileList[startIndex:endIndex]
-            batchArray = self.GetNumpyBatch(fileList)
+            batchArrays = self.GetNumpyBatch(fileList)
+            batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = self.labels[startIndex:endIndex]
-            return batchArray, batchLabels
+            return batchArrays, batchLabels
 
 if __name__ == '__main__':
     numpyDirectory = '/Users/psturm/Desktop/Research/brain_age_prediction/Data/'
