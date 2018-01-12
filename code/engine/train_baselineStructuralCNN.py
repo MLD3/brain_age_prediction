@@ -12,12 +12,12 @@ from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
 from itertools import product
-from engine.trainCommon import *
+from engine.trainCommonNPY import *
 
-def GetCNNBaselineModel(learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+def GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
                         batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM'):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = baselineStructuralCNN(matricesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName))
+    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName))
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
     ############ DEFINE OPTIMIZER ############
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     dataSet = DataSetNPY(numpyDirectory=StructuralDataDir, numpyFileList=fileList, labels=labels)
 
     trainingPL = TrainingPlaceholder()
-    matricesPL, labelsPL = MatrixPlaceholders()
+    imagesPL, labelsPL = StructuralPlaceholders()
     predictionLayers = []
     trainOperations = []
     lossFunctions = []
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     saveNames = []
 
     with tf.variable_scope('3DConvolutionStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel()
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -57,5 +57,5 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append('3DConvolutionStandard')
 
-    RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
+    RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
