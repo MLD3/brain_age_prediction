@@ -3,8 +3,8 @@ import numpy as np
 from utils.config import get
 from placeholders.shared_placeholders import *
 
-def standardBatchNorm(inputs, trainingPL, momentum=0.9):
-    return tf.layers.batch_normalization(inputs, training=trainingPL, momentum=momentum)
+def standardBatchNorm(inputs, trainingPL, momentum=0.9, name=None):
+    return tf.layers.batch_normalization(inputs, training=trainingPL, momentum=momentum, name=name)
 
 def standardPool(inputs, kernel_size=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME', name=None):
     return tf.nn.max_pool3d(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
