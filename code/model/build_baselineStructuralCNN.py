@@ -37,18 +37,21 @@ def standardBlock(inputs, blockNumber, filters):
     BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
     return BlockMaxPool
 
-def baselineStructuralCNN(matricesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu):
+def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu):
     ################## FIRST BLOCK ##################
-    Block1 = standardBlock(matricesPl, blockNumber=1, filters=8)
+    Block1 = standardBlock(imagesPL, blockNumber=1, filters=8)
 
     ################## SECOND BLOCK ##################
-    Block2 = standardBlock(matricesPl, blockNumber=1, filters=16)
+    Block2 = standardBlock(Block1, blockNumber=1, filters=16)
 
     ################## THIRD BLOCK ##################
-    Block3 = standardBlock(matricesPl, blockNumber=1, filters=32)
+    Block3 = standardBlock(Block2, blockNumber=1, filters=32)
+
+    ################## THIRD BLOCK ##################
+    Block4 = standardBlock(Block3, blockNumber=1, filters=64)
 
     ################## FIFTH BLOCK ##################
-    Block5 = standardBlock(matricesPl, blockNumber=1, filters=128)
+    Block5 = standardBlock(Block4, blockNumber=1, filters=128)
 
     flattenedLayer = tf.layers.flatten(Block5)
     numberOfUnitsInOutputLayer = 1
