@@ -41,7 +41,7 @@
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,
             "NB_STEPS": 110,
-            "BATCH_SIZE": 32,
+            "BATCH_SIZE": 4,
             "KEEP_PROB": 0.6
         },
         "ROI_BASELINE": {
