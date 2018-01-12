@@ -15,9 +15,9 @@ from itertools import product
 from engine.trainCommonNPY import *
 
 def GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
-                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM'):
+                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName))
+    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName), optionalHiddenLayerUnits=optionalHiddenLayerUnits)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
     ############ DEFINE OPTIMIZER ############
@@ -56,6 +56,15 @@ if __name__ == '__main__':
         stepCountArray.append(stepCount)
         batchSizeArray.append(batchSize)
         saveNames.append('3DConvolutionStandard')
+
+    with tf.variable_scope('3DConvolutionExtraHiddenLayer96'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=96)
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append('3DConvolutionExtraHiddenLayer96')
 
     RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)

@@ -37,7 +37,7 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
     BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
     return BlockMaxPool
 
-def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu):
+def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0):
     ################## FIRST BLOCK ##################
     Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
@@ -54,6 +54,11 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=128)
 
     flattenedLayer = tf.layers.flatten(Block5)
+    if optionalHiddenLayerUnits > 0:
+        optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
+        droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+        flattenedLayer = droppedOutHiddenLayer
+
     numberOfUnitsInOutputLayer = 1
     outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
