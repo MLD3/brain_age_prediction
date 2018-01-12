@@ -7,7 +7,7 @@ from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss
 from data_scripts.DataSetNPY import DataSetNPY
 from sklearn.model_selection import train_test_split, KFold
-from model.build_baselineROICNN import baselineStructuralCNN
+from model.build_baselineStructuralCNN import baselineStructuralCNN
 from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
