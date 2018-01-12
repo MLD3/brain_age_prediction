@@ -42,16 +42,16 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
     ################## SECOND BLOCK ##################
-    Block2 = standardBlock(Block1, trainingPL, blockNumber=1, filters=16)
+    Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
 
     ################## THIRD BLOCK ##################
-    Block3 = standardBlock(Block2, trainingPL, blockNumber=1, filters=32)
+    Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
 
     ################## THIRD BLOCK ##################
-    Block4 = standardBlock(Block3, trainingPL, blockNumber=1, filters=64)
+    Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
 
     ################## FIFTH BLOCK ##################
-    Block5 = standardBlock(Block4, trainingPL, blockNumber=1, filters=128)
+    Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=128)
 
     flattenedLayer = tf.layers.flatten(Block5)
     numberOfUnitsInOutputLayer = 1
