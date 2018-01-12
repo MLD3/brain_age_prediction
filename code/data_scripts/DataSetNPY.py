@@ -66,7 +66,7 @@ class DataSetNPY(object):
             batchArrays = self.GetNumpyBatch(fileList)
             batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = np.concatenate((leftOverLabels, newLabels), axis=0)
-
+            batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels
         else:
             self.currentStartIndex += batchSize
@@ -75,6 +75,7 @@ class DataSetNPY(object):
             batchArrays = self.GetNumpyBatch(fileList)
             batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = self.labels[startIndex:endIndex]
+            batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels
 
 if __name__ == '__main__':
