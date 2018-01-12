@@ -6,10 +6,12 @@ def restore(sess, savePath):
     Returns the tensorflow Saver.
     """
     saver = tf.train.Saver()
-    try:
-        saver.restore(sess, savePath)
-        print('Restored model from {} successfully'.format(savePath))
-    except Exception as error:
-        print('Unable to restore model from path {} with error {}'.format(savePath, error))
-
+    if tf.train.checkpoint_exists(savePath)
+        try:
+            saver.restore(sess, savePath)
+            print('Restored model from {} successfully'.format(savePath))
+        except Exception as error:
+            print('Unable to restore model from path {} with error {}'.format(savePath, error))
+    else:
+        print('No checkpoint exists at path {}. Training from scratch...'.format(savePath))
     return saver
