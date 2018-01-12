@@ -151,7 +151,7 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         saveName = saveNames[index]
 
         print('===================%s===================' % saveName)
-        savePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName
+        savePath = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + saveName
 
         ########## GET CROSS VALIDATION PERFORMANCE OF MODEL ##########
         averageFinalValidationPerformance = CrossValidateModelParameters(splitTrainSet,
@@ -187,7 +187,7 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         if (index == bestIndex):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
-                fileSavePath = get('TRAIN.ROI_BASELINE.CHECKPOINT_DIR') + saveName + '_split1.ckpt'
+                fileSavePath = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + saveName + '_split1.ckpt'
                 print(fileSavePath)
                 saver = saveModel.restore(sess, fileSavePath)
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)

@@ -9,7 +9,7 @@ def restore(sess, savePath):
     try:
         saver.restore(sess, savePath)
         print('Restored model from {} successfully'.format(savePath))
-    except ValueError as error:
+    except Exception as error:
         print('Unable to restore model from path {} with error {}'.format(savePath, error))
 
     return saver
