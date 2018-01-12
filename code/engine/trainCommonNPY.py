@@ -111,7 +111,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
             sess.run(tf.global_variables_initializer())
             fileSavePath = savePath + '_split%i.ckpt' % splitIndex
             splitTrainSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex])
-            splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], numClasses=1)
+            splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex])
             foldTrainingLosses, foldValidationLosses = TrainModel(sess, splitTrainSet, splitValidationSet,
                                                         matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                         lossFunction, fileSavePath, numberOfSteps, batchSize)
