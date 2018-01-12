@@ -26,7 +26,7 @@ def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None)
                            use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer(),
                            bias_initializer=tf.zeros_initializer(), name=name)
 
-def standardBlock(inputs, blockNumber, filters):
+def standardBlock(inputs, trainingPL, blockNumber, filters):
     #### 3x3x3 Convolution ####
     BlockConvolution1 = standardConvolution(inputs, filters=8, name='Block{}Convolution1'.format(blockNumber))
     #### 3x3x3 Convolution ####
@@ -39,19 +39,19 @@ def standardBlock(inputs, blockNumber, filters):
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu):
     ################## FIRST BLOCK ##################
-    Block1 = standardBlock(imagesPL, blockNumber=1, filters=8)
+    Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
     ################## SECOND BLOCK ##################
-    Block2 = standardBlock(Block1, blockNumber=1, filters=16)
+    Block2 = standardBlock(Block1, trainingPL, blockNumber=1, filters=16)
 
     ################## THIRD BLOCK ##################
-    Block3 = standardBlock(Block2, blockNumber=1, filters=32)
+    Block3 = standardBlock(Block2, trainingPL, blockNumber=1, filters=32)
 
     ################## THIRD BLOCK ##################
-    Block4 = standardBlock(Block3, blockNumber=1, filters=64)
+    Block4 = standardBlock(Block3, trainingPL, blockNumber=1, filters=64)
 
     ################## FIFTH BLOCK ##################
-    Block5 = standardBlock(Block4, blockNumber=1, filters=128)
+    Block5 = standardBlock(Block4, trainingPL, blockNumber=1, filters=128)
 
     flattenedLayer = tf.layers.flatten(Block5)
     numberOfUnitsInOutputLayer = 1
