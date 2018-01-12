@@ -6,7 +6,7 @@ def restore(sess, savePath):
     Returns the tensorflow Saver.
     """
     saver = tf.train.Saver()
-    if tf.train.checkpoint_exists(savePath)
+    if tf.train.checkpoint_exists(savePath):
         try:
             saver.restore(sess, savePath)
             print('Restored model from {} successfully'.format(savePath))
