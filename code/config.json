@@ -9,7 +9,7 @@
             "PATH": "/data/psturm/PNC_724_phenotypics.csv"
         },
         "MATRICES": {
-            "PATH": "../Data/Matrices",
+            "PATH": "../data/Matrices",
             "DIMENSION": 264
         },
         "STRUCTURAL": {
@@ -24,15 +24,15 @@
             "NIFTY_PATH": "/data/psturm/functional/niftiImages/"
         },
         "IMAGES": {
-            "TRAIN_PATH": "../Data/Images/Train_Images",
-            "TEST_PATH": "../Data/Images/Test_Images"
+            "TRAIN_PATH": "../data/Images/Train_Images",
+            "TEST_PATH": "../data/Images/Test_Images"
         },
         "fMRI_PHENOTYPICS": {
-            "PATH" : "../Data/PNC_724_phenotypics.csv"
+            "PATH" : "../data/PNC_724_phenotypics.csv"
         },
         "SAMPLE": {
-            "TRAIN_PATH": "../Data/sample_train.csv",
-            "TEST_PATH": "../Data/sample_test.csv"
+            "TRAIN_PATH": "../data/sample_train.csv",
+            "TEST_PATH": "../data/sample_test.csv"
         }
     },
     "TRAIN": {

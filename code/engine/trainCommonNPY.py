@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import math
+import os
 from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss, PlotComparisonBarChart
@@ -88,7 +89,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
 def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
-                                 numberOfSteps, batchSize):
+                                 numberOfSteps, batchSize, dateString):
     """
     Trains a model using 5-fold cross validation on the given data set.
     Puts a plot of the results in the ../plots/ directory, and returns
@@ -121,10 +122,7 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
     ########## PLOT THE RESULTS OF CROSS VALIDATION ##########
     accumulatedTrainingLoss = np.array(accumulatedTrainingLoss)
     accumulatedValidationLoss = np.array(accumulatedValidationLoss)
-    PlotTrainingValidationLoss(accumulatedTrainingLoss, accumulatedValidationLoss, saveName, 'plots/' + saveName + '.png')
-
-    if numberOfSteps >= 1000:
-        PlotTrainingValidationLoss(accumulatedTrainingLoss[:,-1000:], accumulatedValidationLoss[:,-1000:], saveName, 'plots/' + saveName + 'last1000.png')
+    PlotTrainingValidationLoss(accumulatedTrainingLoss, accumulatedValidationLoss, saveName, 'plots/{}/{}.png'.format(dateString, saveName))
 
     ########## GET AVERAGE VALIDATION PERFORMANCE ##########
     averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
@@ -132,6 +130,12 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
 
 def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                  lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
+    dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
+    if not os.path.exists('plots/{}'.format(dateString)):
+        os.makedirs('plots/{}'.format(dateString))
+    if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString)):
+        os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString))
+
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
     splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train)
@@ -151,13 +155,13 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         saveName = saveNames[index]
 
         print('===================%s===================' % saveName)
-        savePath = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + saveName
+        savePath = '{}{}/{}'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString, saveName)
 
         ########## GET CROSS VALIDATION PERFORMANCE OF MODEL ##########
         averageFinalValidationPerformance = CrossValidateModelParameters(splitTrainSet,
                                                 matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                 lossFunction, savePath, saveName,
-                                                numberOfSteps, batchSize)
+                                                numberOfSteps, batchSize, dateString)
         finalValidationPerformances.append(averageFinalValidationPerformance)
 
         ########## DETERMINE BEST MODEL SO FAR ##########
@@ -187,11 +191,11 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         if (index == bestIndex):
             with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
-                fileSavePath = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + saveName + '_split1.ckpt'
+                fileSavePath = savePath = '{}{}/{}_split1.ckpt'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString, saveName)
                 print(fileSavePath)
                 saver = saveModel.restore(sess, fileSavePath)
                 testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                 print('Best model had test loss: %f' % testLoss)
         index += 1
-    savePath = 'plots/modelComparison%s.png' % datetime.now().strftime('%I:%M%p_%B_%d_%Y')
+    savePath = 'plots/{}/modelComparison.png'.format(dateString)
     PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath=savePath)
