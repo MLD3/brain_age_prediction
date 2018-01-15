@@ -49,7 +49,7 @@ if __name__ == '__main__':
     saveNames = []
 
     with tf.variable_scope('3DConvolutionStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL)
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, stepCountName='SMALL_NB_STEPS')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         saveNames.append('3DConvolutionStandard')
 
     with tf.variable_scope('3DConvolutionExtraHiddenLayer96'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=96)
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=96, stepCountName='SMALL_NB_STEPS')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
