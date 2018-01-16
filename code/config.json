@@ -37,6 +37,7 @@
     },
     "TRAIN": {
         "CNN_BASELINE": {
+            "SUMMARIES_DIR": "../summaries/cnn_baseline/",
             "CHECKPOINT_DIR": "../checkpoints/cnn_baseline/",
             "LEARNING_RATE": 0.0005,
             "MOMENTUM": 0.9,

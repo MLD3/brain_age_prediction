@@ -63,7 +63,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     Trains a model defined by matricesPL, labelsPL, predictionLayer, trainOperation and lossFunction
     over numberOfSteps steps with batch size batchSize. Uses savePath to save the model.
     """
-    extraUpdateOps = sess.graph.get_collection(tf.GraphKeys.UPDATE_OPS)
+    extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     ############# Define tf saver #############
     saver = saveModel.restore(sess, savePath)
 
@@ -88,7 +88,7 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
 
     return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
-def CrossValidateModelParameters(graph, splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
+def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
                                  numberOfSteps, batchSize, dateString):
     """
     Trains a model using 5-fold cross validation on the given data set.
@@ -104,7 +104,7 @@ def CrossValidateModelParameters(graph, splitTrainSet, matricesPL, labelsPL, tra
     accumulatedValidationLoss = []
     splitIndex = 0
 
-    with tf.Session(graph=graph) as sess:
+    with tf.Session() as sess:
         for tIndex, vIndex in folder.split(X):
             splitIndex += 1
             print('-------------Split: %i-------------' % splitIndex)
@@ -133,13 +133,19 @@ def CrossValidateModelParameters(graph, splitTrainSet, matricesPL, labelsPL, tra
     averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
     return averageFinalValidationPerformance
 
-def RunCrossValidation(graphs, dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
+def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                  lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
     dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
     if not os.path.exists('plots/{}'.format(dateString)):
         os.makedirs('plots/{}'.format(dateString))
     if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString)):
         os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString))
+    if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)):
+        os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString))
+
+    ########## DEFINE A SUMMARY WRITER ##########
+    summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)
+    tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
@@ -152,7 +158,6 @@ def RunCrossValidation(graphs, dataSet, matricesPL, labelsPL, predictionLayers, 
     lowestLoss = math.inf
     finalValidationPerformances = []
     for index in range(len(saveNames)):
-        graph = graphs[index]
         predictionLayer = predictionLayers[index]
         lossFunction = lossFunctions[index]
         trainOperation = trainOperations[index]
@@ -164,7 +169,7 @@ def RunCrossValidation(graphs, dataSet, matricesPL, labelsPL, predictionLayers, 
         savePath = '{}{}/{}'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString, saveName)
 
         ########## GET CROSS VALIDATION PERFORMANCE OF MODEL ##########
-        averageFinalValidationPerformance = CrossValidateModelParameters(graph, splitTrainSet,
+        averageFinalValidationPerformance = CrossValidateModelParameters(splitTrainSet,
                                                 matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                 lossFunction, savePath, saveName,
                                                 numberOfSteps, batchSize, dateString)
@@ -187,7 +192,6 @@ def RunCrossValidation(graphs, dataSet, matricesPL, labelsPL, predictionLayers, 
     index = 0
 
     for index in range(len(saveNames)):
-        graph = graphs[index]
         predictionLayer = predictionLayers[index]
         lossFunction = lossFunctions[index]
         trainOperation = trainOperations[index]
@@ -196,7 +200,7 @@ def RunCrossValidation(graphs, dataSet, matricesPL, labelsPL, predictionLayers, 
         saveName = saveNames[index]
 
         if (index == bestIndex):
-            with tf.Session(graph) as sess:
+            with tf.Session() as sess:
                 sess.run(tf.global_variables_initializer())
                 fileSavePath = savePath = '{}{}/{}_split1.ckpt'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString, saveName)
                 print(fileSavePath)
