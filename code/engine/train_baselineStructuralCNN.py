@@ -41,6 +41,7 @@ if __name__ == '__main__':
 
     trainingPL = TrainingPlaceholder()
     imagesPL, labelsPL = StructuralPlaceholders()
+    graphs = []
     predictionLayers = []
     trainOperations = []
     lossFunctions = []
@@ -48,23 +49,29 @@ if __name__ == '__main__':
     batchSizeArray = []
     saveNames = []
 
-    with tf.variable_scope('3DConvolutionStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, stepCountName='SMALL_NB_STEPS')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('3DConvolutionStandard')
+    g_1 = tf.Graph()
+    with g_1.as_default():
+        graphs.append(g_1)
+        with tf.variable_scope('3DConvolutionStandard'):
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, stepCountName='SMALL_NB_STEPS')
+            predictionLayers.append(predictionLayer)
+            trainOperations.append(trainOperation)
+            lossFunctions.append(lossFunction)
+            stepCountArray.append(stepCount)
+            batchSizeArray.append(batchSize)
+            saveNames.append('3DConvolutionStandard')
 
-    with tf.variable_scope('3DConvolutionExtraHiddenLayer96'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=96, stepCountName='SMALL_NB_STEPS')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append('3DConvolutionExtraHiddenLayer96')
+    g_2 = tf.Graph()
+    with g_2.as_default():
+        graphs.append(g_2)
+        with tf.variable_scope('3DConvolutionExtraHiddenLayer96'):
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=96, stepCountName='SMALL_NB_STEPS')
+            predictionLayers.append(predictionLayer)
+            trainOperations.append(trainOperation)
+            lossFunctions.append(lossFunction)
+            stepCountArray.append(stepCount)
+            batchSizeArray.append(batchSize)
+            saveNames.append('3DConvolutionExtraHiddenLayer96')
 
-    RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
+    RunCrossValidation(graphs, dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
