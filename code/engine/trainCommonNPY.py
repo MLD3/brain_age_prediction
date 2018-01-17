@@ -145,7 +145,8 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
 
     ########## DEFINE A SUMMARY WRITER ##########
     summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)
-    tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
+    graphWriter = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
+    graphWriter.close()
 
     ########## SPLIT DATA INTO TRAIN AND TEST ##########
     X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
