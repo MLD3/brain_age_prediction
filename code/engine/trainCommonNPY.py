@@ -140,8 +140,6 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
         os.makedirs('plots/{}'.format(dateString))
     if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString)):
         os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString))
-    if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)):
-        os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString))
 
     ########## DEFINE A SUMMARY WRITER ##########
     summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)
