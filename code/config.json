@@ -40,11 +40,16 @@
             "SUMMARIES_DIR": "../summaries/cnn_baseline/",
             "CHECKPOINT_DIR": "../checkpoints/cnn_baseline/",
             "LEARNING_RATE": 0.0005,
+            "SMALL_LEARNING_RATE": 0.0001,
             "MOMENTUM": 0.9,
             "NB_STEPS": 10000,
             "SMALL_NB_STEPS": 10,
-            "BATCH_SIZE": 4,
-            "KEEP_PROB": 0.6
+            "LARGE_BATCH_SIZE": 32,
+            "BATCH_SIZE": 16,
+            "SMALL_BATCH_SIZE": 4,
+            "KEEP_PROB": 0.6,
+            "SMALL_KEEP_PROB": 0.3,
+            "TINY_KEEP_PROB": 0.1
         },
         "ROI_BASELINE": {
             "CHECKPOINT_DIR": "../checkpoints/roi_baseline/",
