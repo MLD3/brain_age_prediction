@@ -102,5 +102,6 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append(tf.contrib.framework.get_name_scope())
 
-    RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
+    trainer = ModelTrainerNPY(summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
+    trainer.RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
