@@ -62,7 +62,7 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     ################## FIFTH BLOCK ##################
     Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=128)
 
-    with tf.variable_scope('FullyConnectedLayers')
+    with tf.variable_scope('FullyConnectedLayers'):
         flattenedLayer = tf.layers.flatten(Block5)
         if optionalHiddenLayerUnits > 0:
             optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')

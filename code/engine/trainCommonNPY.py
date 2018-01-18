@@ -104,7 +104,7 @@ class ModelTrainerNPY(object):
         return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
     def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
-                                     numberOfSteps, batchSize d):
+                                     numberOfSteps, batchSize):
         """
         Trains a model using 5-fold cross validation on the given data set.
         Puts a plot of the results in the ../plots/ directory, and returns
