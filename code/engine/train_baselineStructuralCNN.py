@@ -15,9 +15,9 @@ from itertools import product
 from engine.trainCommonNPY import *
 
 def GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
-                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0):
+                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0, useAttentionMap=False):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName), optionalHiddenLayerUnits=optionalHiddenLayerUnits)
+    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName), optionalHiddenLayerUnits=optionalHiddenLayerUnits, useAttentionMap=useAttentionMap)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
     ############ DEFINE OPTIMIZER ############
@@ -95,6 +95,15 @@ if __name__ == '__main__':
 
     with tf.variable_scope('3DConvolutionExtraHiddenLayer48'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=48)
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append(tf.contrib.framework.get_name_scope())
+
+    with tf.variable_scope('3DConvolutionAttention'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, useAttentionMap=True)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)

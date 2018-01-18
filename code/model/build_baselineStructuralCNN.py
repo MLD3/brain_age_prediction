@@ -27,17 +27,26 @@ def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None)
                            bias_initializer=tf.zeros_initializer(), name=name)
 
 def standardBlock(inputs, trainingPL, blockNumber, filters):
-    #### 3x3x3 Convolution ####
-    BlockConvolution1 = standardConvolution(inputs, filters=8, name='Block{}Convolution1'.format(blockNumber))
-    #### 3x3x3 Convolution ####
-    BlockConvolution2 = standardConvolution(BlockConvolution1, filters=8, name='Block{}Convolution2'.format(blockNumber))
-    #### Batch Normalization ####
-    BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
-    #### Max Pooling ####
-    BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
-    return BlockMaxPool
+    with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
+        #### 3x3x3 Convolution ####
+        BlockConvolution1 = standardConvolution(inputs, filters=8, name='Block{}Convolution1'.format(blockNumber))
+        #### 3x3x3 Convolution ####
+        BlockConvolution2 = standardConvolution(BlockConvolution1, filters=8, name='Block{}Convolution2'.format(blockNumber))
+        #### Batch Normalization ####
+        BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
+        #### Max Pooling ####
+        BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
+        return BlockMaxPool
 
-def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0):
+def attentionMap(inputs):
+    with tf.variable_scope('attentionMap'):
+        attentionWeight = tf.Variable(tf.ones(shape=inputs.shape, name='attentionWeight'))
+        return tf.multiply(inputs, attentionWeight)
+
+def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
+    if useAttentionMap:
+        imagesPL = attentionMap(imagesPL)
+
     ################## FIRST BLOCK ##################
     Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
@@ -53,12 +62,13 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     ################## FIFTH BLOCK ##################
     Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=128)
 
-    flattenedLayer = tf.layers.flatten(Block5)
-    if optionalHiddenLayerUnits > 0:
-        optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
-        droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-        flattenedLayer = droppedOutHiddenLayer
+    with tf.variable_scope('FullyConnectedLayers')
+        flattenedLayer = tf.layers.flatten(Block5)
+        if optionalHiddenLayerUnits > 0:
+            optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            flattenedLayer = droppedOutHiddenLayer
 
-    numberOfUnitsInOutputLayer = 1
-    outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+        numberOfUnitsInOutputLayer = 1
+        outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
