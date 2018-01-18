@@ -48,6 +48,15 @@ if __name__ == '__main__':
     batchSizeArray = []
     saveNames = []
 
+    with tf.variable_scope('3DConvolutionAttention'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, useAttentionMap=True)
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append(tf.contrib.framework.get_name_scope())
+
     with tf.variable_scope('3DConvolutionStandard'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL)
         predictionLayers.append(predictionLayer)
@@ -95,15 +104,6 @@ if __name__ == '__main__':
 
     with tf.variable_scope('3DConvolutionExtraHiddenLayer48'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, optionalHiddenLayerUnits=48)
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
-
-    with tf.variable_scope('3DConvolutionAttention'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, useAttentionMap=True)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)

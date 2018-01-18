@@ -40,7 +40,9 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
 
 def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
-        attentionWeight = tf.Variable(tf.ones(shape=inputs.shape, name='attentionWeight'))
+        weightShape = list(inputs.shape)
+        weightShape[0] = 1
+        attentionWeight = tf.Variable(tf.ones(shape=weightShape, name='attentionWeight'))
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
