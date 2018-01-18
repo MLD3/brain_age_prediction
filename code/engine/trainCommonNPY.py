@@ -19,7 +19,7 @@ class ModelTrainerNPY(object):
         self.checkpointDir = checkpointDir
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 
-    def DefineFeedDict(batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=False):
+    def DefineFeedDict(self, batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=False):
         """
         Defines a tensorflow feed dict for running operations
         """
@@ -30,7 +30,7 @@ class ModelTrainerNPY(object):
         }
         return feed_dict
 
-    def GetEvaluatedLoss(sess, dataSet, lossFunction, matricesPL, labelsPL, trainingPL):
+    def GetEvaluatedLoss(self, sess, dataSet, lossFunction, matricesPL, labelsPL, trainingPL):
         """
         Returns the evaluated loss of the current model on the given loss function
         """
@@ -43,7 +43,7 @@ class ModelTrainerNPY(object):
 
         return accumulatedLoss
 
-    def ReportProgress(sess, step, lossFunction, matricesPL, labelsPL, splitTrainSet, splitValdSet, trainingPL, stepSize=50):
+    def ReportProgress(self, sess, step, lossFunction, matricesPL, labelsPL, splitTrainSet, splitValdSet, trainingPL, stepSize=50):
         """
         Reports training and validation loss every stepSize steps
         """
@@ -55,7 +55,7 @@ class ModelTrainerNPY(object):
         else:
             return (None, None, False)
 
-    def SaveModel(sess, step, saver, path, stepSize=100):
+    def SaveModel(self, sess, step, saver, path, stepSize=100):
         """
         Saves the model to path every stepSize steps
         """
@@ -63,7 +63,7 @@ class ModelTrainerNPY(object):
             saver.save(sess, path)
             print('Step: %d, Saved model to path  %s' % (step, path))
 
-    def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
+    def TrainModel(self, sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
                    numberOfSteps, batchSize, trainSummaryWriter, validationSummaryWriter):
         """
         Trains a model defined by matricesPL, labelsPL, predictionLayer, trainOperation and lossFunction
@@ -103,7 +103,7 @@ class ModelTrainerNPY(object):
 
         return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
-    def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
+    def CrossValidateModelParameters(self, splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
                                      numberOfSteps, batchSize):
         """
         Trains a model using 5-fold cross validation on the given data set.
@@ -158,7 +158,7 @@ class ModelTrainerNPY(object):
         averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
         return averageFinalValidationPerformance
 
-    def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
+    def RunCrossValidation(self, dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
         if not os.path.exists('plots/{}'.format(self.dateString)):
             os.makedirs('plots/{}'.format(self.dateString))
