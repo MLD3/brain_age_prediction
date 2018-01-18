@@ -37,7 +37,7 @@ class ModelTrainerNPY(object):
         accumulatedLoss = 0
         for i in range(dataSet.numExamples):
             batchArray, batchLabel = dataSet.NextBatch(batchSize=1, shuffle=False)
-            feed_dict = DefineFeedDict(batchArray, batchLabel, matricesPL, labelsPL, trainingPL)
+            feed_dict = self.DefineFeedDict(batchArray, batchLabel, matricesPL, labelsPL, trainingPL)
             accumulatedLoss += sess.run(lossFunction, feed_dict=feed_dict)
         accumulatedLoss = accumulatedLoss / dataSet.numExamples
 
@@ -48,14 +48,14 @@ class ModelTrainerNPY(object):
         Reports training and validation loss every stepSize steps
         """
         if step % stepSize == 0:
-            trainingLoss = GetEvaluatedLoss(sess, splitTrainSet, lossFunction, matricesPL, labelsPL, trainingPL)
-            validationLoss = GetEvaluatedLoss(sess, splitValdSet, lossFunction, matricesPL, labelsPL, trainingPL)
+            trainingLoss = self.GetEvaluatedLoss(sess, splitTrainSet, lossFunction, matricesPL, labelsPL, trainingPL)
+            validationLoss = self.GetEvaluatedLoss(sess, splitValdSet, lossFunction, matricesPL, labelsPL, trainingPL)
             print('Step: %d, Evaluated Training Loss: %f, Evaluated Validation Loss: %f' % (step, trainingLoss, validationLoss))
             return (trainingLoss, validationLoss, True)
         else:
             return (None, None, False)
 
-    def SaveModel(self, sess, step, saver, path, stepSize=100):
+    def SaveModel(self, sess, step, saver, path, stepSize=500):
         """
         Saves the model to path every stepSize steps
         """
@@ -86,11 +86,11 @@ class ModelTrainerNPY(object):
         for batch_index in range(numberOfSteps):
             ############# RUN TRAINING OPERATIONS #############
             batchArrays, batchLabels = splitTrainSet.NextBatch(batchSize)
-            feed_dict = DefineFeedDict(batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=True)
+            feed_dict = self.DefineFeedDict(batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=True)
             sess.run([trainOperation, extraUpdateOps], feed_dict=feed_dict)
 
             ############# REPORT TRAINING PROGRESS #############
-            trainingLoss, validationLoss, shouldUse = ReportProgress(sess, batch_index, lossFunction, matricesPL, labelsPL, splitTrainSet, splitValidationSet, trainingPL)
+            trainingLoss, validationLoss, shouldUse = self.ReportProgress(sess, batch_index, lossFunction, matricesPL, labelsPL, splitTrainSet, splitValidationSet, trainingPL)
             if shouldUse:
                 accumulatedTrainingLoss.append(trainingLoss)
                 accumulatedValidationLoss.append(validationLoss)
@@ -99,7 +99,7 @@ class ModelTrainerNPY(object):
                 validationSummaryWriter.add_summary(sess.run(validationSummary, feed_dict={validationLossPlaceholder: validationLoss}), batch_index)
 
             ############# SAVE TRAINED MODEL #############
-            SaveModel(sess, batch_index, saver, savePath)
+            self.SaveModel(sess, batch_index, saver, savePath)
 
         return (accumulatedTrainingLoss, accumulatedValidationLoss)
 
@@ -139,7 +139,7 @@ class ModelTrainerNPY(object):
                 splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex])
 
                 ########## TRAIN THE MODEL ##########
-                foldTrainingLosses, foldValidationLosses = TrainModel(sess, splitTrainSet, splitValidationSet,
+                foldTrainingLosses, foldValidationLosses = self.TrainModel(sess, splitTrainSet, splitValidationSet,
                                                             matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                             lossFunction, fileSavePath, numberOfSteps, batchSize, trainSummaryWriter, validationSummaryWriter)
                 accumulatedTrainingLoss.append(foldTrainingLosses)
@@ -192,7 +192,7 @@ class ModelTrainerNPY(object):
             savePath = '{}{}/{}'.format(self.checkpointDir, self.dateString, saveName)
 
             ########## GET CROSS VALIDATION PERFORMANCE OF MODEL ##########
-            averageFinalValidationPerformance = CrossValidateModelParameters(splitTrainSet,
+            averageFinalValidationPerformance = self.CrossValidateModelParameters(splitTrainSet,
                                                     matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                     lossFunction, savePath, saveName,
                                                     numberOfSteps, batchSize)
@@ -228,7 +228,7 @@ class ModelTrainerNPY(object):
                     fileSavePath = savePath = '{}{}/{}_split1.ckpt'.format(self.checkpointDir, self.dateString, saveName)
                     print(fileSavePath)
                     saver = saveModel.restore(sess, fileSavePath)
-                    testLoss = GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
+                    testLoss = self.GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
                     print('Best model had test loss: %f' % testLoss)
             index += 1
         savePath = 'plots/{}/modelComparison.png'.format(self.dateString)
