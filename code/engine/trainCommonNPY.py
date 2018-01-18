@@ -147,7 +147,7 @@ class ModelTrainerNPY(object):
 
                 ########## CLOSE THE SUMMARY WRITER ##########
                 trainSummaryWriter.close()
-                testSummaryWriter.close()
+                validationSummaryWriter.close()
 
         ########## PLOT THE RESULTS OF CROSS VALIDATION ##########
         accumulatedTrainingLoss = np.array(accumulatedTrainingLoss)
