@@ -58,7 +58,7 @@ def SaveModel(sess, step, saver, path, stepSize=100):
         print('Step: %d, Saved model to path  %s' % (step, path))
 
 def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath,
-               numberOfSteps, batchSize):
+               numberOfSteps, batchSize, trainSummaryWriter, validationSummaryWriter):
     """
     Trains a model defined by matricesPL, labelsPL, predictionLayer, trainOperation and lossFunction
     over numberOfSteps steps with batch size batchSize. Uses savePath to save the model.
@@ -71,6 +71,12 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
     accumulatedTrainingLoss = []
     accumulatedValidationLoss = []
 
+    ############# DEFINE SUMMARY PLACEHOLDERS ##############
+    trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
+    validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
+    trainSummary = tf.summary.scalar('trainingLoss', trainLossPlaceholder)
+    validationSummary = tf.summary.scalar('validationLoss', validationLossPlaceholder)
+
     for batch_index in range(numberOfSteps):
         ############# RUN TRAINING OPERATIONS #############
         batchArrays, batchLabels = splitTrainSet.NextBatch(batchSize)
@@ -82,6 +88,9 @@ def TrainModel(sess, splitTrainSet, splitValidationSet, matricesPL, labelsPL, tr
         if shouldUse:
             accumulatedTrainingLoss.append(trainingLoss)
             accumulatedValidationLoss.append(validationLoss)
+
+            trainSummaryWriter.add_summary(sess.run(trainSummary, feed_dict={trainLossPlaceholder: trainingLoss}), batch_index)
+            validationSummaryWriter.add_summary(sess.run(validationSummary, feed_dict={validationLossPlaceholder: validationLoss}), batch_index)
 
         ############# SAVE TRAINED MODEL #############
         SaveModel(sess, batch_index, saver, savePath)
@@ -109,6 +118,12 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
             splitIndex += 1
             print('-------------Split: %i-------------' % splitIndex)
 
+            ########## CREATE SUMMARY WRITER ##########
+            trainSummarydir = '{}{}/{}/train/split_{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString, saveName, splitIndex)
+            trainSummaryWriter = tf.summary.FileWriter(trainSummarydir)
+            validationSummaryDir = '{}{}/{}/validation/split_{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString, saveName, splitIndex)
+            validationSummaryWriter = tf.summary.FileWriter(validationSummaryDir)
+
             ########## INITIALIZE VARIABLES ##########
             sess.run(tf.global_variables_initializer())
 
@@ -120,9 +135,13 @@ def CrossValidateModelParameters(splitTrainSet, matricesPL, labelsPL, trainingPL
             ########## TRAIN THE MODEL ##########
             foldTrainingLosses, foldValidationLosses = TrainModel(sess, splitTrainSet, splitValidationSet,
                                                         matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
-                                                        lossFunction, fileSavePath, numberOfSteps, batchSize)
+                                                        lossFunction, fileSavePath, numberOfSteps, batchSize, trainSummaryWriter, validationSummaryWriter)
             accumulatedTrainingLoss.append(foldTrainingLosses)
             accumulatedValidationLoss.append(foldValidationLosses)
+
+            ########## CLOSE THE SUMMARY WRITER ##########
+            trainSummaryWriter.close()
+            testSummaryWriter.close()
 
     ########## PLOT THE RESULTS OF CROSS VALIDATION ##########
     accumulatedTrainingLoss = np.array(accumulatedTrainingLoss)
@@ -141,7 +160,7 @@ def RunCrossValidation(dataSet, matricesPL, labelsPL, predictionLayers, trainOpe
     if not os.path.exists('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString)):
         os.makedirs('{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dateString))
 
-    ########## DEFINE A SUMMARY WRITER ##########
+    ########## WRITE THE GRAPH TO THE SUMMARY FILE ##########
     summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dateString)
     graphWriter = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
     graphWriter.close()
