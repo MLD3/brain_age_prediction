@@ -31,12 +31,12 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
         #### 3x3x3 Convolution ####
         BlockConvolution1 = standardConvolution(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber))
         #### 3x3x3 Convolution ####
-        BlockConvolution2 = standardConvolution(BlockMaxPool1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
+        BlockConvolution2 = standardConvolution(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
         #### Batch Normalization ####
         BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
         BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
-        return BlockMaxPool2
+        return BlockMaxPool
 
 def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
