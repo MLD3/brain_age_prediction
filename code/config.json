@@ -44,9 +44,9 @@
             "MOMENTUM": 0.9,
             "NB_STEPS": 5000,
             "SMALL_NB_STEPS": 10,
-            "LARGE_BATCH_SIZE": 8,
-            "BATCH_SIZE": 6,
-            "SMALL_BATCH_SIZE": 4,
+            "LARGE_BATCH_SIZE": 4,
+            "BATCH_SIZE": 2,
+            "SMALL_BATCH_SIZE": 1,
             "KEEP_PROB": 0.6,
             "SMALL_KEEP_PROB": 0.3,
             "TINY_KEEP_PROB": 0.1

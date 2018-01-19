@@ -46,33 +46,31 @@ def attentionMap(inputs):
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
-    with tf.device('/gpu:0'):
-        if useAttentionMap:
-            imagesPL = attentionMap(imagesPL)
+    if useAttentionMap:
+        imagesPL = attentionMap(imagesPL)
 
-        ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
+    ################## FIRST BLOCK ##################
+    Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
-        ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=8)
+    ################## SECOND BLOCK ##################
+    Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=8)
 
-    with tf.device('/gpu:1'):
-        ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=16)
+    ################## THIRD BLOCK ##################
+    Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8)
 
-        ################## FOURTH BLOCK ##################
-        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=32)
+    ################## FOURTH BLOCK ##################
+    Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
 
-        ################## FIFTH BLOCK ##################
-        Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=64)
+    ################## FIFTH BLOCK ##################
+    Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=8)
 
-        with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block5)
-            if optionalHiddenLayerUnits > 0:
-                optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
-                droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-                flattenedLayer = droppedOutHiddenLayer
+    with tf.variable_scope('FullyConnectedLayers'):
+        flattenedLayer = tf.layers.flatten(Block5)
+        if optionalHiddenLayerUnits > 0:
+            optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            flattenedLayer = droppedOutHiddenLayer
 
-            numberOfUnitsInOutputLayer = 1
-            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+        numberOfUnitsInOutputLayer = 1
+        outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
