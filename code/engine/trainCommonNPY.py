@@ -22,8 +22,8 @@ class ModelTrainerNPY(object):
         ############# DEFINE SUMMARY PLACEHOLDERS ##############
         self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
         self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
-        self.trainSummary = tf.summary.scalar('trainingLoss', trainLossPlaceholder)
-        self.validationSummary = tf.summary.scalar('validationLoss', validationLossPlaceholder)
+        self.trainSummary = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
+        self.validationSummary = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
 
     def DefineFeedDict(self, batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=False):
         """
