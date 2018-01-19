@@ -46,7 +46,7 @@ def attentionMap(inputs):
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
-    with tf.device('/gpu:0'):
+    with tf.device('/gpu:1'):
         if useAttentionMap:
             imagesPL = attentionMap(imagesPL)
 
@@ -59,7 +59,6 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
         ################## THIRD BLOCK ##################
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
 
-    with tf.device('gpu:1'):
         ################## FOURTH BLOCK ##################
         Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
 
