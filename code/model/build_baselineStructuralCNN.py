@@ -30,13 +30,15 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
     with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
         #### 3x3x3 Convolution ####
         BlockConvolution1 = standardConvolution(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber))
+        #### Max Pooling ####
+        BlockMaxPool1 = standardPool(BlockConvolution1, name='Block{}MaxPool1'.format(blockNumber))
         #### 3x3x3 Convolution ####
-        BlockConvolution2 = standardConvolution(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
+        BlockConvolution2 = standardConvolution(BlockMaxPool1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
         #### Batch Normalization ####
         BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
-        BlockMaxPool = standardPool(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
-        return BlockMaxPool
+        BlockMaxPool2 = standardPool(BlockBatchNorm, name='Block{}MaxPool2'.format(blockNumber))
+        return BlockMaxPool2
 
 def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
@@ -51,19 +53,19 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
             imagesPL = attentionMap(imagesPL)
 
         ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=4)
 
         ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=8)
 
         ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=16)
 
         ################## FOURTH BLOCK ##################
-        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=32)
 
         ################## FIFTH BLOCK ##################
-        Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=128)
+        Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=64)
 
         with tf.variable_scope('FullyConnectedLayers'):
             flattenedLayer = tf.layers.flatten(Block5)
