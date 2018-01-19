@@ -19,6 +19,12 @@ class ModelTrainerNPY(object):
         self.checkpointDir = checkpointDir
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 
+        ############# DEFINE SUMMARY PLACEHOLDERS ##############
+        self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
+        self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
+        self.trainSummary = tf.summary.scalar('trainingLoss', trainLossPlaceholder)
+        self.validationSummary = tf.summary.scalar('validationLoss', validationLossPlaceholder)
+
     def DefineFeedDict(self, batchArrays, batchLabels, matricesPL, labelsPL, trainingPL, isTraining=False):
         """
         Defines a tensorflow feed dict for running operations
@@ -77,12 +83,6 @@ class ModelTrainerNPY(object):
         accumulatedTrainingLoss = []
         accumulatedValidationLoss = []
 
-        ############# DEFINE SUMMARY PLACEHOLDERS ##############
-        trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
-        validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
-        trainSummary = tf.summary.scalar('trainingLoss', trainLossPlaceholder)
-        validationSummary = tf.summary.scalar('validationLoss', validationLossPlaceholder)
-
         for batch_index in range(numberOfSteps):
             ############# RUN TRAINING OPERATIONS #############
             batchArrays, batchLabels = splitTrainSet.NextBatch(batchSize)
@@ -95,8 +95,8 @@ class ModelTrainerNPY(object):
                 accumulatedTrainingLoss.append(trainingLoss)
                 accumulatedValidationLoss.append(validationLoss)
 
-                trainSummaryWriter.add_summary(sess.run(trainSummary, feed_dict={trainLossPlaceholder: trainingLoss}), batch_index)
-                validationSummaryWriter.add_summary(sess.run(validationSummary, feed_dict={validationLossPlaceholder: validationLoss}), batch_index)
+                trainSummaryWriter.add_summary(sess.run(self.trainSummary, feed_dict={self.trainLossPlaceholder: trainingLoss}), batch_index)
+                validationSummaryWriter.add_summary(sess.run(self.validationSummary, feed_dict={self.validationLossPlaceholder: validationLoss}), batch_index)
 
             ############# SAVE TRAINED MODEL #############
             self.SaveModel(sess, batch_index, saver, savePath)
