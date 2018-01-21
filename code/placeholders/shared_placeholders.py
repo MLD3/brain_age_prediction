@@ -15,6 +15,7 @@ def TimecoursePlaceholders():
     """
     timecoursePL = tf.placeholder(tf.float32, shape=(None, get('DATA.TIMECOURSES.SEQ_LENGTH'), get('DATA.TIMECOURSES.SEQ_WIDTH')), name='timecoursePL')
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
+    return (timecoursePL, labelsPL)
 
 def StructuralPlaceholders():
     """
