@@ -9,9 +9,16 @@ def TrainingPlaceholder():
     """
     return tf.placeholder_with_default(False, shape=(), name="isTraining")
 
+def TimecoursePlaceholders():
+    """
+    Returns input and output placeholders for the timecourses in the /data directory.
+    """
+    timecoursePL = tf.placeholder(tf.float32, shape=(None, get('DATA.TIMECOURSES.SEQ_LENGTH'), get('DATA.TIMECOURSES.SEQ_WIDTH')), name='timecoursePL')
+    labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
+
 def StructuralPlaceholders():
     """
-    Returns inputa nd output placeholders for the structural images in the /data directory.
+    Returns input and output placeholders for the structural images in the /data directory.
     """
     imagesPL = tf.placeholder(dtype=tf.float32, shape=(None, get('DATA.STRUCTURAL.HEIGHT'), get('DATA.STRUCTURAL.WIDTH'), get('DATA.STRUCTURAL.DEPTH'), 1), name='imagesPL')
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
@@ -19,7 +26,7 @@ def StructuralPlaceholders():
 
 def MatrixPlaceholders():
     """
-    Returns input and output placeholders for the connectivity matrices in the data file,
+    Returns input and output placeholders for the connectivity matrices in the data file.
     """
     matricesPL = tf.placeholder(dtype=tf.float32, shape=(None, get('DATA.MATRICES.DIMENSION'), get('DATA.MATRICES.DIMENSION'), 1), name='matricesPL')
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')

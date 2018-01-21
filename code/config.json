@@ -23,6 +23,11 @@
             "NUMPY_PATH": "/data/psturm/functional/numpyArrays/",
             "NIFTY_PATH": "/data/psturm/functional/niftiImages/"
         },
+        "TIMECOURSES": {
+            "NUMPY_PATH": "/data/psturm/timecourses/numpyArrays/",
+            "SEQ_LENGTH": 120,
+            "SEQ_WIDTH": 264
+        },
         "IMAGES": {
             "TRAIN_PATH": "../data/Images/Train_Images",
             "TEST_PATH": "../data/Images/Test_Images"
@@ -47,6 +52,21 @@
             "LARGE_BATCH_SIZE": 4,
             "BATCH_SIZE": 2,
             "SMALL_BATCH_SIZE": 1,
+            "KEEP_PROB": 0.6,
+            "SMALL_KEEP_PROB": 0.3,
+            "TINY_KEEP_PROB": 0.1
+        },
+        "LSTM_BASELINE": {
+            "SUMMARIES_DIR": "../summaries/lstm_baseline/",
+            "CHECKPOINT_DIR": "../checkpoints/lstm_baseline/",
+            "LEARNING_RATE": 0.0005,
+            "SMALL_LEARNING_RATE": 0.0001,
+            "MOMENTUM": 0.9,
+            "NB_STEPS": 5000,
+            "SMALL_NB_STEPS": 10,
+            "LARGE_BATCH_SIZE": 64,
+            "BATCH_SIZE": 32,
+            "SMALL_BATCH_SIZE": 16,
             "KEEP_PROB": 0.6,
             "SMALL_KEEP_PROB": 0.3,
             "TINY_KEEP_PROB": 0.1

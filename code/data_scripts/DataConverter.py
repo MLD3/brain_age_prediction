@@ -12,6 +12,16 @@ def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
         outFileName = outFile + str(subject)
         np.save(outFileName, imageArray)
 
+def convertCSVToNPY(inFile, outFile, SubjectDataFrame):
+    for _, row in SubjectDataFrame.iterrows():
+        subject = row['Subject']
+        print('Saving Subject {}'.format(subject))
+        fileName = inFile + str(subject) + '.csv'
+        df = pd.read_csv(fileName, header=None)
+        npArray = df.as_matrix()
+        outFileName = outFile + str(subject)
+        np.save(outFileName, npArray)
+
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
     inFileStructural = '/data/psturm/structural/niftiImages/'
