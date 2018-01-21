@@ -33,7 +33,7 @@ def MatrixPlaceholders():
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
     return (matricesPL, labelsPL)
 
-def AdamOptimizer(loss, learningRate):
+def AdamOptimizer(loss, learningRate, clipGrads=False):
     """
     Given the network loss, constructs the training op needed to train the
     network using adam optimization.
@@ -43,7 +43,12 @@ def AdamOptimizer(loss, learningRate):
         (i.e., the operation that minimizes the loss function).
     """
     optimizer = tf.train.AdamOptimizer(learningRate)
-    trainOperation = optimizer.minimize(loss)
+    if clipGrads:
+        gradients, variables = zip(*optimizer.compute_gradients(loss))
+        gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+        trainOperation = optimizer.apply_gradients(zip(gradients, variables))
+    else:
+        trainOperation = optimizer.minimize(loss)
     return trainOperation
 
 def ScheduledGradOptimizer(loss, baseLearningRate, momentum=0.9, decaySteps=1000, decayRate=0.5):
