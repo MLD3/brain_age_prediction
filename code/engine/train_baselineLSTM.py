@@ -59,5 +59,5 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     trainer = ModelTrainerNPY(summaryDir=get('TRAIN.LSTM_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.LSTM_BASELINE.CHECKPOINT_DIR'))
-    trainer.RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
+    trainer.RunCrossValidation(dataSet, timecoursePL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
