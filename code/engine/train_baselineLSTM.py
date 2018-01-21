@@ -23,7 +23,7 @@ def GetBaselineLSTMModel(timecoursePL, learningRateName='LEARNING_RATE', stepCou
 
     ############ DEFINE OPTIMIZER ############
     if optimizer == 'ADAM':
-        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.LSTM_BASELINE.%s' % learningRateName))
+        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.LSTM_BASELINE.%s' % learningRateName), clipGrads=True)
     elif optimizer == 'GRAD_DECAY':
         trainOperation = ScheduledGradOptimizer(lossFunction, baseLearningRate=get('TRAIN.LSTM_BASELINE.%s' % learningRateName))
 
