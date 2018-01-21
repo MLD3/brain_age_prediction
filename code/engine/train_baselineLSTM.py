@@ -50,7 +50,7 @@ if __name__ == '__main__':
     saveNames = []
 
     with tf.variable_scope('LSTMStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetBaselineLSTMModel(timecoursePL, trainingPL)
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetBaselineLSTMModel(timecoursePL)
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
