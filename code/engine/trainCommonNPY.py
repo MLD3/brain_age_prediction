@@ -135,8 +135,8 @@ class ModelTrainerNPY(object):
 
                 ########## DEFINE THE DATA SET ##########
                 fileSavePath = savePath + '_split%i.ckpt' % splitIndex
-                splitTrainSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex])
-                splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex])
+                splitTrainSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex], reshapeBatches=splitTrainSet.reshapeBatches)
+                splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], reshapeBatches=splitTrainSet.reshapeBatches)
 
                 ########## TRAIN THE MODEL ##########
                 foldTrainingLosses, foldValidationLosses = self.TrainModel(sess, splitTrainSet, splitValidationSet,
@@ -172,8 +172,8 @@ class ModelTrainerNPY(object):
 
         ########## SPLIT DATA INTO TRAIN AND TEST ##########
         X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
-        splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train)
-        splitTestSet = DataSetNPY(dataSet.numpyDirectory, X_test, y_test)
+        splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train, reshapeBatches=dataSet.reshapeBatches)
+        splitTestSet = DataSetNPY(dataSet.numpyDirectory, X_test, y_test, reshapeBatches=dataSet.reshapeBatches)
 
         ########## ITERATE OVER ALL MODELS ##########
         index = 0
