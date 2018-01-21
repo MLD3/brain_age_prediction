@@ -6,7 +6,7 @@ from tensorflow.python.framework import dtypes
 from utils.config import get
 
 class DataSetNPY(object):
-    def __init__(self, numpyDirectory, numpyFileList, labels):
+    def __init__(self, numpyDirectory, numpyFileList, labels, reshapeBatches=True):
         """
         Builds a dataset from .npy files in the specified directory.
         Useful if data is too large to fit in memory.
@@ -19,6 +19,7 @@ class DataSetNPY(object):
             'numpyFileList.shape: {}, labels.shape: {}'.format(numpyFileList.shape, labels.shape))
         self.numExamples = numpyFileList.shape[0]
         self.currentStartIndex = 0
+        self.reshapeBatches = reshapeBatches
 
     def GetNumpyBatch(self, fileList):
         batchArray = [0] * fileList.shape[0]
@@ -64,7 +65,8 @@ class DataSetNPY(object):
 
             fileList = np.concatenate((leftOverFiles, newFiles), axis=0)
             batchArrays = self.GetNumpyBatch(fileList)
-            batchArrays = np.expand_dims(batchArrays, 5)
+            if (self.reshapeBatches):
+                batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = np.concatenate((leftOverLabels, newLabels), axis=0)
             batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels
@@ -73,7 +75,8 @@ class DataSetNPY(object):
             endIndex = self.currentStartIndex
             fileList = self.numpyFileList[startIndex:endIndex]
             batchArrays = self.GetNumpyBatch(fileList)
-            batchArrays = np.expand_dims(batchArrays, 5)
+            if (self.reshapeBatches):
+                batchArrays = np.expand_dims(batchArrays, 5)
             batchLabels = self.labels[startIndex:endIndex]
             batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels

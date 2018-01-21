@@ -38,7 +38,7 @@ if __name__ == '__main__':
     StructuralDataDir = get('DATA.TIMECOURSES.NUMPY_PATH')
     fileList = np.array([str(subject) + '.npy' for subject in PhenotypicsDF['Subject'].tolist()])
     labels = np.array(PhenotypicsDF['AgeYears'].tolist())
-    dataSet = DataSetNPY(numpyDirectory=StructuralDataDir, numpyFileList=fileList, labels=labels)
+    dataSet = DataSetNPY(numpyDirectory=StructuralDataDir, numpyFileList=fileList, labels=labels, reshapeBatches=False)
 
     trainingPL = TrainingPlaceholder()
     timecoursePL, labelsPL = TimecoursePlaceholders()
