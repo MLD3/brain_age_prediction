@@ -40,7 +40,7 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
 
 def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
-        weightShape = list(inputs.shape)
+        weightShape = inputs.shape.as_list()
         weightShape[0] = 1
         numberWeights = np.prod(weightShape)
         attentionWeight = tf.Variable(tf.ones(shape=(numberWeights), name='attentionWeight'))
