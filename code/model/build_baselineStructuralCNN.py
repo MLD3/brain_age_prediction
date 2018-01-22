@@ -42,7 +42,10 @@ def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
         weightShape = list(inputs.shape)
         weightShape[0] = 1
-        attentionWeight = tf.Variable(tf.ones(shape=weightShape, name='attentionWeight'))
+        numberWeights = np.prod(weightShape)
+        attentionWeight = tf.Variable(tf.ones(shape=(numberWeights), name='attentionWeight'))
+        attentionWeight = tf.nn.softmax(attentionWeight, name='attentionSoftmax')
+        attentionWeight = tf.reshape(attentionWeight, shape=weightShape, name='reshapeAttention')
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
@@ -53,16 +56,16 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
 
     ################## SECOND BLOCK ##################
-    Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=8)
+    Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
 
     ################## THIRD BLOCK ##################
-    Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8)
+    Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
 
     ################## FOURTH BLOCK ##################
-    Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
+    # Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
 
     ################## FIFTH BLOCK ##################
-    Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=8)
+    # Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=8)
 
     with tf.variable_scope('FullyConnectedLayers'):
         flattenedLayer = tf.layers.flatten(Block5)
