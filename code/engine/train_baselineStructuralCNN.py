@@ -48,6 +48,14 @@ if __name__ == '__main__':
     batchSizeArray = []
     saveNames = []
 
+    with tf.variable_scope('3DConvolutionSmallLearningRate'):
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='SMALL_LEARNING_RATE', batchSizeName='LARGE_BATCH_SIZE')
+        predictionLayers.append(predictionLayer)
+        trainOperations.append(trainOperation)
+        lossFunctions.append(lossFunction)
+        stepCountArray.append(stepCount)
+        batchSizeArray.append(batchSize)
+        saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('3DConvolutionAttention'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, useAttentionMap=True, learningRateName='SMALL_LEARNING_RATE', batchSizeName='LARGE_BATCH_SIZE')
@@ -58,15 +66,6 @@ if __name__ == '__main__':
         batchSizeArray.append(batchSize)
         saveNames.append(tf.contrib.framework.get_name_scope())
 
-
-    with tf.variable_scope('3DConvolutionSmallLearningRate'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='SMALL_LEARNING_RATE', batchSizeName='LARGE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
 
 
     trainer = ModelTrainerNPY(summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
