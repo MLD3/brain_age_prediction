@@ -22,6 +22,22 @@ def convertCSVToNPY(inFile, outFile, SubjectDataFrame):
         outFileName = outFile + str(subject)
         np.save(outFileName, npArray)
 
+def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame):
+    accumulatedArrays = []
+    for _, row in SubjectDataFrame.iterrows():
+        subject = row['Subject']
+        age = row['AgeYears']
+        print('Reading Subject {}'.format(subject))
+        fileName = inFile + str(subject) + '.npy'
+        npArray = np.load(fileName)
+        npArray = npArray.flatten()
+        npArray = npArray.astype(np.float32)
+        npArray = np.insert(npArray, 0, age)
+        accumulatedArrays.append(npArray)
+    print('Writing Binary File...')
+    accumulatedArrays = np.array(accumulatedArrays)
+    accumulatedArrays.tofile('{}.bin'.format(outFile))
+
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
     inFileStructural = '/data/psturm/structural/niftiImages/'

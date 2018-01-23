@@ -48,7 +48,17 @@ def attentionMap(inputs):
         attentionWeight = tf.reshape(attentionWeight, shape=weightShape, name='reshapeAttention')
         return tf.multiply(inputs, attentionWeight)
 
-def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False):
+def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False, downscaleRate=None):
+    if downscaleRate:
+        if isinstance(downscaleRate, int):
+            downscaleSize = [1, downscaleRate, downscaleRate, downscaleRate, 1]
+            imagesPL = standardPool(imagesPL, kernel_size=downscaleSize, strides=downscaleSize)
+        elif isinstance(downscaleRate, (list, tuple)) and len(downscaleRate) == 3:
+            downscaleSize = [1, downscaleRate[0], downscaleRate[1], downscaleRate[2], 1]
+            imagesPL = standardPool(imagesPL, kernel_size=downscaleSize, strides=downscaleSize)
+        else:
+            raise ValueError('Unrecognized downscale rate: {}'.format(downscaleRate))
+
     if useAttentionMap:
         imagesPL = attentionMap(imagesPL)
 
