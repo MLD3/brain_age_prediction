@@ -38,7 +38,7 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame):
     accumulatedArrays = np.array(accumulatedArrays)
     accumulatedArrays.tofile('{}.bin'.format(outFile))
 
-def SpliceNIIFilesAlongAxes(inFile, SubjectDataFrame):
+def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
         subject = row['Subject']
         print('Splicing Subject {}'.format(subject))
@@ -53,21 +53,21 @@ def SpliceNIIFilesAlongAxes(inFile, SubjectDataFrame):
         heightPadding = desiredDim - currentHeight
         depthPadding = desiredDim - currentDepth
 
-        xSlicesName = 'xAxisSlices/'
+        xSlicesName = '{}xAxisSlices/'.format(outFile)
         for i in range(currentWidth):
             xSlice = imageArray[i, :, :]
             xSlice = np.pad(xSlice, [(heightPadding, 0), (depthPadding, 0)], mode='constant')
             assert xSlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(xSlice.Shape)
             np.save('{}{}_x_{}'.format(xSlicesName, subject, i))
 
-        ySlicesName = 'yAxisSlices/'
+        ySlicesName = '{}yAxisSlices/'.format(outFile)
         for i in range(currentHeight):
             ySlice = imageArray[:, i, :]
             ySlice = np.pad(ySlice, [(widthPadding, 0), (depthPadding, 0)], mode='constant')
             assert ySlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(ySlice.Shape)
             np.save('{}{}_y_{}'.format(ySlicesName, subject, i))
 
-        zSlicesName = 'zAxisSlices/'
+        zSlicesName = '{}zAxisSlices/'.format(outFile)
         for i in range(currentDepth):
             zSlice = imageArray[:, :, i]
             zSlice = np.pad(zSlice, [(widthPadding, 0), (heightPadding, 0)], mode='constant')
@@ -77,10 +77,5 @@ def SpliceNIIFilesAlongAxes(inFile, SubjectDataFrame):
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
     inFileStructural = '/data/psturm/structural/niftiImages/'
-    inFileFunctional = '/data/psturm/functional/niftiImages/s6_'
-
-    outFileStructural = '/data/psturm/structural/numpyArrays/'
-    outFileFunctional = '/data/psturm/functional/numpyArrays/'
-
-    ConvertNIItoCSV(inFileStructural, outFileStructural, SubjectDataFrame)
-    ConvertNIItoCSV(inFileFunctional, outFileFunctional, SubjectDataFrame)
+    outFileStructural = '/data/psturm/structural/'
+    SpliceNIIFilesAlongAxes(inFileStructural, outFileStructural, SubjectDataFrame)
