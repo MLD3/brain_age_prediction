@@ -58,21 +58,21 @@ def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
             xSlice = imageArray[i, :, :]
             xSlice = np.pad(xSlice, [(heightPadding, 0), (depthPadding, 0)], mode='constant')
             assert xSlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(xSlice.Shape)
-            np.save('{}{}_x_{}'.format(xSlicesName, subject, i))
+            np.save('{}{}_x_{}'.format(xSlicesName, subject, i), xSlice)
 
         ySlicesName = '{}yAxisSlices/'.format(outFile)
         for i in range(currentHeight):
             ySlice = imageArray[:, i, :]
             ySlice = np.pad(ySlice, [(widthPadding, 0), (depthPadding, 0)], mode='constant')
             assert ySlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(ySlice.Shape)
-            np.save('{}{}_y_{}'.format(ySlicesName, subject, i))
+            np.save('{}{}_y_{}'.format(ySlicesName, subject, i), ySlice)
 
         zSlicesName = '{}zAxisSlices/'.format(outFile)
         for i in range(currentDepth):
             zSlice = imageArray[:, :, i]
             zSlice = np.pad(zSlice, [(widthPadding, 0), (heightPadding, 0)], mode='constant')
             assert zSlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(zSlice.Shape)
-            np.save('{}{}_z_{}'.format(zSlicesName, subject, i))
+            np.save('{}{}_z_{}'.format(zSlicesName, subject, i), zSlice)
 
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
