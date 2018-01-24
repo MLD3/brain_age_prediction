@@ -19,7 +19,7 @@ from engine.trainCommonNPY import *
 if __name__ == '__main__':
     PhenotypicsDF = readCSVData(get('DATA.PHENOTYPICS.PATH'))
 
-    BaseDir = get('DATA.SLICES.BASE_DIR')
+    BaseDir = get('DATA.SLICES.TOP_DIR')
     xSlicesSuffix = get('DATA.SLICES.X_SLICES_DIR')
     ySlicesSuffix = get('DATA.SLICES.Y_SLICES_DIR')
     zSlicesSuffix = get('DATA.SLICES.Z_SLICES_DIR')
