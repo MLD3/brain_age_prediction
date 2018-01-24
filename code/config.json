@@ -12,6 +12,13 @@
             "PATH": "../data/Matrices",
             "DIMENSION": 264
         },
+        "SLICES": {
+            "BASE_DIR:": "/data/psturm/structural/",
+            "X_SLICES_DIR": "xAxisSlices/",
+            "Y_SLICES_DIR": "yAxisSlices/",
+            "Z_SLICES_DIR": "zAxisSlices/",
+            "DIMENSION": 145
+        },
         "STRUCTURAL": {
             "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
             "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
