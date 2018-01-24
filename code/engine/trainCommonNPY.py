@@ -178,7 +178,7 @@ class ModelTrainerNPY(object):
         graphWriter = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
-        if not is instance(dataSet, list):
+        if not isinstance(dataSet, list):
             ########## SPLIT DATA INTO TRAIN AND TEST ##########
             X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
             splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train, reshapeBatches=dataSet.reshapeBatches)
@@ -197,7 +197,7 @@ class ModelTrainerNPY(object):
             batchSize = batchSizes[index]
             saveName = saveNames[index]
 
-            if is instance(dataSet, list):
+            if isinstance(dataSet, list):
                 ########## SPLIT DATA INTO TRAIN AND TEST ##########
                 X_train, X_test, y_train, y_test = train_test_split(dataSet[index].numpyFileList, dataSet[index].labels, test_size=0.1)
                 splitTrainSet = DataSetNPY(dataSet[index].numpyDirectory, X_train, y_train, reshapeBatches=dataSet[index].reshapeBatches)
@@ -233,7 +233,7 @@ class ModelTrainerNPY(object):
         numberOfSteps = numberOfStepsArray[bestIndex]
         batchSize = batchSizes[bestIndex]
         saveName = saveNames[bestIndex]
-        if is instance(dataSet, list):
+        if isinstance(dataSet, list):
             ########## SPLIT DATA INTO TRAIN AND TEST ##########
             X_train, X_test, y_train, y_test = train_test_split(dataSet[bestIndex].numpyFileList, dataSet[bestIndex].labels, test_size=0.1)
             splitTrainSet = DataSetNPY(dataSet[bestIndex].numpyDirectory, X_train, y_train, reshapeBatches=dataSet[bestIndex].reshapeBatches)
