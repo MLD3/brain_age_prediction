@@ -15,7 +15,7 @@ from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommonNPY import *
 
-def GetCNNBaselineModel(imagesPL, trainingPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+def GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
                         batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0, useAttentionMap=False,
                         downscaleRate=None):
     ############ DEFINE PLACEHOLDERS, LOSS ############
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     if not args.skewed:
         with tf.variable_scope('3DConvolutionStandard'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE')
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE')
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
 
         with tf.variable_scope('3DConvolutionDownscale2x2x2'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=2)
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=2)
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
 
         with tf.variable_scope('3DConvolutionDownscale3x3x3'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=3)
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=3)
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
 
         with tf.variable_scope('3DConvolutionDownscale4x4x4'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=4)
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=4)
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
     else:
         with tf.variable_scope('3DConvolutionDownscale2x1x1'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[2,1,1])
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[2,1,1])
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
 
         with tf.variable_scope('3DConvolutionDownscale1x2x1'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,2,1])
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,2,1])
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
             saveNames.append(tf.contrib.framework.get_name_scope())
 
         with tf.variable_scope('3DConvolutionDownscale1x1x2'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,1,2])
+            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,1,2])
             predictionLayers.append(predictionLayer)
             trainOperations.append(trainOperation)
             lossFunctions.append(lossFunction)

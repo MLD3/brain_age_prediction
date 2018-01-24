@@ -16,7 +16,7 @@ from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommonNPY import *
 
-def GetSliceCNN(imagesPL, trainingPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+def GetSliceCNN(imagesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
                         batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0,
                         downscaleRate=None):
     ############ DEFINE PLACEHOLDERS, LOSS ############
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     saveNames = []
 
     with tf.variable_scope('3DConvolutionStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, batchSizeName='LARGE_BATCH_SIZE')
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('SliceCNNAllAxes'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, batchSizeName='SLICE_BATCH_SIZE')
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('SliceCNNxAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, batchSizeName='SLICE_BATCH_SIZE')
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('SliceCNNyAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, batchSizeName='SLICE_BATCH_SIZE')
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('SliceCNNzAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, batchSizeName='SLICE_BATCH_SIZE')
+        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(imagesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
         predictionLayers.append(predictionLayer)
         trainOperations.append(trainOperation)
         lossFunctions.append(lossFunction)
