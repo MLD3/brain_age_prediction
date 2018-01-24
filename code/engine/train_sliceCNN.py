@@ -76,7 +76,7 @@ def GetXYZDataSet(PhenotypicsDF, useX=True, useY=True, useZ=True):
                 labels.append(subjectLabel)
 
     dataSet = DataSetNPY(numpyDirectory=BaseDir, numpyFileList=np.array(fileList), labels=np.array(labels))
-    return
+    return dataSet
 
 if __name__ == '__main__':
     PhenotypicsDF = readCSVData(get('DATA.PHENOTYPICS.PATH'))
