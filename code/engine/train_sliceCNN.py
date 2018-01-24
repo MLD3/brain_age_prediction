@@ -16,11 +16,11 @@ from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommonNPY import *
 
-def GetSliceCNN(imagesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
+def GetSliceCNN(slicesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
                         batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0,
                         downscaleRate=None):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+    predictionLayer = SliceCNN(slicesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
                                             optionalHiddenLayerUnits=optionalHiddenLayerUnits, downscaleRate=downscaleRate)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
@@ -80,36 +80,21 @@ def GetXYZDataSet(PhenotypicsDF, useX=True, useY=True, useZ=True):
 
 if __name__ == '__main__':
     PhenotypicsDF = readCSVData(get('DATA.PHENOTYPICS.PATH'))
-    StructuralDataDir = get('DATA.STRUCTURAL.NUMPY_PATH')
-    fileList = np.array([str(subject) + '.npy' for subject in PhenotypicsDF['Subject'].tolist()])
-    labels = np.array(PhenotypicsDF['AgeYears'].tolist())
-
-    NormalDataset = DataSetNPY(numpyDirectory=StructuralDataDir, numpyFileList=fileList, labels=labels)
     XYZDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF)
     XDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=True, useY=False, useZ=False)
     YDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=False, useY=True, useZ=False)
     ZDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=False, useY=False, useZ=True)
 
-    dataSets = [NormalDataset, XYZDataset, XDataset, YDataset, ZDataset]
+    dataSets = [XYZDataset, XDataset, YDataset, ZDataset]
 
     trainingPL = TrainingPlaceholder()
-    imagesPL, labelsPL = StructuralPlaceholders()
-    slicesPL, _ = SlicePlaceholders()
+    slicesPL, labelsPL = SlicePlaceholders()
     predictionLayers = []
     trainOperations = []
     lossFunctions = []
     stepCountArray = []
     batchSizeArray = []
     saveNames = []
-
-    with tf.variable_scope('3DConvolutionStandard'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
 
     with tf.variable_scope('SliceCNNAllAxes'):
         predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(slicesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
@@ -148,5 +133,5 @@ if __name__ == '__main__':
         saveNames.append(tf.contrib.framework.get_name_scope())
 
     trainer = ModelTrainerNPY(summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
-    trainer.RunCrossValidation(dataSets, imagesPL, labelsPL, predictionLayers, trainOperations,
+    trainer.RunCrossValidation(dataSets, slicesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
