@@ -178,10 +178,11 @@ class ModelTrainerNPY(object):
         graphWriter = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
-        ########## SPLIT DATA INTO TRAIN AND TEST ##########
-        X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
-        splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train, reshapeBatches=dataSet.reshapeBatches)
-        splitTestSet = DataSetNPY(dataSet.numpyDirectory, X_test, y_test, reshapeBatches=dataSet.reshapeBatches)
+        if not is instance(dataSet, list):
+            ########## SPLIT DATA INTO TRAIN AND TEST ##########
+            X_train, X_test, y_train, y_test = train_test_split(dataSet.numpyFileList, dataSet.labels, test_size=0.1)
+            splitTrainSet = DataSetNPY(dataSet.numpyDirectory, X_train, y_train, reshapeBatches=dataSet.reshapeBatches)
+            splitTestSet = DataSetNPY(dataSet.numpyDirectory, X_test, y_test, reshapeBatches=dataSet.reshapeBatches)
 
         ########## ITERATE OVER ALL MODELS ##########
         index = 0
@@ -195,6 +196,12 @@ class ModelTrainerNPY(object):
             numberOfSteps = numberOfStepsArray[index]
             batchSize = batchSizes[index]
             saveName = saveNames[index]
+
+            if is instance(dataSet, list):
+                ########## SPLIT DATA INTO TRAIN AND TEST ##########
+                X_train, X_test, y_train, y_test = train_test_split(dataSet[index].numpyFileList, dataSet[index].labels, test_size=0.1)
+                splitTrainSet = DataSetNPY(dataSet[index].numpyDirectory, X_train, y_train, reshapeBatches=dataSet[index].reshapeBatches)
+                splitTestSet = DataSetNPY(dataSet[index].numpyDirectory, X_test, y_test, reshapeBatches=dataSet[index].reshapeBatches)
 
             print('===================%s===================' % saveName)
             savePath = '{}{}/{}'.format(self.checkpointDir, self.dateString, saveName)
@@ -220,24 +227,25 @@ class ModelTrainerNPY(object):
         print('===================BEST MODEL===================')
         print('Best model was %s with validation performance of %f' % (saveNames[bestIndex], finalValidationPerformances[bestIndex]))
 
-        index = 0
+        predictionLayer = predictionLayers[bestIndex]
+        lossFunction = lossFunctions[bestIndex]
+        trainOperation = trainOperations[bestIndex]
+        numberOfSteps = numberOfStepsArray[bestIndex]
+        batchSize = batchSizes[bestIndex]
+        saveName = saveNames[bestIndex]
+        if is instance(dataSet, list):
+            ########## SPLIT DATA INTO TRAIN AND TEST ##########
+            X_train, X_test, y_train, y_test = train_test_split(dataSet[bestIndex].numpyFileList, dataSet[bestIndex].labels, test_size=0.1)
+            splitTrainSet = DataSetNPY(dataSet[bestIndex].numpyDirectory, X_train, y_train, reshapeBatches=dataSet[bestIndex].reshapeBatches)
+            splitTestSet = DataSetNPY(dataSet[bestIndex].numpyDirectory, X_test, y_test, reshapeBatches=dataSet[bestIndex].reshapeBatches)
 
-        for index in range(len(saveNames)):
-            predictionLayer = predictionLayers[index]
-            lossFunction = lossFunctions[index]
-            trainOperation = trainOperations[index]
-            numberOfSteps = numberOfStepsArray[index]
-            batchSize = batchSizes[index]
-            saveName = saveNames[index]
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            fileSavePath = savePath = '{}{}/{}_split1.ckpt'.format(self.checkpointDir, self.dateString, saveName)
+            print(fileSavePath)
+            saver = saveModel.restore(sess, fileSavePath)
+            testLoss = self.GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
+            print('Best model had test loss: %f' % testLoss)
 
-            if (index == bestIndex):
-                with tf.Session() as sess:
-                    sess.run(tf.global_variables_initializer())
-                    fileSavePath = savePath = '{}{}/{}_split1.ckpt'.format(self.checkpointDir, self.dateString, saveName)
-                    print(fileSavePath)
-                    saver = saveModel.restore(sess, fileSavePath)
-                    testLoss = self.GetEvaluatedLoss(sess, splitTestSet, lossFunction, matricesPL, labelsPL, trainingPL)
-                    print('Best model had test loss: %f' % testLoss)
-            index += 1
         savePath = 'plots/{}/modelComparison.png'.format(self.dateString)
         PlotComparisonBarChart(performances=finalValidationPerformances, names=saveNames, savePath=savePath)

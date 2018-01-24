@@ -57,6 +57,7 @@
             "MOMENTUM": 0.9,
             "NB_STEPS": 5000,
             "SMALL_NB_STEPS": 10,
+            "SLICE_BATCH_SIZE": 64,
             "LARGE_BATCH_SIZE": 4,
             "BATCH_SIZE": 2,
             "SMALL_BATCH_SIZE": 1,
