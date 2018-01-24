@@ -16,7 +16,7 @@
             "X_SLICES_DIR": "xAxisSlices/",
             "Y_SLICES_DIR": "yAxisSlices/",
             "Z_SLICES_DIR": "zAxisSlices/",
-            "TOP_DIR:": "/data/psturm/structural/",
+            "BASE_DIR": "/data/psturm/structural/",
             "DIMENSION": 145
         },
         "STRUCTURAL": {
