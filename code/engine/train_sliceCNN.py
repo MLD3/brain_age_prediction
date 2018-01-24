@@ -20,7 +20,7 @@ def GetSliceCNN(imagesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE'
                         batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0,
                         downscaleRate=None):
     ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = sliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+    predictionLayer = SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
                                             optionalHiddenLayerUnits=optionalHiddenLayerUnits, downscaleRate=downscaleRate)
     lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
 
