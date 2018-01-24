@@ -48,13 +48,13 @@ def standardBlock(inputs, trainingPL, blockNumber, filters):
         return BlockMaxPool
 
 def block2D(inputs, trainingPL, blockNumber, filters):
-    with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
+    with tf.variable_scope('2DConvBlock{}'.format(blockNumber)):
         #### 3x3x3 Convolution ####
         BlockConvolution1 = convolution2D(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber))
         #### 3x3x3 Convolution ####
         BlockConvolution2 = convolution2D(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
         #### Batch Normalization ####
-        BlockBatchNorm = convolution2D(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
+        BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
         BlockMaxPool = pool2D(BlockBatchNorm, name='Block{}MaxPool'.format(blockNumber))
         return BlockMaxPool
@@ -69,7 +69,7 @@ def attentionMap(inputs):
         attentionWeight = tf.reshape(attentionWeight, shape=weightShape, name='reshapeAttention')
         return tf.multiply(inputs, attentionWeight)
 
-def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False, downscaleRate=None):
+def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False, downscaleRate=None):
     if downscaleRate:
         if isinstance(downscaleRate, int):
             downscaleSize = [1, downscaleRate, downscaleRate, downscaleRate, 1]
@@ -110,7 +110,7 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_B
     return outputLayer
 
 
-def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.ROI_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, downscaleRate=None):
+def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, downscaleRate=None):
     if downscaleRate:
         if isinstance(downscaleRate, int):
             downscaleSize = [1, downscaleRate, downscaleRate, 1]
