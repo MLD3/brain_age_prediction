@@ -61,7 +61,7 @@ class ModelTrainerNPY(object):
         else:
             return (None, None, False)
 
-    def SaveModel(self, sess, step, saver, path, stepSize=500):
+    def SaveModel(self, sess, step, saver, path, stepSize=50):
         """
         Saves the model to path every stepSize steps
         """
@@ -82,6 +82,8 @@ class ModelTrainerNPY(object):
         ############# DEFINE ARRAYS TO HOLD LOSS #############
         accumulatedTrainingLoss = []
         accumulatedValidationLoss = []
+        bestValidationLoss = math.inf
+        bestLossStepIndex = 0
 
         for batch_index in range(numberOfSteps):
             ############# RUN TRAINING OPERATIONS #############
@@ -98,10 +100,14 @@ class ModelTrainerNPY(object):
                 trainSummaryWriter.add_summary(sess.run(self.trainSummary, feed_dict={self.trainLossPlaceholder: trainingLoss}), batch_index)
                 validationSummaryWriter.add_summary(sess.run(self.validationSummary, feed_dict={self.validationLossPlaceholder: validationLoss}), batch_index)
 
-            ############# SAVE TRAINED MODEL #############
-            self.SaveModel(sess, batch_index, saver, savePath)
+                ############# SAVE TRAINED MODEL #############
+                if validationLoss < bestValidationLoss:
+                    bestLossStepIndex = batch_index
+                    bestValidationLoss = validationLoss
+                    self.SaveModel(sess, batch_index, saver, savePath)
 
-        return (accumulatedTrainingLoss, accumulatedValidationLoss)
+        print('Step: {}, best validation loss: {}'.format(bestLossStepIndex, bestValidationLoss))
+        return (accumulatedTrainingLoss, accumulatedValidationLoss, bestValidationLoss)
 
     def CrossValidateModelParameters(self, splitTrainSet, matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation, lossFunction, savePath, saveName,
                                      numberOfSteps, batchSize):
@@ -117,6 +123,7 @@ class ModelTrainerNPY(object):
         folder = KFold(n_splits=5, shuffle=False)
         accumulatedTrainingLoss = []
         accumulatedValidationLoss = []
+        bestValidationLosses = []
         splitIndex = 0
 
         with tf.Session() as sess:
@@ -139,11 +146,12 @@ class ModelTrainerNPY(object):
                 splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], reshapeBatches=splitTrainSet.reshapeBatches)
 
                 ########## TRAIN THE MODEL ##########
-                foldTrainingLosses, foldValidationLosses = self.TrainModel(sess, splitTrainSet, splitValidationSet,
+                foldTrainingLosses, foldValidationLosses, bestValidationLoss = self.TrainModel(sess, splitTrainSet, splitValidationSet,
                                                             matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                             lossFunction, fileSavePath, numberOfSteps, batchSize, trainSummaryWriter, validationSummaryWriter)
                 accumulatedTrainingLoss.append(foldTrainingLosses)
                 accumulatedValidationLoss.append(foldValidationLosses)
+                bestValidationLosses.append(bestValidationLoss)
 
                 ########## CLOSE THE SUMMARY WRITER ##########
                 trainSummaryWriter.close()
@@ -154,9 +162,9 @@ class ModelTrainerNPY(object):
         accumulatedValidationLoss = np.array(accumulatedValidationLoss)
         PlotTrainingValidationLoss(accumulatedTrainingLoss, accumulatedValidationLoss, saveName, 'plots/{}/{}.png'.format(self.dateString, saveName))
 
-        ########## GET AVERAGE VALIDATION PERFORMANCE ##########
-        averageFinalValidationPerformance = np.mean(accumulatedValidationLoss[:, -1])
-        return averageFinalValidationPerformance
+        ########## GET BEST VALIDATION PERFORMANCE ##########
+        averageBestValidationPerformance = np.mean(bestValidationLosses)
+        return averageBestValidationPerformance
 
     def RunCrossValidation(self, dataSet, matricesPL, labelsPL, predictionLayers, trainOperations,
                                      lossFunctions, trainingPL, numberOfStepsArray, batchSizes, saveNames):
@@ -192,15 +200,15 @@ class ModelTrainerNPY(object):
             savePath = '{}{}/{}'.format(self.checkpointDir, self.dateString, saveName)
 
             ########## GET CROSS VALIDATION PERFORMANCE OF MODEL ##########
-            averageFinalValidationPerformance = self.CrossValidateModelParameters(splitTrainSet,
+            averageBestValidationPerformance = self.CrossValidateModelParameters(splitTrainSet,
                                                     matricesPL, labelsPL, trainingPL, predictionLayer, trainOperation,
                                                     lossFunction, savePath, saveName,
                                                     numberOfSteps, batchSize)
-            finalValidationPerformances.append(averageFinalValidationPerformance)
+            finalValidationPerformances.append(averageBestValidationPerformance)
 
             ########## DETERMINE BEST MODEL SO FAR ##########
-            if (averageFinalValidationPerformance < lowestLoss):
-                lowestLoss = averageFinalValidationPerformance
+            if (averageBestValidationPerformance < lowestLoss):
+                lowestLoss = averageBestValidationPerformance
                 bestIndex = index
             index += 1
 
