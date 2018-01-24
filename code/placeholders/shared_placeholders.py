@@ -31,7 +31,7 @@ def SlicePlaceholders():
     """
     slicesPL = tf.placeholder(dtype=tf.float32, shape=(None, get('DATA.SLICES.DIMENSION'), get('DATA.SLICES.DIMENSION'), 1), name='slicesPL')
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
-    return (imagesPL, labelsPL)
+    return (slicesPL, labelsPL)
 
 def MatrixPlaceholders():
     """
