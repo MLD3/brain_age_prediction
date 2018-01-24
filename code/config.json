@@ -13,10 +13,10 @@
             "DIMENSION": 264
         },
         "SLICES": {
-            "BASE_DIR:": "/data/psturm/structural/",
             "X_SLICES_DIR": "xAxisSlices/",
             "Y_SLICES_DIR": "yAxisSlices/",
             "Z_SLICES_DIR": "zAxisSlices/",
+            "BASE_DIR:": "/data/psturm/structural/",
             "DIMENSION": 145
         },
         "STRUCTURAL": {
