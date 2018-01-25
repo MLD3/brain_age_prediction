@@ -20,6 +20,30 @@ class DataSetNPY(object):
         self.numExamples = numpyFileList.shape[0]
         self.currentStartIndex = 0
         self.reshapeBatches = reshapeBatches
+        self.isPreloaded = False
+        self.data = None
+
+    def PreloadData(self):
+        batchArray = [0] * self.numExamples
+        index = 0
+        print('Preloading Data...')
+        for fileName in self.numpyFileList:
+            print('Loading file {} out of {}'.format(index + 1, self.numExamples), end='\r')
+            npArray = np.load(self.numpyDirectory + fileName)
+            batchArray[index] = npArray
+            index += 1
+
+        batchArray = np.array(batchArray)
+        if self.reshapeBatches:
+            batchArrays = np.expand_dims(batchArrays, len(batchArrays.shape))
+        assert batchArray.shape[0] == self.numExamples, 'Batch Shape: {}, num examples: {}'.format(batchArray.shape, self.numExamples)
+
+        self.data = batchArray
+        self.isPreloaded = True
+        print('Preloading Data Complete.')
+
+    def GetPreloadedData(self):
+        return self.data, np.array(labels).reshape((self.numExamples, 1))
 
     def GetNumpyBatch(self, fileList):
         batchArray = [0] * fileList.shape[0]
@@ -31,7 +55,7 @@ class DataSetNPY(object):
             index += 1
 
         batchArray = np.array(batchArray)
-        assert batchArray.shape[0] == fileList.shape[0], 'Batch Shape: {}, File List Shape: {}'.format(batchArray, fileList.shape)
+        assert batchArray.shape[0] == fileList.shape[0], 'Batch Shape: {}, File List Shape: {}'.format(batchArray.shape, fileList.shape)
         return batchArray
 
     def ShuffleData(self):
@@ -41,6 +65,8 @@ class DataSetNPY(object):
         self.labels = self.labels[permutation]
 
     def NextBatch(self, batchSize, shuffle=True):
+        assert not self.isPreloaded, 'Cannot shuffle batches if data is preloaded'
+
         startIndex = self.currentStartIndex
 
         # Randomly shuffle data for the first epoch
@@ -66,7 +92,7 @@ class DataSetNPY(object):
             fileList = np.concatenate((leftOverFiles, newFiles), axis=0)
             batchArrays = self.GetNumpyBatch(fileList)
             if self.reshapeBatches:
-                batchArrays = np.expand_dims(batchArrays, 5)
+                batchArrays = np.expand_dims(batchArrays, len(batchArrays.shape))
             batchLabels = np.concatenate((leftOverLabels, newLabels), axis=0)
             batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels
@@ -76,7 +102,7 @@ class DataSetNPY(object):
             fileList = self.numpyFileList[startIndex:endIndex]
             batchArrays = self.GetNumpyBatch(fileList)
             if self.reshapeBatches:
-                batchArrays = np.expand_dims(batchArrays, 5)
+                batchArrays = np.expand_dims(batchArrays, len(batchArrays.shape))
             batchLabels = self.labels[startIndex:endIndex]
             batchLabels = batchLabels.reshape((batchSize, 1))
             return batchArrays, batchLabels

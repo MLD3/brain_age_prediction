@@ -14,7 +14,11 @@ from placeholders.shared_placeholders import *
 from datetime import datetime
 
 class ModelTrainerNPY(object):
-    def __init__(self, summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR')):
+    def __init__(self,
+                 summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                 checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                 preloadValidationSets=False):
+        self.preloadValidationSets = preloadValidationSets
         self.summaryDir = summaryDir
         self.checkpointDir = checkpointDir
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
@@ -41,11 +45,17 @@ class ModelTrainerNPY(object):
         Returns the evaluated loss of the current model on the given loss function
         """
         accumulatedLoss = 0
-        for i in range(dataSet.numExamples):
-            batchArray, batchLabel = dataSet.NextBatch(batchSize=1, shuffle=False)
+        if dataSet.isPreloaded:
+            batchArray, batchLabel = dataSet.GetPreloadedData()
             feed_dict = self.DefineFeedDict(batchArray, batchLabel, matricesPL, labelsPL, trainingPL)
             accumulatedLoss += sess.run(lossFunction, feed_dict=feed_dict)
-        accumulatedLoss = accumulatedLoss / dataSet.numExamples
+
+        else:
+            for i in range(dataSet.numExamples):
+                batchArray, batchLabel = dataSet.NextBatch(batchSize=1, shuffle=False)
+                feed_dict = self.DefineFeedDict(batchArray, batchLabel, matricesPL, labelsPL, trainingPL)
+                accumulatedLoss += sess.run(lossFunction, feed_dict=feed_dict)
+            accumulatedLoss = accumulatedLoss / dataSet.numExamples
 
         return accumulatedLoss
 
@@ -144,6 +154,8 @@ class ModelTrainerNPY(object):
                 fileSavePath = savePath + '_split%i.ckpt' % splitIndex
                 splitTrainSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[tIndex], labels=Y[tIndex], reshapeBatches=splitTrainSet.reshapeBatches)
                 splitValidationSet = DataSetNPY(numpyDirectory=dataDirectory, numpyFileList=X[vIndex], labels=Y[vIndex], reshapeBatches=splitTrainSet.reshapeBatches)
+                if self.preloadValidationSets:
+                    splitValidationSet.PreloadData()
 
                 ########## TRAIN THE MODEL ##########
                 foldTrainingLosses, foldValidationLosses, bestValidationLoss = self.TrainModel(sess, splitTrainSet, splitValidationSet,

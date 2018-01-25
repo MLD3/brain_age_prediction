@@ -22,21 +22,37 @@ def convertCSVToNPY(inFile, outFile, SubjectDataFrame):
         outFileName = outFile + str(subject)
         np.save(outFileName, npArray)
 
-def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame):
+def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
     accumulatedArrays = []
+    numRows = SubjectDataFrame.shape[0]
+    index = 0
+    print('Converting data in file {}'.format(inFile))
     for _, row in SubjectDataFrame.iterrows():
+        index += 1
         subject = row['Subject']
         age = row['AgeYears']
-        print('Reading Subject {}'.format(subject))
-        fileName = inFile + str(subject) + '.npy'
-        npArray = np.load(fileName)
-        npArray = npArray.flatten()
-        npArray = npArray.astype(np.float32)
-        npArray = np.insert(npArray, 0, age)
-        accumulatedArrays.append(npArray)
-    print('Writing Binary File...')
+        print('Reading subject {}, {} out of {}'.format(subject, index, numRows), end='\r')
+        for i in range(maxDims):
+            fileName = "{}{}_x_{}".format(inFile, subject, i)
+            npArray = np.load(fileName)
+            npArray = npArray.flatten()
+            npArray = npArray.astype(np.float32)
+            npArray = np.insert(npArray, 0, age)
+            accumulatedArrays.append(npArray)
+
     accumulatedArrays = np.array(accumulatedArrays)
-    accumulatedArrays.tofile('{}.bin'.format(outFile))
+    print("Shape of accumulated arrays: {}".format(accumulatedArrays.shape))
+    np.random.shuffle(accumulatedArrays)
+    testSet = accumulatedArrays[:5000]
+    validationSet = accumulatedArrays[5000:10000]
+    trainingSet = accumulatedArrays[10000:]
+
+    print('Writing test set to file...')
+    testSet.tofile('{}_test.bin'.format(outFile))
+    print('Writing validation set to file...')
+    validationSet.tofile('{}_vald.bin'.format(outFile))
+    print('Writing training set to file...')
+    trainingSet.tofile('{}_train.bin'.format(outFile))
 
 def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
@@ -76,6 +92,6 @@ def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
 
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
-    inFileStructural = '/data/psturm/structural/niftiImages/'
-    outFileStructural = '/data/psturm/structural/'
-    SpliceNIIFilesAlongAxes(inFileStructural, outFileStructural, SubjectDataFrame)
+    ConvertNPYToBinary(inFile='/data/psturm/structural/xAxisSlices/', outFile='/data/psturm/structural/xAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=121)
+    ConvertNPYToBinary(inFile='/data/psturm/structural/yAxisSlices/', outFile='/data/psturm/structural/yAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=145)
+    ConvertNPYToBinary(inFile='/data/psturm/structural/zAxisSlices/', outFile='/data/psturm/structural/zAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=121)
