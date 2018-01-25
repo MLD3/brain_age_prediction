@@ -23,9 +23,13 @@ def convertCSVToNPY(inFile, outFile, SubjectDataFrame):
         np.save(outFileName, npArray)
 
 def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
-    accumulatedArrays = []
     numRows = SubjectDataFrame.shape[0]
+    numExamples = numRows * maxDims
+    exampleWidth = 145*145 + 1
+    accumulatedArrays = np.zeros((numExamples, exampleWidth))
+
     index = 0
+    j = 0
     print('Converting data in file {}'.format(inFile))
     for _, row in SubjectDataFrame.iterrows():
         index += 1
@@ -38,14 +42,17 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
             npArray = npArray.flatten()
             npArray = npArray.astype(np.float32)
             npArray = np.insert(npArray, 0, age)
-            accumulatedArrays.append(npArray)
+            accumulatedArrays[j, :] = npArray
+            j += 1
 
-    accumulatedArrays = np.array(accumulatedArrays)
     print("Shape of accumulated arrays: {}".format(accumulatedArrays.shape))
-    np.random.shuffle(accumulatedArrays)
-    testSet = accumulatedArrays[:5000]
-    validationSet = accumulatedArrays[5000:10000]
-    trainingSet = accumulatedArrays[10000:]
+    indices = np.random.permutation(accumulatedArrays.shape[0])
+    testSet = accumulatedArrays[indices[:5000]]
+    print("Test set shape: {}".format(testSet.shape))
+    validationSet = accumulatedArrays[indices[5000:10000]]
+    print("Validation set shape: {}".format(validationSet.shape))
+    trainingSet = accumulatedArrays[indices[10000:]]
+    print("Training set shape: {}".format(trainingSet.shape))
 
     print('Writing test set to file...')
     testSet.tofile('{}_test.bin'.format(outFile))
