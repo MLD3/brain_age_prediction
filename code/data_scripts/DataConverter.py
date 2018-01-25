@@ -22,7 +22,7 @@ def convertCSVToNPY(inFile, outFile, SubjectDataFrame):
         outFileName = outFile + str(subject)
         np.save(outFileName, npArray)
 
-def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
+def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121, midChar='x'):
     numRows = SubjectDataFrame.shape[0]
     numExamples = numRows * maxDims
     exampleWidth = 145*145 + 1
@@ -37,7 +37,7 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
         age = row['AgeYears']
         print('Reading subject {}, {} out of {}'.format(subject, index, numRows), end='\r')
         for i in range(maxDims):
-            fileName = "{}{}_x_{}.npy".format(inFile, subject, i)
+            fileName = "{}{}_{}_{}.npy".format(inFile, subject, midChar, i)
             npArray = np.load(fileName)
             npArray = npArray.flatten()
             npArray = npArray.astype(np.float32)
@@ -99,6 +99,5 @@ def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
 
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
-    ConvertNPYToBinary(inFile='/data/psturm/structural/xAxisSlices/', outFile='/data/psturm/structural/xAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=121)
-    ConvertNPYToBinary(inFile='/data/psturm/structural/yAxisSlices/', outFile='/data/psturm/structural/yAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=145)
-    ConvertNPYToBinary(inFile='/data/psturm/structural/zAxisSlices/', outFile='/data/psturm/structural/zAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=121)
+    ConvertNPYToBinary(inFile='/data/psturm/structural/yAxisSlices/', outFile='/data/psturm/structural/yAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=145, midChar='y')
+    ConvertNPYToBinary(inFile='/data/psturm/structural/zAxisSlices/', outFile='/data/psturm/structural/zAxisSlices/dataSet', SubjectDataFrame=SubjectDataFrame, maxDims=121, midChar='z')
