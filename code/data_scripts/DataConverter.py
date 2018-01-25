@@ -33,7 +33,7 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121):
         age = row['AgeYears']
         print('Reading subject {}, {} out of {}'.format(subject, index, numRows), end='\r')
         for i in range(maxDims):
-            fileName = "{}{}_x_{}".format(inFile, subject, i)
+            fileName = "{}{}_x_{}.npy".format(inFile, subject, i)
             npArray = np.load(fileName)
             npArray = npArray.flatten()
             npArray = npArray.astype(np.float32)
