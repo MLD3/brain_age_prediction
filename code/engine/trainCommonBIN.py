@@ -33,11 +33,12 @@ class ModelTrainerBIN(object):
         self.numberOfSteps = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
+        if not os.path.exists('{}{}'.format(summaryDir, self.dateString)):
+            os.makedirs('{}{}'.format(summaryDir, self.dateString))
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
-        if not os.path.exists('{}{}'.format(summaryDir, self.dateString)):
-            os.makedirs('{}{}'.format(summaryDir, self.dateString))
+
 
     def GetBootstrapTestPerformance(self, sess, trainingPL, testLossOp, bootstrapLossOp):
         numReps = 1000
@@ -79,10 +80,12 @@ class ModelTrainerBIN(object):
         tf.summary.scalar('validationLoss', valdLossOp)
 
         # Start the threads to read in data
+        print('Starting queue runners...')
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         # Initialize relevant variables
+        print('Initializing validation and testing sets...')
         self.validationDataSet.InitializeConstantData(sess=sess)
         self.testDataSet.InitializeConstantData(sess=sess)
         sess.run(tf.global_variables_initializer())
