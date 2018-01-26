@@ -1,20 +1,14 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-import math
 import argparse
-from data_scripts.DataReader import *
-from data_scripts.DataHolder import DataHolder
-from data_scripts.DataPlotter import PlotTrainingValidationLoss
 from data_scripts.DataSetBIN import DataSetBIN
 from sklearn.model_selection import train_test_split, KFold
 from model.build_sliceCNN import SliceCNN
-from engine.train_baselineStructuralCNN import GetCNNBaselineModel
 from utils import saveModel
 from utils.config import get
+from engine.trainCommonBIN import ModelTrainerBIN
 from placeholders.shared_placeholders import *
-from itertools import product
-from engine.trainCommonBIN import *
 
 def GetSliceCNN(
         trainingDataSet,

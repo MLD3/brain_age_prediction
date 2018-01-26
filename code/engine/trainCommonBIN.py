@@ -3,9 +3,6 @@ import numpy as np
 import pandas as pd
 import math
 import os
-from data_scripts.DataReader import *
-from data_scripts.DataHolder import DataHolder
-from data_scripts.DataPlotter import PlotTrainingValidationLoss, PlotComparisonBarChart
 from data_scripts.DataSetBIN import DataSetBIN
 from sklearn.model_selection import train_test_split, KFold
 from utils import saveModel
