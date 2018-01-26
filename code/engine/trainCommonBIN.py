@@ -29,12 +29,12 @@ class ModelTrainerBIN(object):
         self.validationDataSet = validationDataSet
         self.testDataSet = testDataSet
 
+        if not os.path.exists('{}{}'.format(checkpointDir, self.dateString)):
+            os.makedirs('{}{}'.format(checkpointDir, self.dateString))
         self.checkpointDir = "{}{}/{}".format(checkpointDir, self.dateString, self.saveName)
         self.numberOfSteps = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
-        if not os.path.exists('{}{}'.format(summaryDir, self.dateString)):
-            os.makedirs('{}{}'.format(summaryDir, self.dateString))
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
