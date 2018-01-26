@@ -73,8 +73,8 @@ class ModelTrainerBIN(object):
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-        self.validationDataSet.InitializeConstantData()
-        self.testDataSet.InitializeConstantData()
+        self.validationDataSet.InitializeConstantData(sess=sess)
+
 
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         mergedSummaryOp = tf.summary.merge_all()
@@ -98,6 +98,7 @@ class ModelTrainerBIN(object):
                     bestValidationLoss = validationLoss
                     self.SaveModel(sess, batchIndex, saver)
 
+        self.testDataSet.InitializeConstantData(sess=sess)
         pointTestPerformance, lowerBound, upperBound = \
             self.GetBootstrapTestPerformance(sess=sess,
                                              testLossOp=testLossOp,
