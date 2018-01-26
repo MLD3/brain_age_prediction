@@ -36,6 +36,9 @@ class ModelTrainerBIN(object):
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
+        if not os.path.exists(self.checkpointDir):
+            os.makedirs(self.checkpointDir)
+
     def GetBootstrapTestPerformance(self, sess, testLossOp, bootstrapLossOp):
         numReps = 1000
         confidenceInterval = 0.95
