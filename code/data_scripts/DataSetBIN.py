@@ -57,7 +57,7 @@ class DataSetBIN(object):
         """
         Returns an operation that randomly samples the contained constant images/labels.
         """
-        randomIndices = tf.random_uniform(shape=(batchSize,), minval=0, maxVal=batchSize, dtype=tf.int32)
+        randomIndices = tf.random_uniform(shape=(batchSize,), minval=0, maxval=batchSize, dtype=tf.int32)
         randomImages = tf.gather(self.constantImageVar, randomIndices)
         randomLabels = tf.gather(self.constantLabelVar, randomIndices)
         return randomImages, randomLabels
