@@ -54,7 +54,7 @@ def GetSliceCNN(
 
     return trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
 
-def RunTestOnDirs(modelTrainer, trainFiles, valdFiles, testFiles):
+def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
     tf.reset_default_graph()
     trainDataSet = DataSetBIN(binFileNames=trainFiles)
     valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
 
     modelTrainer = ModelTrainerBIN()
-    RunTestOnDirs(modelTrainer, [xTrainFile], [xValdFile], [xTestFile])
+    RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
