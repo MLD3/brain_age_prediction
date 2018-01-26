@@ -97,4 +97,4 @@ if __name__ == '__main__':
     zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
 
     modelTrainer = ModelTrainerBIN()
-    RunTestOnDirs(modelTrainer, [xTrainFile], [xValdFile], [xTestFile]])
+    RunTestOnDirs(modelTrainer, [xTrainFile], [xValdFile], [xTestFile])
