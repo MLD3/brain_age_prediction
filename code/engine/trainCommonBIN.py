@@ -36,8 +36,8 @@ class ModelTrainerBIN(object):
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
-        if not os.path.exists(self.checkpointDir):
-            os.makedirs(self.checkpointDir)
+        if not os.path.exists('{}{}'.format(summaryDir, self.dateString)):
+            os.makedirs('{}{}'.format(summaryDir, self.dateString))
 
     def GetBootstrapTestPerformance(self, sess, trainingPL, testLossOp, bootstrapLossOp):
         numReps = 1000
@@ -84,6 +84,7 @@ class ModelTrainerBIN(object):
 
         # Initialize relevant variables
         self.validationDataSet.InitializeConstantData(sess=sess)
+        self.testDataSet.InitializeConstantData(sess=sess)
         sess.run(tf.global_variables_initializer())
 
         # Collect summary and graph update operations
@@ -115,7 +116,6 @@ class ModelTrainerBIN(object):
                     bestValidationLoss = validationLoss
                     self.SaveModel(sess, batchIndex, saver)
 
-        self.testDataSet.InitializeConstantData(sess=sess)
         pointTestPerformance, lowerBound, upperBound = \
             self.GetBootstrapTestPerformance(sess=sess,
                                              trainingPL=trainingPL,
