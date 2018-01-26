@@ -74,17 +74,23 @@ class ModelTrainerBIN(object):
         print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
 
     def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
+        # Define summary scalars for training and validation loss
         tf.summary.scalar('trainingLoss', trainLossOp)
         tf.summary.scalar('validationLoss', valdLossOp)
 
+        # Start the threads to read in data
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+
+        # Initialize relevant variables
         self.validationDataSet.InitializeConstantData(sess=sess)
+        sess.run(tf.global_variables_initializer())
 
-
+        # Collect summary and graph update operations
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         mergedSummaryOp = tf.summary.merge_all()
 
+        # Restore a model if it exists in the indicated directory
         saver = saveModel.restore(sess, self.checkpointDir)
 
         bestValidationLoss = math.inf
