@@ -6,7 +6,7 @@ import argparse
 from data_scripts.DataReader import *
 from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss
-from data_scripts.DataSetNPY import DataSetNPY
+from data_scripts.DataSetBIN import DataSetBIN
 from sklearn.model_selection import train_test_split, KFold
 from model.build_baselineStructuralCNN import baselineStructuralCNN, SliceCNN
 from engine.train_baselineStructuralCNN import GetCNNBaselineModel
@@ -14,124 +14,69 @@ from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
 from itertools import product
-from engine.trainCommonNPY import *
+from engine.trainCommonBIN import *
 
-def GetSliceCNN(slicesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
-                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0,
-                        downscaleRate=None):
-    ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = SliceCNN(slicesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                            optionalHiddenLayerUnits=optionalHiddenLayerUnits, downscaleRate=downscaleRate)
-    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+def GetSliceCNN(
+        trainingDataSet,
+        validationDataSet,
+        testDataSet,
+        trainingPL,
+        learningRateName='LEARNING_RATE',
+        keepProbName='KEEP_PROB',
+        optionalHiddenLayerUnits=0,
+        downscaleRate=None):
+    trainInputBatch, trainLabelBatch = trainingDataSet.GetBatchOperations()
+    trainOutputLayer = SliceCNN(trainInputBatch,
+                                trainingPL,
+                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                downscaleRate=downscaleRate)
+    trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    trainUpdateOp = AdamOptimizer(lossFunction, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
-    ############ DEFINE OPTIMIZER ############
-    if optimizer == 'ADAM':
-        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
-    elif optimizer == 'GRAD_DECAY':
-        trainOperation = ScheduledGradOptimizer(lossFunction, baseLearningRate=get('TRAIN.CNN_BASELINE.%s' % learningRateName))
+    valdInputBatch, valdLabelBatch = validationDataSet.GetBatchOperations()
+    valdOutputLayer = SliceCNN(valdInputBatch,
+                               trainingPL,
+                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
+    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch, predictions=valdOutputLayer)
+    return trainUpdateOp, trainLossOp, valdLossOp
 
-    ############ DEFINE LEARNING PARAMETERS ############
-    stepCount = get('TRAIN.CNN_BASELINE.%s' % stepCountName)
-    batchSize = get('TRAIN.CNN_BASELINE.%s' % batchSizeName)
-
-    return predictionLayer, lossFunction, trainOperation, stepCount, batchSize
-
-def GetXYZDataSet(PhenotypicsDF, useX=True, useY=True, useZ=True):
-    assert useX or useY or useZ, 'Must choose at least one axis of slices for the data set'
-
-    SubjectList = PhenotypicsDF['Subject'].tolist()
-    LabelList = np.array(PhenotypicsDF['AgeYears'].tolist())
-
-    labels = []
-    fileList = []
-
-    BaseDir = get('DATA.SLICES.BASE_DIR')
-    xSlicesSuffix = get('DATA.SLICES.X_SLICES_DIR')
-    ySlicesSuffix = get('DATA.SLICES.Y_SLICES_DIR')
-    zSlicesSuffix = get('DATA.SLICES.Z_SLICES_DIR')
-
-    for i in range(len(SubjectList)):
-        subjectName = SubjectList[i]
-        subjectLabel = LabelList[i]
-
-        if useX:
-            ###### READ X SLICES ######
-            for j in range(121):
-                fileName = '{}{}_x_{}.npy'.format(xSlicesSuffix, subjectName, j)
-                fileList.append(fileName)
-                labels.append(subjectLabel)
-
-        if useY:
-            ###### READ Y SLICES ######
-            for j in range(145):
-                fileName = '{}{}_y_{}.npy'.format(ySlicesSuffix, subjectName, j)
-                fileList.append(fileName)
-                labels.append(subjectLabel)
-
-        if useZ:
-            ###### READ Z SLICES ######
-            for j in range(121):
-                fileName = '{}{}_z_{}.npy'.format(zSlicesSuffix, subjectName, j)
-                fileList.append(fileName)
-                labels.append(subjectLabel)
-
-    dataSet = DataSetNPY(numpyDirectory=BaseDir, numpyFileList=np.array(fileList), labels=np.array(labels))
-    return dataSet
+def RunTestOnDirs(modelTrainer, trainFiles, valdFiles, testFiles):
+    tf.reset_default_graph()
+    trainDataSet = DataSetBIN(binFileNames=trainFiles)
+    valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
+    testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
+    modelTrainer.DefineNewParams(saveName,
+                                trainDataSet,
+                                validationDataSet,
+                                testDataSet)
+    trainingPL = TrainingPlaceholder()
+    trainUpdateOp, trainLossOp, valdLossOp = GetSliceCNN(
+            trainingDataSet,
+            validationDataSet,
+            testDataSet,
+            trainingPL,
+            learningRateName='LEARNING_RATE',
+            keepProbName='KEEP_PROB',
+            optionalHiddenLayerUnits=0,
+            downscaleRate=None)
+    with tf.Session() as sess:
+        modelTrainer.TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp)
 
 if __name__ == '__main__':
-    PhenotypicsDF = readCSVData(get('DATA.PHENOTYPICS.PATH'))
-    XYZDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF)
-    XDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=True, useY=False, useZ=False)
-    YDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=False, useY=True, useZ=False)
-    ZDataset = GetXYZDataSet(PhenotypicsDF=PhenotypicsDF, useX=False, useY=False, useZ=True)
+    xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
+    xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
+    xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
 
-    dataSets = [XYZDataset, XDataset, YDataset, ZDataset]
+    yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
+    yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
+    yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
 
-    trainingPL = TrainingPlaceholder()
-    slicesPL, labelsPL = SlicePlaceholders()
-    predictionLayers = []
-    trainOperations = []
-    lossFunctions = []
-    stepCountArray = []
-    batchSizeArray = []
-    saveNames = []
+    zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
+    zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
+    zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
 
-    with tf.variable_scope('SliceCNNAllAxes'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(slicesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
-
-    with tf.variable_scope('SliceCNNxAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(slicesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
-
-    with tf.variable_scope('SliceCNNyAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(slicesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
-
-    with tf.variable_scope('SliceCNNzAxis'):
-        predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetSliceCNN(slicesPL, trainingPL, labelsPL, batchSizeName='SLICE_BATCH_SIZE')
-        predictionLayers.append(predictionLayer)
-        trainOperations.append(trainOperation)
-        lossFunctions.append(lossFunction)
-        stepCountArray.append(stepCount)
-        batchSizeArray.append(batchSize)
-        saveNames.append(tf.contrib.framework.get_name_scope())
-
-    trainer = ModelTrainerNPY(summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
-    trainer.RunCrossValidation(dataSets, slicesPL, labelsPL, predictionLayers, trainOperations,
-                                     lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
+    modelTrainer = ModelTrainerBIN()
+    RunTestOnDirs(modelTrainer, [xTrainFile], [xValdFile], [xTestFile]])

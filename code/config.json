@@ -13,10 +13,15 @@
             "DIMENSION": 264
         },
         "SLICES": {
-            "X_SLICES_DIR": "xAxisSlices/",
-            "Y_SLICES_DIR": "yAxisSlices/",
-            "Z_SLICES_DIR": "zAxisSlices/",
-            "BASE_DIR": "/data/psturm/structural/",
+            "X_SLICES_TRAIN": "/data/psturm/structural/xAxisSlices/dataSet_train.bin",
+            "X_SLICES_VALD": "/data/psturm/structural/xAxisSlices/dataSet_vald.bin",
+            "X_SLICES_TEST": "/data/psturm/structural/xAxisSlices/dataSet_test.bin",
+            "Y_SLICES_TRAIN": "/data/psturm/structural/yAxisSlices/dataSet_train.bin",
+            "Y_SLICES_VALD": "/data/psturm/structural/yAxisSlices/dataSet_vald.bin",
+            "Y_SLICES_TEST": "/data/psturm/structural/yAxisSlices/dataSet_test.bin",
+            "Z_SLICES_TRAIN": "/data/psturm/structural/zAxisSlices/dataSet_train.bin",
+            "Z_SLICES_VALD": "/data/psturm/structural/zAxisSlices/dataSet_vald.bin",
+            "Z_SLICES_TEST": "/data/psturm/structural/zAxisSlices/dataSet_test.bin",
             "DIMENSION": 145
         },
         "STRUCTURAL": {
@@ -48,6 +53,12 @@
         }
     },
     "TRAIN": {
+        "DEFAULTS": {
+            "LARGE_NB_STEPS": 30000,
+            "NB_STEPS": 10000,
+            "TEST_NB_STEPS": 500,
+            "LEARNING_RATE": 0.0001
+        },
         "CNN_BASELINE": {
             "SUMMARIES_DIR": "../summaries/cnn_baseline/",
             "CHECKPOINT_DIR": "../checkpoints/cnn_baseline/",

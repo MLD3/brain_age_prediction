@@ -40,7 +40,7 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121, midChar='
             fileName = "{}{}_{}_{}.npy".format(inFile, subject, midChar, i)
             npArray = np.load(fileName)
             npArray = npArray.flatten()
-            npArray = npArray.astype(np.float32)
+            npArray = npArray.astype(np.float64)
             npArray = np.insert(npArray, 0, age)
             accumulatedArrays[j, :] = npArray
             j += 1
