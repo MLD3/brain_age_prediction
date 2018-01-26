@@ -11,15 +11,15 @@ from engine.trainCommonBIN import ModelTrainerBIN
 from placeholders.shared_placeholders import *
 
 def GetSliceCNN(
-        trainingDataSet,
-        validationDataSet,
+        trainDataSet,
+        valdDataSet,
         testDataSet,
         trainingPL,
         learningRateName='LEARNING_RATE',
         keepProbName='KEEP_PROB',
         optionalHiddenLayerUnits=0,
         downscaleRate=None):
-    trainInputBatch, trainLabelBatch = trainingDataSet.GetBatchOperations()
+    trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
     trainOutputLayer = SliceCNN(trainInputBatch,
                                 trainingPL,
                                 keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
@@ -28,7 +28,7 @@ def GetSliceCNN(
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
     trainUpdateOp = AdamOptimizer(lossFunction, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
-    valdInputBatch, valdLabelBatch = validationDataSet.GetConstantDataVariables()
+    valdInputBatch, valdLabelBatch = valdDataSet.GetConstantDataVariables()
     valdOutputLayer = SliceCNN(valdInputBatch,
                                trainingPL,
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
@@ -61,13 +61,13 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
     testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
     modelTrainer.DefineNewParams(saveName,
                                 trainDataSet,
-                                validationDataSet,
+                                valdDataSet,
                                 testDataSet)
     trainingPL = TrainingPlaceholder()
     trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
         GetSliceCNN(
-            trainingDataSet,
-            validationDataSet,
+            trainDataSet,
+            valdDataSet,
             testDataSet,
             trainingPL,
             learningRateName='LEARNING_RATE',
