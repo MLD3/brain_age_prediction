@@ -75,7 +75,7 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
             optionalHiddenLayerUnits=0,
             downscaleRate=None)
     with tf.Session() as sess:
-        modelTrainer.TrainModel(sess, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
+        modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
 
 if __name__ == '__main__':
     xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')

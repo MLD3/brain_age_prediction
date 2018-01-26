@@ -39,7 +39,7 @@ class ModelTrainerBIN(object):
         if not os.path.exists(self.checkpointDir):
             os.makedirs(self.checkpointDir)
 
-    def GetBootstrapTestPerformance(self, sess, testLossOp, bootstrapLossOp):
+    def GetBootstrapTestPerformance(self, sess, trainingPL, testLossOp, bootstrapLossOp):
         numReps = 1000
         confidenceInterval = 0.95
         alpha = (1.0 - confidenceInterval) * 0.5
@@ -56,7 +56,10 @@ class ModelTrainerBIN(object):
         testScalar    =  tf.summary.scalar('TestLoss', testLossOp)
         histSummary, scalarSummary, pointPerformance = \
             sess.run([bootstrapHist, testScalar, testLossOp],
-                     feed_dict={bootstrapPlaceholder: bootstrapPerformances})
+                     feed_dict={
+                        bootstrapPlaceholder: bootstrapPerformances,
+                        trainingPL: False
+                        })
 
         self.writer.add_summary(histSummary, 1)
         self.writer.add_summary(scalarSummary, 1)
@@ -70,7 +73,7 @@ class ModelTrainerBIN(object):
         saver.save(sess, self.checkpointDir)
         print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
 
-    def TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
+    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
         tf.summary.scalar('trainingLoss', trainLossOp)
         tf.summary.scalar('validationLoss', valdLossOp)
 
@@ -88,11 +91,16 @@ class ModelTrainerBIN(object):
         bestLossStepIndex = 0
 
         for batchIndex in range(self.numberOfSteps):
-            sess.run([trainUpdateOp, extraUpdateOps], feed_dict=feed_dict)
+            sess.run([trainUpdateOp, extraUpdateOps], feed_dict={
+                trainingPL: True
+                })
 
             if batchIndex % self.batchStepsBetweenSummary == 0:
                 summary, trainingLoss, validationLoss = \
-                    sess.run([mergedSummaryOp, trainLossOp, valdLossOp], feed_dict=feed_dict)
+                    sess.run([mergedSummaryOp, trainLossOp, valdLossOp], feed_dict={
+                    trainingPL: False
+                    })
+
                 print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(batchIndex, trainingLoss, validationLoss))
                 self.writer.add_summary(summary, batchIndex)
 
@@ -104,6 +112,7 @@ class ModelTrainerBIN(object):
         self.testDataSet.InitializeConstantData(sess=sess)
         pointTestPerformance, lowerBound, upperBound = \
             self.GetBootstrapTestPerformance(sess=sess,
+                                             trainingPL=trainingPL,
                                              testLossOp=testLossOp,
                                              bootstrapLossOp=bootstrapLossOp)
 
