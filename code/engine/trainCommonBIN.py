@@ -79,7 +79,7 @@ class ModelTrainerBIN(object):
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         mergedSummaryOp = tf.summary.merge_all()
 
-        saver = saveModel.restore(sess, savePath)
+        saver = saveModel.restore(sess, self.checkpointDir)
 
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
