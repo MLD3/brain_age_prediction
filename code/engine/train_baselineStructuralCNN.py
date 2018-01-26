@@ -4,7 +4,6 @@ import pandas as pd
 import math
 import argparse
 from data_scripts.DataReader import *
-from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss
 from data_scripts.DataSetNPY import DataSetNPY
 from sklearn.model_selection import train_test_split, KFold

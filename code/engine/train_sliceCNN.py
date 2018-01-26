@@ -8,7 +8,7 @@ from data_scripts.DataHolder import DataHolder
 from data_scripts.DataPlotter import PlotTrainingValidationLoss
 from data_scripts.DataSetBIN import DataSetBIN
 from sklearn.model_selection import train_test_split, KFold
-from model.build_baselineStructuralCNN import baselineStructuralCNN, SliceCNN
+from model.build_sliceCNN import SliceCNN
 from engine.train_baselineStructuralCNN import GetCNNBaselineModel
 from utils import saveModel
 from utils.config import get
@@ -34,14 +34,31 @@ def GetSliceCNN(
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
     trainUpdateOp = AdamOptimizer(lossFunction, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
-    valdInputBatch, valdLabelBatch = validationDataSet.GetBatchOperations()
+    valdInputBatch, valdLabelBatch = validationDataSet.GetConstantDataVariables()
     valdOutputLayer = SliceCNN(valdInputBatch,
                                trainingPL,
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
                                downscaleRate=downscaleRate)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch, predictions=valdOutputLayer)
-    return trainUpdateOp, trainLossOp, valdLossOp
+
+    testInputBatch, testLabelBatch = testDataSet.GetConstantDataVariables()
+    testOutputLayer = SliceCNN(testInputBatch,
+                               trainingPL,
+                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
+    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch, predictions=testOutputLayer)
+
+    randomTestInput, randomTestLabels = testData.GetRandomResamples()
+    bootstrapOutputLayer = SliceCNN(randomTestInput,
+                               trainingPL,
+                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
+    bootstrapLossOp = tf.losses.mean_squared_error(labels=randomTestLabels, predictions=bootstrapOutputLayer)
+
+    return trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
 
 def RunTestOnDirs(modelTrainer, trainFiles, valdFiles, testFiles):
     tf.reset_default_graph()
@@ -53,7 +70,8 @@ def RunTestOnDirs(modelTrainer, trainFiles, valdFiles, testFiles):
                                 validationDataSet,
                                 testDataSet)
     trainingPL = TrainingPlaceholder()
-    trainUpdateOp, trainLossOp, valdLossOp = GetSliceCNN(
+    trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
+        GetSliceCNN(
             trainingDataSet,
             validationDataSet,
             testDataSet,
@@ -63,7 +81,7 @@ def RunTestOnDirs(modelTrainer, trainFiles, valdFiles, testFiles):
             optionalHiddenLayerUnits=0,
             downscaleRate=None)
     with tf.Session() as sess:
-        modelTrainer.TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp)
+        modelTrainer.TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
 
 if __name__ == '__main__':
     xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')

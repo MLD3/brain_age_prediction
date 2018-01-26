@@ -39,6 +39,30 @@ class ModelTrainerBIN(object):
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
+    def GetBootstrapTestPerformance(self, sess, testLossOp, bootstrapLossOp):
+        numReps = 1000
+        confidenceInterval = 0.95
+        alpha = (1.0 - confidenceInterval) * 0.5
+        lowerBoundIndex = numReps * alpha
+        upperBoundIndex = numReps * (1.0 - alpha)
+
+        bootstrapPerformances = np.zeros(N)
+        for i in range(N):
+            bootstrapPerformances[i] = sess.run(bootstrapLossOp)
+        bootstrapPerformances = np.sort(bootstrapPerformances)
+
+        bootstrapPlaceholder = tf.placeholder(dtype=tf.float32, shape=(numreps,), name='bootstrapPlaceholder')
+        bootstrapHist =  tf.summary.histogram('Bootstrap Test Performance', bootstrapPlaceholder)
+        testScalar    =  tf.summary.scalar('TestLoss', testLossOp)
+        histSummary, scalarSummary, pointPerformance = \
+            sess.run([bootstrapHist, testScalar, testLossOp],
+                     feed_dict={bootstrapPlaceholder: bootstrapPerformances})
+
+        self.writer.add_summary(histSummary, 1)
+        self.writer.add_summary(scalarSummary, 1)
+
+        return pointPerformance, bootstrapPerformances[lowerBoundIndex], bootstrapPerformances[upperBoundIndex]
+
     def SaveModel(self, sess, step, saver):
         """
         Saves the model to path every stepSize steps
@@ -46,7 +70,15 @@ class ModelTrainerBIN(object):
         saver.save(sess, self.checkpointDir)
         print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
 
-    def TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp):
+    def TrainModel(self, sess, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
+        tf.summary.scalar('trainingLoss', trainLossOp)
+        tf.summary.scalar('validationLoss', valdLossOp)
+
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        self.validationDataSet.InitializeConstantData()
+        self.testDataSet.InitializeConstantData()
+
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         mergedSummaryOp = tf.summary.merge_all()
 
@@ -69,4 +101,16 @@ class ModelTrainerBIN(object):
                     bestValidationLoss = validationLoss
                     self.SaveModel(sess, batchIndex, saver)
 
+        pointTestPerformance, lowerBound, upperBound = \
+            self.GetBootstrapTestPerformance(sess=sess,
+                                             testLossOp=testLossOp,
+                                             bootstrapLossOp=bootstrapLossOp)
+
+        coord.request_stop()
+        coord.join(threads)
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
+        print("Model {} had test performance: {} ({}, {})".format(
+            self.saveName,
+            pointTestPerformance,
+            lowerBound,
+            upperBound))

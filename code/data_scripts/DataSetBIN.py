@@ -53,13 +53,13 @@ class DataSetBIN(object):
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
 
-    def GetRandomOperation(batchSize):
+    def GetRandomResamples(self, batchSize=5000):
         """
-        Returns an operation that randomly samples the contained image and label batch operations.
+        Returns an operation that randomly samples the contained constant images/labels.
         """
         randomIndices = tf.random_uniform(shape=(batchSize,), minval=0, maxVal=batchSize, dtype=tf.int32)
-        randomImages = tf.gather(self.imageBatchOperation, randomIndices)
-        randomLabels = tf.gather(self.labelBatchOperation, randomIndices)
+        randomImages = tf.gather(self.constantImageVar, randomIndices)
+        randomLabels = tf.gather(self.constantLabelVar, randomIndices)
         return randomImages, randomLabels
 
     def NextBatch(self, sess):
@@ -71,8 +71,8 @@ class DataSetBIN(object):
         return sess.run([self.imageBatchOperation, self.labelBatchOperation])
 
     def GetConstantDataVariables(self, inType=tf.float64, dataShape=(5000, 145, 145, 1), labelShape=(5000, 1)):
-        self.constantImageVar = tf.Variable(self.imageBatchOperation, trainable=False, collections=[])
-        self.constantLabelVar = tf.Variable(self.labelBatchOperation, trainable=False, collections=[])
+        self.constantImageVar = tf.Variable(self.imageBatchOperation, trainable=False, collections=[], name='imageVariable')
+        self.constantLabelVar = tf.Variable(self.labelBatchOperation, trainable=False, collections=[], name='labelVariable')
 
         return self.constantImageVar, self.constantLabelVar
 
