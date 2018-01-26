@@ -44,7 +44,7 @@ def GetSliceCNN(
                                downscaleRate=downscaleRate)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch, predictions=testOutputLayer)
 
-    randomTestInput, randomTestLabels = testData.GetRandomResamples()
+    randomTestInput, randomTestLabels = testDataSet.GetRandomResamples()
     bootstrapOutputLayer = SliceCNN(randomTestInput,
                                trainingPL,
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
