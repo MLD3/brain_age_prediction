@@ -91,6 +91,7 @@ class ModelTrainerBIN(object):
         sess.run(tf.global_variables_initializer())
 
         # Collect summary and graph update operations
+        print('Collecting Summary Operations...')
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         mergedSummaryOp = tf.summary.merge_all()
 
@@ -100,6 +101,7 @@ class ModelTrainerBIN(object):
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
 
+        print('Beginning Training...')
         for batchIndex in range(self.numberOfSteps):
             sess.run([trainUpdateOp, extraUpdateOps], feed_dict={
                 trainingPL: True
