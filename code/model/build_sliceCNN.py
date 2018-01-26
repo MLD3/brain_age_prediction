@@ -39,6 +39,9 @@ def block2D(inputs, trainingPL, blockNumber, filters):
         return BlockMaxPool
 
 def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, downscaleRate=None):
+    if imagesPL.dtype != tf.float32:
+        imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+
     if downscaleRate:
         if isinstance(downscaleRate, int):
             downscaleSize = [1, downscaleRate, downscaleRate, 1]
