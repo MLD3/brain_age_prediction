@@ -92,13 +92,10 @@ class ModelTrainerBIN(object):
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         # Initialize relevant variables
-        print('Initializing validation and testing sets...')
-        self.validationDataSet.InitializeConstantData(sess=sess)
-        self.testDataSet.InitializeConstantData(sess=sess)
+        print('Initializing variables')
         sess.run(tf.global_variables_initializer())
 
         # Collect summary and graph update operations
-        print('Collecting Summary Operations...')
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
         # Restore a model if it exists in the indicated directory
