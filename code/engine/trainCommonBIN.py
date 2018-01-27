@@ -60,12 +60,12 @@ class ModelTrainerBIN(object):
 
         bootstrapPerformances = np.zeros(N)
         for i in range(N):
-            bootstrapPerformances[i] = GetPerformanceThroughSet(sess, bootstrapLossOp)
+            bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, bootstrapLossOp)
         bootstrapPerformances = np.sort(bootstrapPerformances)
 
         bootstrapPlaceholder = tf.placeholder(dtype=tf.float32, shape=(numreps,), name='bootstrapPlaceholder')
         bootstrapHist =  tf.summary.histogram('Bootstrap Test Performance', bootstrapPlaceholder)
-        pointPerformance = GetPerformanceThroughSet(sess, testLossOp)
+        pointPerformance = self.GetPerformanceThroughSet(sess, testLossOp)
 
         histSummary = \
             sess.run(bootstrapHist,
@@ -115,7 +115,7 @@ class ModelTrainerBIN(object):
                     sess.run(trainLossOp, feed_dict={
                     trainingPL: False
                     })
-                validationLoss = GetPerformanceThroughSet(sess, valdLossOp)
+                validationLoss = self.GetPerformanceThroughSet(sess, valdLossOp)
 
                 print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
                             batchIndex,
