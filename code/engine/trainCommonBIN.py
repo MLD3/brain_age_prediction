@@ -21,7 +21,7 @@ class ModelTrainerBIN(object):
                         testDataSet,
                         summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                         checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
-                        numberOfSteps=get('TRAIN.DEFAULTS.NB_STEPS'),
+                        numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
                         batchStepsBetweenSummary=200
                         ):
         self.saveName = saveName
