@@ -148,7 +148,7 @@ class ModelTrainerBIN(object):
                                              trainingPL=trainingPL,
                                              testLossOp=testLossOp,
                                              bootstrapLossOp=bootstrapLossOp)
-
+        self.writer.close()
         coord.request_stop()
         coord.join(threads)
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
