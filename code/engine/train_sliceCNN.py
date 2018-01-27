@@ -56,9 +56,12 @@ def GetSliceCNN(
 
 def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
     tf.reset_default_graph()
-    trainDataSet = DataSetBIN(binFileNames=trainFiles)
-    valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
-    testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
+    with tf.variable_scope('TrainingInputs'):
+        trainDataSet = DataSetBIN(binFileNames=trainFiles)
+    with tf.variable_scope('ValidationInputs'):
+        valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
+    with tf.variable_scope('TestInputs'):
+        testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
     modelTrainer.DefineNewParams(saveName,
                                 trainDataSet,
                                 valdDataSet,
