@@ -53,15 +53,16 @@ class DataSetBIN(object):
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
 
-    def GetRandomResamples(self, batchSize=5000):
+    def GetRandomResamples(self, batchSize=100):
         """
         Returns an operation that randomly samples the contained constant images/labels.
         """
         randomIndices = tf.random_uniform(shape=(batchSize,), minval=0, maxval=batchSize, dtype=tf.int32)
-        randomImages = tf.gather(self.constantImageVar, randomIndices)
-        randomLabels = tf.gather(self.constantLabelVar, randomIndices)
+        randomImages = tf.gather(self.imageBatchOperation, randomIndices)
+        randomLabels = tf.gather(self.labelBatchOperation, randomIndices)
         return randomImages, randomLabels
 
+    ##### THE FUNCTIONS BELOW ARE DEPRECATED #####
     def NextBatch(self, sess):
         """
         Returns the next batch of examples using sess. Assumes that

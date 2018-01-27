@@ -28,7 +28,7 @@ def GetSliceCNN(
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
     trainUpdateOp = AdamOptimizer(trainLossOp, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
-    valdInputBatch, valdLabelBatch = valdDataSet.GetConstantDataVariables()
+    valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
     valdOutputLayer = SliceCNN(valdInputBatch,
                                trainingPL,
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
@@ -36,7 +36,7 @@ def GetSliceCNN(
                                downscaleRate=downscaleRate)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch, predictions=valdOutputLayer)
 
-    testInputBatch, testLabelBatch = testDataSet.GetConstantDataVariables()
+    testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
     testOutputLayer = SliceCNN(testInputBatch,
                                trainingPL,
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
@@ -57,8 +57,8 @@ def GetSliceCNN(
 def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
     tf.reset_default_graph()
     trainDataSet = DataSetBIN(binFileNames=trainFiles)
-    valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
-    testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=5000, maxItemsInQueue=5000, shuffle=False)
+    valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
+    testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
     modelTrainer.DefineNewParams(saveName,
                                 trainDataSet,
                                 valdDataSet,

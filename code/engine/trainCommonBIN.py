@@ -38,7 +38,18 @@ class ModelTrainerBIN(object):
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
 
+        self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
+        self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
+        self.trainSummary = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
+        self.validationSummary = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
 
+    def GetPerformanceThroughSet(self, sess, lossOp, numberIters=50):
+        accumulatedLoss = 0
+        for i in range(numberIters):
+            currentLoss = sess.run(lossOp)
+            accumulatedLoss += currentLoss
+        accumulatedLoss = accumulatedLoss / numberIters
+        return accumulatedLoss
 
     def GetBootstrapTestPerformance(self, sess, trainingPL, testLossOp, bootstrapLossOp):
         numReps = 1000
@@ -49,18 +60,18 @@ class ModelTrainerBIN(object):
 
         bootstrapPerformances = np.zeros(N)
         for i in range(N):
-            bootstrapPerformances[i] = sess.run(bootstrapLossOp)
+            bootstrapPerformances[i] = GetPerformanceThroughSet(sess, bootstrapLossOp)
         bootstrapPerformances = np.sort(bootstrapPerformances)
 
         bootstrapPlaceholder = tf.placeholder(dtype=tf.float32, shape=(numreps,), name='bootstrapPlaceholder')
         bootstrapHist =  tf.summary.histogram('Bootstrap Test Performance', bootstrapPlaceholder)
-        testScalar    =  tf.summary.scalar('TestLoss', testLossOp)
-        histSummary, scalarSummary, pointPerformance = \
-            sess.run([bootstrapHist, testScalar, testLossOp],
+        pointPerformance = GetPerformanceThroughSet(sess, testLossOp)
+
+        histSummary = \
+            sess.run(bootstrapHist,
                      feed_dict={
                         bootstrapPlaceholder: bootstrapPerformances,
-                        trainingPL: False
-                        })
+                        trainingPL: False})
 
         self.writer.add_summary(histSummary, 1)
         self.writer.add_summary(scalarSummary, 1)
@@ -75,10 +86,6 @@ class ModelTrainerBIN(object):
         print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
 
     def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
-        # Define summary scalars for training and validation loss
-        tf.summary.scalar('trainingLoss', trainLossOp)
-        tf.summary.scalar('validationLoss', valdLossOp)
-
         # Start the threads to read in data
         print('Starting queue runners...')
         coord = tf.train.Coordinator()
@@ -93,7 +100,6 @@ class ModelTrainerBIN(object):
         # Collect summary and graph update operations
         print('Collecting Summary Operations...')
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        mergedSummaryOp = tf.summary.merge_all()
 
         # Restore a model if it exists in the indicated directory
         saver = saveModel.restore(sess, self.checkpointDir)
@@ -108,13 +114,30 @@ class ModelTrainerBIN(object):
                 })
 
             if batchIndex % self.batchStepsBetweenSummary == 0:
-                summary, trainingLoss, validationLoss = \
-                    sess.run([mergedSummaryOp, trainLossOp, valdLossOp], feed_dict={
+                trainingLoss = \
+                    sess.run(trainLossOp, feed_dict={
                     trainingPL: False
                     })
+                validationLoss = GetPerformanceThroughSet(sess, valdLossOp)
 
-                print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(batchIndex, trainingLoss, validationLoss))
-                self.writer.add_summary(summary, batchIndex)
+                print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
+                            batchIndex,
+                            trainingLoss,
+                            validationLoss))
+                self.writer.add_summary(
+                    sess.run(
+                        self.trainSummary,
+                        feed_dict={
+                            self.trainLossPlaceholder: trainingLoss
+                        }),
+                    batchIndex)
+                self.writer.add_summary(
+                    sess.run(
+                        self.validationSummary,
+                        feed_dict={
+                            self.validationLossPlaceholder: validationLoss
+                        }),
+                    batchIndex)
 
                 if validationLoss < bestValidationLoss:
                     bestLossStepIndex = batchIndex
