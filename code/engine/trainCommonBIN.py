@@ -58,8 +58,8 @@ class ModelTrainerBIN(object):
         lowerBoundIndex = numReps * alpha
         upperBoundIndex = numReps * (1.0 - alpha)
 
-        bootstrapPerformances = np.zeros(N)
-        for i in range(N):
+        bootstrapPerformances = np.zeros(numReps)
+        for i in range(numReps):
             bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, bootstrapLossOp)
         bootstrapPerformances = np.sort(bootstrapPerformances)
 
