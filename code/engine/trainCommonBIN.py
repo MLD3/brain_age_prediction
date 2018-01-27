@@ -76,7 +76,6 @@ class ModelTrainerBIN(object):
                         trainingPL: False})
 
         self.writer.add_summary(histSummary, 1)
-        self.writer.add_summary(scalarSummary, 1)
 
         return pointPerformance, bootstrapPerformances[lowerBoundIndex], bootstrapPerformances[upperBoundIndex]
 
