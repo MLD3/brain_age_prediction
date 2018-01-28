@@ -55,7 +55,6 @@ def GetSliceCNN(
     return trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
 
 def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
-    tf.reset_default_graph()
     with tf.variable_scope('TrainingInputs'):
         trainDataSet = DataSetBIN(binFileNames=trainFiles)
     with tf.variable_scope('ValidationInputs'):
