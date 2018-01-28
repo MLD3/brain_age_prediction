@@ -76,7 +76,8 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
     modelTrainer.DefineNewParams(saveName,
                                 trainDataSet,
                                 valdDataSet,
-                                testDataSet)
+                                testDataSet,
+                                numberOfSteps=get('TRAIN.DEFAULTS.LARGE_NB_STEPS'))
     with tf.Session() as sess:
         modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
 
@@ -100,21 +101,29 @@ if __name__ == '__main__':
     modelTrainer = ModelTrainerBIN()
 
     if args.data == 'X':
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+        with tf.variable_scope('xAxisModel'):
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
     elif args.data == 'Y':
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+        with tf.variable_scope('yAxisModel'):
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
     elif args.data == 'Z':
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+        with tf.variable_scope('zAxisModel'):
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
     elif args.data == 'XYZ':
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
+        with tf.variable_scope('xyzAxisModel'):
+            RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
                                                    [xValdFile, yValdFile, zValdFile],
                                                    [xTestFile, yTestFile, zTestFile])
     elif args.data == 'ALL':
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
-        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
-                                                   [xValdFile, yValdFile, zValdFile],
-                                                   [xTestFile, yTestFile, zTestFile])
+        with tf.variable_scope('xAxisModel'):
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+        with tf.variable_scope('yAxisModel'):
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+        with tf.variable_scope('zAxisModel'):
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+        with tf.variable_scope('xyzAxisModel'):
+            RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
+                                                       [xValdFile, yValdFile, zValdFile],
+                                                       [xTestFile, yTestFile, zTestFile])
     else:
         print('Unrecognized data argument {}.'.format(args.data))
