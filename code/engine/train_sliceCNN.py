@@ -118,4 +118,3 @@ if __name__ == '__main__':
                                                    [xTestFile, yTestFile, zTestFile])
     else:
         print('Unrecognized data argument {}.'.format(args.data))
-        return
