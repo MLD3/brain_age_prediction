@@ -55,8 +55,8 @@ class ModelTrainerBIN(object):
         numReps = 1000
         confidenceInterval = 0.95
         alpha = (1.0 - confidenceInterval) * 0.5
-        lowerBoundIndex = numReps * alpha
-        upperBoundIndex = numReps * (1.0 - alpha)
+        lowerBoundIndex = int(numReps * alpha)
+        upperBoundIndex = int(numReps * (1.0 - alpha))
 
         bootstrapPerformances = np.zeros(numReps)
         for i in range(numReps):
