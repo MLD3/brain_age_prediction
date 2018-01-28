@@ -82,21 +82,40 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run 2D Convolution Slice Tests on sMRI')
-    parser.add_argument('--data', help='The data set to use. One of X, Y, Z, XYZ.', action='store', dest='data')
+    parser.add_argument('--data', help='The data set to use. One of X, Y, Z, XYZ, ALL.', action='store', dest='data')
     args = parser.parse_args()
-    print(args.data)
 
-    # xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
-    # xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
-    # xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
-    #
-    # yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
-    # yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
-    # yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
-    #
-    # zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
-    # zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
-    # zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
-    #
-    # modelTrainer = ModelTrainerBIN()
-    # RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+    xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
+    xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
+    xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
+
+    yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
+    yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
+    yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
+
+    zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
+    zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
+    zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
+
+    modelTrainer = ModelTrainerBIN()
+
+    if args.data == 'X':
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+    elif args.data == 'Y':
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+    elif args.data == 'Z':
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+    elif args.data == 'XYZ':
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
+                                                   [xValdFile, yValdFile, zValdFile],
+                                                   [xTestFile, yTestFile, zTestFile])
+    elif args.data == 'ALL':
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+        RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
+                                                   [xValdFile, yValdFile, zValdFile],
+                                                   [xTestFile, yTestFile, zTestFile])
+    else:
+        print('Unrecognized data argument {}.'.format(args.data))
+        return
