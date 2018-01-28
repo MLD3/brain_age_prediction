@@ -62,10 +62,6 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
         valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
     with tf.variable_scope('TestInputs'):
         testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
-    modelTrainer.DefineNewParams(saveName,
-                                trainDataSet,
-                                valdDataSet,
-                                testDataSet)
     trainingPL = TrainingPlaceholder()
     trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
         GetSliceCNN(
@@ -77,21 +73,30 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
             keepProbName='KEEP_PROB',
             optionalHiddenLayerUnits=0,
             downscaleRate=None)
+    modelTrainer.DefineNewParams(saveName,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet)
     with tf.Session() as sess:
         modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
 
 if __name__ == '__main__':
-    xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
-    xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
-    xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
+    parser = argparse.ArgumentParser(description='Run 2D Convolution Slice Tests on sMRI')
+    parser.add_argument('--data', help='The data set to use. One of X, Y, Z, XYZ.', action='store', dest='data')
+    args = parser.parse_args()
+    print(args.data)
 
-    yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
-    yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
-    yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
-
-    zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
-    zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
-    zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
-
-    modelTrainer = ModelTrainerBIN()
-    RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+    # xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
+    # xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
+    # xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
+    #
+    # yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
+    # yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
+    # yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
+    #
+    # zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
+    # zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
+    # zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
+    #
+    # modelTrainer = ModelTrainerBIN()
+    # RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
