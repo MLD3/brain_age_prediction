@@ -86,8 +86,8 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles, axis
                                 valdDataSet,
                                 testDataSet,
                                 numberOfSteps=get('TRAIN.DEFAULTS.LARGE_NB_STEPS'))
-    # with tf.Session() as sess:
-    #     modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
+    with tf.Session() as sess:
+        modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 def WriteDefaultGraphToDir(dirName):
     writer = tf.summary.FileWriter(logdir=dirName, graph=tf.get_default_graph())
