@@ -118,7 +118,7 @@ if __name__ == '__main__':
     elif args.data == 'XYZ':
         with tf.variable_scope('xyzAxisModel'):
             RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
-                                                   [valdFile,
+                                                   [valdFile],
                                                    [testFile], axis=3)
     elif args.data == 'ALL':
         with tf.variable_scope('xAxisModel'):
