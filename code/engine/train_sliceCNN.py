@@ -34,7 +34,8 @@ def GetSliceCNN(
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
                                downscaleRate=downscaleRate)
-    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch, predictions=valdOutputLayer)
+    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
+                                              predictions=tf.reduce_mean(valdOutputLayer))
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
     testOutputLayer = SliceCNN(testInputBatch,
@@ -42,27 +43,34 @@ def GetSliceCNN(
                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
                                downscaleRate=downscaleRate)
-    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch, predictions=testOutputLayer)
+    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
+                                              predictions=tf.reduce_mean(testOutputLayer))
 
-    randomTestInput, randomTestLabels = testDataSet.GetRandomResamples()
-    bootstrapOutputLayer = SliceCNN(randomTestInput,
-                               trainingPL,
-                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate)
-    bootstrapLossOp = tf.losses.mean_squared_error(labels=randomTestLabels, predictions=bootstrapOutputLayer)
+    return trainUpdateOp, trainLossOp, valdLossOp, testLossOp
 
-    return trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
-
-def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
+def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles, axis=0):
     with tf.variable_scope('TrainingInputs'):
         trainDataSet = DataSetBIN(binFileNames=trainFiles)
     with tf.variable_scope('ValidationInputs'):
-        valdDataSet  = DataSetBIN(binFileNames=valdFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
+        valdDataSet  = DataSetBIN(binFileNames=valdFiles,
+                                imageDims=[121, 145, 121, 1],
+                                batchSize=1,
+                                maxItemsInQueue=75,
+                                minItemsInQueue=1,
+                                shuffle=False,
+                                training=False,
+                                axis=axis)
     with tf.variable_scope('TestInputs'):
-        testDataSet  = DataSetBIN(binFileNames=testFiles, batchSize=100, maxItemsInQueue=5000, shuffle=False)
+        testDataSet  = DataSetBIN(binFileNames=testFiles,
+                                imageDims=[121, 145, 121, 1],
+                                batchSize=1,
+                                maxItemsInQueue=75,
+                                minItemsInQueue=1,
+                                shuffle=False,
+                                training=False,
+                                axis=axis)
     trainingPL = TrainingPlaceholder()
-    trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
+    trainUpdateOp, trainLossOp, valdLossOp, testLossOp = \
         GetSliceCNN(
             trainDataSet,
             valdDataSet,
@@ -76,9 +84,13 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles):
                                 trainDataSet,
                                 valdDataSet,
                                 testDataSet,
-                                numberOfSteps=get('TRAIN.DEFAULTS.LARGE_NB_STEPS'))
+                                numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'))
     with tf.Session() as sess:
-        modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp)
+        modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
+
+def WriteDefaultGraphToDir(dirName):
+    writer = tf.summary.FileWriter(logdir=dirName, graph=tf.get_default_graph())
+    writer.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run 2D Convolution Slice Tests on sMRI')
@@ -101,28 +113,30 @@ if __name__ == '__main__':
 
     if args.data == 'X':
         with tf.variable_scope('xAxisModel'):
-            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile], axis=0)
     elif args.data == 'Y':
         with tf.variable_scope('yAxisModel'):
-            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile], axis=1)
     elif args.data == 'Z':
         with tf.variable_scope('zAxisModel'):
-            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile], axis=2)
     elif args.data == 'XYZ':
         with tf.variable_scope('xyzAxisModel'):
             RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
                                                    [xValdFile, yValdFile, zValdFile],
-                                                   [xTestFile, yTestFile, zTestFile])
+                                                   [xTestFile, yTestFile, zTestFile], axis=3)
     elif args.data == 'ALL':
         with tf.variable_scope('xAxisModel'):
-            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile])
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile], axis=0)
         with tf.variable_scope('yAxisModel'):
-            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile])
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile]. axis=1)
         with tf.variable_scope('zAxisModel'):
-            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile])
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile], axis=2)
         with tf.variable_scope('xyzAxisModel'):
             RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
-                                                       [xValdFile, yValdFile, zValdFile],
-                                                       [xTestFile, yTestFile, zTestFile])
+                                                         [xValdFile, yValdFile, zValdFile],
+                                                         [xTestFile, yTestFile, zTestFile], axis=3)
+        WriteDefaultGraphToDir(dirName='{}{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     modelTrainer.dateString))
     else:
         print('Unrecognized data argument {}.'.format(args.data))

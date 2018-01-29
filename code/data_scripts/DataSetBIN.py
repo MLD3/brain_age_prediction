@@ -62,6 +62,13 @@ class DataSetBIN(object):
             elif axis == 2: #Z AXIS
                 images = tf.transpose(images, perm=[2, 0, 1])
                 images = tf.pad(images, [[0,0], [24, 0], [0,0], [0,0]])
+            elif axis == 3: #Hack to specify all axes
+                imagesX = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
+                imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2]),
+                                 [[0, 0], [24, 0], [24, 0], [0, 0]])
+                imagesZ = tf.pad(tf.transpose(images, perm=[2, 0, 1]),
+                                 [[0,0], [24, 0], [0,0], [0,0]])
+                images = tf.concat([imagesX, imagesY, imagesZ], axis=0)
             self.imageBatchOperation = images
 
     def GetBatchOperations(self):
@@ -105,4 +112,3 @@ if __name__ == '__main__':
                             shuffle=False,
                             training=False,
                             axis=0)
-    

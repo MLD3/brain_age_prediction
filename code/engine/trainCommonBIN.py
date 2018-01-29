@@ -36,48 +36,20 @@ class ModelTrainerBIN(object):
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
         summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
-        self.writer = tf.summary.FileWriter(summaryDir, graph=tf.get_default_graph())
+        self.writer = tf.summary.FileWriter(summaryDir)
 
         self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
         self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
         self.trainSummary = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
         self.validationSummary = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
 
-    def GetPerformanceThroughSet(self, sess, lossOp, numberIters=50):
+    def GetPerformanceThroughSet(self, sess, lossOp, numberIters=75):
         accumulatedLoss = 0
         for i in range(numberIters):
             currentLoss = sess.run(lossOp)
             accumulatedLoss += currentLoss
         accumulatedLoss = accumulatedLoss / numberIters
         return accumulatedLoss
-
-    def GetBootstrapTestPerformance(self, sess, trainingPL, testLossOp, bootstrapLossOp):
-        numReps = 1000
-        confidenceInterval = 0.95
-        alpha = (1.0 - confidenceInterval) * 0.5
-        lowerBoundIndex = int(numReps * alpha)
-        upperBoundIndex = int(numReps * (1.0 - alpha))
-
-        bootstrapPerformances = np.zeros(numReps)
-        for i in range(numReps):
-            print('Getting bootstrap test performance, iteration {} out of {}'.format(i, numReps), end='\r')
-            bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, bootstrapLossOp)
-        bootstrapPerformances = np.sort(bootstrapPerformances)
-        print('')
-
-        bootstrapPlaceholder = tf.placeholder(dtype=tf.float32, shape=(numReps,), name='bootstrapPlaceholder')
-        bootstrapHist =  tf.summary.histogram('Bootstrap Test Performance', bootstrapPlaceholder)
-        pointPerformance = self.GetPerformanceThroughSet(sess, testLossOp)
-
-        histSummary = \
-            sess.run(bootstrapHist,
-                     feed_dict={
-                        bootstrapPlaceholder: bootstrapPerformances,
-                        trainingPL: False})
-
-        self.writer.add_summary(histSummary, 1)
-
-        return pointPerformance, bootstrapPerformances[lowerBoundIndex], bootstrapPerformances[upperBoundIndex]
 
     def SaveModel(self, sess, step, saver):
         """
@@ -86,7 +58,7 @@ class ModelTrainerBIN(object):
         saver.save(sess, self.checkpointDir)
         print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
 
-    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, bootstrapLossOp):
+    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp):
         # Start the threads to read in data
         print('Starting queue runners...')
         coord = tf.train.Coordinator()
@@ -142,17 +114,11 @@ class ModelTrainerBIN(object):
                     bestValidationLoss = validationLoss
                     self.SaveModel(sess, batchIndex, saver)
 
-        pointTestPerformance, lowerBound, upperBound = \
-            self.GetBootstrapTestPerformance(sess=sess,
-                                             trainingPL=trainingPL,
-                                             testLossOp=testLossOp,
-                                             bootstrapLossOp=bootstrapLossOp)
+        testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
         self.writer.close()
         coord.request_stop()
         coord.join(threads)
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
-        print("Model {} had test performance: {} ({}, {})".format(
+        print("Model {} had test performance: {}".format(
             self.saveName,
-            pointTestPerformance,
-            lowerBound,
-            upperBound))
+            pointTestPerformance))
