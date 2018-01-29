@@ -141,7 +141,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     flattenedImages = np.zeros((numTraining * 121, 145 * 145 + 1))
     index = 0
     for j in range(numTraining):
-        print('Slicing image {} of {}, x axis'.format(j, numTraining))
+        print('Slicing image {} of {}, x axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
         for i in range(121):
             xSlice = currentImage[i, :, :]
@@ -156,7 +156,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     flattenedImages = np.zeros((numTraining * 145, 145 * 145 + 1))
     index = 0
     for j in range(numTraining):
-        print('Slicing image {} of {}, y axis'.format(j, numTraining))
+        print('Slicing image {} of {}, y axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
         for i in range(145):
             ySlice = currentImage[:, i, :]
@@ -171,7 +171,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     flattenedImages = np.zeros((numTraining * 145, 145 * 145 + 1))
     index = 0
     for j in range(numTraining):
-        print('Slicing image {} of {}, z axis'.format(j, numTraining))
+        print('Slicing image {} of {}, z axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
         for i in range(121):
             zSlice = currentImage[:, :, i]
