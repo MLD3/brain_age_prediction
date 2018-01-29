@@ -85,8 +85,8 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles, axis
                                 valdDataSet,
                                 testDataSet,
                                 numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'))
-    with tf.Session() as sess:
-        modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
+    # with tf.Session() as sess:
+        # modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 def WriteDefaultGraphToDir(dirName):
     writer = tf.summary.FileWriter(logdir=dirName, graph=tf.get_default_graph())
@@ -133,5 +133,8 @@ if __name__ == '__main__':
                                                          [testFile], axis=3)
         WriteDefaultGraphToDir(dirName='{}{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                                                      modelTrainer.dateString))
+        for x in tf.global_variables():
+            print(x.name)
+
     else:
         print('Unrecognized data argument {}.'.format(args.data))
