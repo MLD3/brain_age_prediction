@@ -119,21 +119,20 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     valdIndices = indices[75:150]
     trainIndices = indices[150:]
 
-    flattenedImages = brainImages.reshape((numRows, 121*145*121))
-    flattenedImages = np.insert(flattenedImages, 0, ages, axis=1)
-    print(flattenedImages.shape)
-    flattenedImages[testIndices].tofile('{}structural_test.bin'.format(outFile))
-    flattenedImages[valdIndices].tofile('{}structural_vald.bin'.format(outFile))
-    flattenedImages[trainIndices].tofile('{}structural_train.bin'.format(outFile))
-    flattenedImages = None
-
+    # flattenedImages = brainImages.reshape((numRows, 121*145*121))
+    # flattenedImages = np.insert(flattenedImages, 0, ages, axis=1)
+    # print(flattenedImages.shape)
+    # flattenedImages[testIndices].tofile('{}structural_test.bin'.format(outFile))
+    # flattenedImages[valdIndices].tofile('{}structural_vald.bin'.format(outFile))
+    # flattenedImages[trainIndices].tofile('{}structural_train.bin'.format(outFile))
+    # flattenedImages = None
 
     trainingImages = brainImages[trainIndices]
     trainingAges = ages[trainIndices]
     numTraining = numRows - 150
     desiredDim = 145
 
-    currentWidth, currentHeight, currentDepth = imageArray.shape
+    currentWidth, currentHeight, currentDepth = 121, 145, 121
     widthPadding = desiredDim - currentWidth
     heightPadding = desiredDim - currentHeight
     depthPadding = desiredDim - currentDepth
