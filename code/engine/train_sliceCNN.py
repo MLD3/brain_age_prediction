@@ -98,44 +98,39 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     xTrainFile = get('DATA.SLICES.X_SLICES_TRAIN')
-    xValdFile  = get('DATA.SLICES.X_SLICES_VALD')
-    xTestFile  = get('DATA.SLICES.X_SLICES_TEST')
-
     yTrainFile = get('DATA.SLICES.Y_SLICES_TRAIN')
-    yValdFile  = get('DATA.SLICES.Y_SLICES_VALD')
-    yTestFile  = get('DATA.SLICES.Y_SLICES_TEST')
-
     zTrainFile = get('DATA.SLICES.Z_SLICES_TRAIN')
-    zValdFile  = get('DATA.SLICES.Z_SLICES_VALD')
-    zTestFile  = get('DATA.SLICES.Z_SLICES_TEST')
+
+    valdFile = get('DATA.SLICES.VALD')
+    testFile = get('DATA.SLICES.TEST')
 
     modelTrainer = ModelTrainerBIN()
 
     if args.data == 'X':
         with tf.variable_scope('xAxisModel'):
-            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile], axis=0)
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [valdFile], [testFile], axis=0)
     elif args.data == 'Y':
         with tf.variable_scope('yAxisModel'):
-            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile], axis=1)
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [valdFile], [testFile], axis=1)
     elif args.data == 'Z':
         with tf.variable_scope('zAxisModel'):
-            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile], axis=2)
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [valdFile], [testFile], axis=2)
     elif args.data == 'XYZ':
         with tf.variable_scope('xyzAxisModel'):
             RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
-                                                   [xValdFile, yValdFile, zValdFile],
-                                                   [xTestFile, yTestFile, zTestFile], axis=3)
+                                                   [valdFile,
+                                                   [testFile], axis=3)
     elif args.data == 'ALL':
         with tf.variable_scope('xAxisModel'):
-            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile], axis=0)
+            RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [valdFile], [testFile], axis=0)
         with tf.variable_scope('yAxisModel'):
-            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile], axis=1)
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [valdFile], [testFile], axis=1)
         with tf.variable_scope('zAxisModel'):
-            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile], axis=2)
+            RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [valdFile], [testFile], axis=2)
         with tf.variable_scope('xyzAxisModel'):
             RunTestOnDirs(modelTrainer, 'xyzAxisSlices', [xTrainFile, yTrainFile, zTrainFile],
-                                                         [xValdFile, yValdFile, zValdFile],
-                                                         [xTestFile, yTestFile, zTestFile], axis=3)
+                                                         [valdFile],
+                                                         [testFile], axis=3)
         WriteDefaultGraphToDir(dirName='{}{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                                                      modelTrainer.dateString))
     else:
