@@ -12,7 +12,8 @@ class DataSetBIN(object):
             batchSize=32,
             maxItemsInQueue=2000,
             minItemsInQueue=500,
-            shuffle=True
+            shuffle=True,
+            training=True
         ):
         # Define a file name queue
         self.binFileNames = binFileNames
@@ -32,6 +33,9 @@ class DataSetBIN(object):
         image = tf.reshape(tf.strided_slice(decoded, [1], [1 + numbersInImage]),
                            imageDims)
         label.set_shape((1,))
+
+        if not training:
+            image = tf.pad(image, [[24, 0], [0, 0], [24, 0], [0, 0]], name='Image Padding', mode='CONSTANT')
 
         # Define the batch operations
         if shuffle:
@@ -80,3 +84,9 @@ class DataSetBIN(object):
     def InitializeConstantData(self, sess):
         sess.run(self.constantImageVar.initializer)
         sess.run(self.constantLabelVar.initializer)
+
+if __name__ == '__main__':
+    fileNames = ['/data/psturm/structural/structural_test.bin']
+    testDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=False, training=False)
+    bootstrapDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=True, training=False)
+    

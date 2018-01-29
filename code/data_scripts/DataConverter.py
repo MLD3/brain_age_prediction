@@ -99,8 +99,7 @@ def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
 
 def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     numRows = SubjectDataFrame.shape[0]
-    brainImages = np.zeros((numRows, 121, 145, 121))
-    exampleWidth = 121 * 145 * 121 + 1
+    brainImages = np.zeros((numRows, 145, 145, 145))
     ages = np.zeros((numRows))
     index = 0
     for _, row in SubjectDataFrame.iterrows():
@@ -110,6 +109,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
         print('Reading subject {}, {} out of {}'.format(subject, index, numRows), end='\r')
         fileName = '{}{}.npy'.format(inFile, subject)
         image = np.load(fileName)
+        image = np.pad(image, [(0,0), (24,0), (0,0), (24,0)], mode='constant')
 
         brainImages[index - 1, :, :, :] = image
         ages[index - 1] = age
@@ -119,7 +119,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     valdIndices = indices[75:150]
     trainIndices = indices[150:]
 
-    flattenedImages = brainImages.reshape((numRows, 121*145*121))
+    flattenedImages = brainImages.reshape((numRows, 145*145*145))
     flattenedImages = np.insert(flattenedImages, 0, ages, axis=1)
     print(flattenedImages.shape)
     print('Saving test set...')
@@ -134,11 +134,6 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     trainingAges = ages[trainIndices]
     numTraining = numRows - 150
     desiredDim = 145
-
-    currentWidth, currentHeight, currentDepth = 121, 145, 121
-    widthPadding = desiredDim - currentWidth
-    heightPadding = desiredDim - currentHeight
-    depthPadding = desiredDim - currentDepth
 
     flattenedImages = np.zeros((numTraining * 121, 145 * 145 + 1))
     index = 0
