@@ -70,6 +70,7 @@ class DataSetBIN(object):
                                  [[0,0], [24, 0], [0,0], [0,0]])
                 images = tf.concat([imagesX, imagesY, imagesZ], axis=0)
             self.imageBatchOperation = images
+            self.labelBatchOperation = tf.reshape(self.selfLabelBatchOperation, shape=())
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
