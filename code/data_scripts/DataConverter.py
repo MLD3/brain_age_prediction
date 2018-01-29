@@ -186,4 +186,4 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
 
 if __name__ == '__main__':
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
-    NPYToBinaryDataset(inFile='/data/psturm/structural/numpyArrays', outFile='/data/psturm/structural', SubjectDataFrame=SubjectDataFrame)
+    NPYToBinaryDataset(inFile='/data/psturm/structural/numpyArrays/', outFile='/data/psturm/structural/', SubjectDataFrame=SubjectDataFrame)
