@@ -50,7 +50,7 @@
     },
     "TRAIN": {
         "DEFAULTS": {
-            "LARGE_NB_STEPS": 30000,
+            "LARGE_NB_STEPS": 60000,
             "NB_STEPS": 10000,
             "TEST_NB_STEPS": 500,
             "LEARNING_RATE": 0.0001

@@ -20,33 +20,30 @@ def GetSliceCNN(
         optionalHiddenLayerUnits=0,
         downscaleRate=None):
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    with tf.variable_scope('trainCNN'):
-        trainOutputLayer = SliceCNN(trainInputBatch,
-                                    trainingPL,
-                                    keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                    optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                    downscaleRate=downscaleRate)
+    trainOutputLayer = SliceCNN(trainInputBatch,
+                                trainingPL,
+                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                downscaleRate=downscaleRate)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
-    with tf.variable_scope('Optimzer'):
+    with tf.variable_scope('optimizer'):
         trainUpdateOp = AdamOptimizer(trainLossOp, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    with tf.variable_scope('valdCNN'):
-        valdOutputLayer = SliceCNN(valdInputBatch,
-                                   trainingPL,
-                                   keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                   optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                   downscaleRate=downscaleRate)
+    valdOutputLayer = SliceCNN(valdInputBatch,
+                               trainingPL,
+                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
                                               predictions=tf.reduce_mean(valdOutputLayer))
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    with tf.variable_scope('testCNN'):
-        testOutputLayer = SliceCNN(testInputBatch,
-                                   trainingPL,
-                                   keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                   optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                   downscaleRate=downscaleRate)
+    testOutputLayer = SliceCNN(testInputBatch,
+                               trainingPL,
+                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=tf.reduce_mean(testOutputLayer))
 
@@ -88,9 +85,9 @@ def RunTestOnDirs(modelTrainer, saveName, trainFiles, valdFiles, testFiles, axis
                                 trainDataSet,
                                 valdDataSet,
                                 testDataSet,
-                                numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'))
+                                numberOfSteps=get('TRAIN.DEFAULTS.LARGE_NB_STEPS'))
     # with tf.Session() as sess:
-        # modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
+    #     modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 def WriteDefaultGraphToDir(dirName):
     writer = tf.summary.FileWriter(logdir=dirName, graph=tf.get_default_graph())
@@ -137,8 +134,5 @@ if __name__ == '__main__':
                                                          [testFile], axis=3)
         WriteDefaultGraphToDir(dirName='{}{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                                                      modelTrainer.dateString))
-        for x in tf.global_variables():
-            print(x.name)
-
     else:
         print('Unrecognized data argument {}.'.format(args.data))
