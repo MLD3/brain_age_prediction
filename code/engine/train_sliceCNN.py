@@ -129,7 +129,7 @@ if __name__ == '__main__':
         with tf.variable_scope('xAxisModel'):
             RunTestOnDirs(modelTrainer, 'xAxisSlices', [xTrainFile], [xValdFile], [xTestFile], axis=0)
         with tf.variable_scope('yAxisModel'):
-            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile]. axis=1)
+            RunTestOnDirs(modelTrainer, 'yAxisSlices', [yTrainFile], [yValdFile], [yTestFile], axis=1)
         with tf.variable_scope('zAxisModel'):
             RunTestOnDirs(modelTrainer, 'zAxisSlices', [zTrainFile], [zValdFile], [zTestFile], axis=2)
         with tf.variable_scope('xyzAxisModel'):
