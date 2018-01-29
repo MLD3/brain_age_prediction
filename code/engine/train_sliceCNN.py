@@ -27,7 +27,7 @@ def GetSliceCNN(
                                     optionalHiddenLayerUnits=optionalHiddenLayerUnits,
                                     downscaleRate=downscaleRate)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
-    with tf.variable_scope('Optimzer')
+    with tf.variable_scope('Optimzer'):
     trainUpdateOp = AdamOptimizer(trainLossOp, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
