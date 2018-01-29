@@ -64,7 +64,7 @@ class DataSetBIN(object):
                 images = tf.pad(images, [[0,0], [24, 0], [0,0], [0,0]])
             elif axis == 3: #Hack to specify all axes
                 imagesX = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
-                imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2, 3),
+                imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2, 3]),
                                  [[0, 0], [24, 0], [24, 0], [0, 0]])
                 imagesZ = tf.pad(tf.transpose(images, perm=[2, 0, 1, 3]),
                                  [[0,0], [24, 0], [0,0], [0,0]])
