@@ -20,29 +20,33 @@ def GetSliceCNN(
         optionalHiddenLayerUnits=0,
         downscaleRate=None):
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    trainOutputLayer = SliceCNN(trainInputBatch,
-                                trainingPL,
-                                keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                downscaleRate=downscaleRate)
+    with tf.variable_scope('trainCNN'):
+        trainOutputLayer = SliceCNN(trainInputBatch,
+                                    trainingPL,
+                                    keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                                    optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                    downscaleRate=downscaleRate)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    with tf.variable_scope('Optimzer')
     trainUpdateOp = AdamOptimizer(trainLossOp, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    valdOutputLayer = SliceCNN(valdInputBatch,
-                               trainingPL,
-                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate)
+    with tf.variable_scope('valdCNN'):
+        valdOutputLayer = SliceCNN(valdInputBatch,
+                                   trainingPL,
+                                   keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                                   optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                   downscaleRate=downscaleRate)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
                                               predictions=tf.reduce_mean(valdOutputLayer))
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    testOutputLayer = SliceCNN(testInputBatch,
-                               trainingPL,
-                               keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate)
+    with tf.variable_scope('testCNN'):
+        testOutputLayer = SliceCNN(testInputBatch,
+                                   trainingPL,
+                                   keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
+                                   optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                   downscaleRate=downscaleRate)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=tf.reduce_mean(testOutputLayer))
 
