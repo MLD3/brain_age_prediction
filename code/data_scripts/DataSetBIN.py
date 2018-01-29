@@ -57,16 +57,16 @@ class DataSetBIN(object):
             if axis == 0: #X AXIS
                 images = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
             if axis == 1: #Y AXIS
-                images = tf.transpose(images, perm=[1, 0, 2])
+                images = tf.transpose(images, perm=[1, 0, 2, 3])
                 images = tf.pad(images, [[0, 0], [24, 0], [24, 0], [0, 0]])
             elif axis == 2: #Z AXIS
-                images = tf.transpose(images, perm=[2, 0, 1])
+                images = tf.transpose(images, perm=[2, 0, 1, 3])
                 images = tf.pad(images, [[0,0], [24, 0], [0,0], [0,0]])
             elif axis == 3: #Hack to specify all axes
                 imagesX = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
-                imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2]),
+                imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2, 3),
                                  [[0, 0], [24, 0], [24, 0], [0, 0]])
-                imagesZ = tf.pad(tf.transpose(images, perm=[2, 0, 1]),
+                imagesZ = tf.pad(tf.transpose(images, perm=[2, 0, 1, 3]),
                                  [[0,0], [24, 0], [0,0], [0,0]])
                 images = tf.concat([imagesX, imagesY, imagesZ], axis=0)
             self.imageBatchOperation = images
