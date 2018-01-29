@@ -79,15 +79,11 @@ class ModelTrainerBIN(object):
 
         print('Beginning Training...')
         for batchIndex in range(self.numberOfSteps):
-            sess.run([trainUpdateOp, extraUpdateOps], feed_dict={
+            trainingLoss, _, _ = sess.run([trainLossOp, trainUpdateOp, extraUpdateOps], feed_dict={
                 trainingPL: True
                 })
 
             if batchIndex % self.batchStepsBetweenSummary == 0:
-                trainingLoss = \
-                    sess.run(trainLossOp, feed_dict={
-                    trainingPL: False
-                    })
                 validationLoss = self.GetPerformanceThroughSet(sess, valdLossOp)
 
                 print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
@@ -121,4 +117,4 @@ class ModelTrainerBIN(object):
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
         print("Model {} had test performance: {}".format(
             self.saveName,
-            pointTestPerformance))
+            testLoss))
