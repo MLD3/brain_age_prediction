@@ -145,12 +145,13 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     for j in range(numTraining):
         print('Slicing image {} of {}, x axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
+        currentAge = trainingAges[j]
         for i in range(121):
             xSlice = currentImage[i, :, :]
             xSlice = np.pad(xSlice, [(heightPadding, 0), (depthPadding, 0)], mode='constant')
             assert xSlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(xSlice.Shape)
             xSlice = xSlice.flatten()
-            xSlice = np.insert(xSlice, 0, age)
+            xSlice = np.insert(xSlice, 0, currentAge)
             flattenedImages[index, :] = xSlice
             index += 1
     print('Saving x axis training set...')
@@ -161,28 +162,30 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     for j in range(numTraining):
         print('Slicing image {} of {}, y axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
+        currentAge = trainingAges[j]
         for i in range(145):
             ySlice = currentImage[:, i, :]
             ySlice = np.pad(ySlice, [(widthPadding, 0), (depthPadding, 0)], mode='constant')
             assert ySlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(ySlice.Shape)
             ySlice = ySlice.flatten()
-            ySlice = np.insert(ySlice, 0, age)
+            ySlice = np.insert(ySlice, 0, currentAge)
             flattenedImages[index, :] = ySlice
             index += 1
     print('Saving y axis training set...')
     flattenedImages.tofile('{}yAxisSlices/train.bin'.format(outFile))
 
-    flattenedImages = np.zeros((numTraining * 145, 145 * 145 + 1))
+    flattenedImages = np.zeros((numTraining * 121, 145 * 145 + 1))
     index = 0
     for j in range(numTraining):
         print('Slicing image {} of {}, z axis'.format(j, numTraining), end='\r')
         currentImage = trainingImages[j, :, :, :]
+        currentAge = trainingAges[j]
         for i in range(121):
             zSlice = currentImage[:, :, i]
             zSlice = np.pad(zSlice, [(widthPadding, 0), (heightPadding, 0)], mode='constant')
             assert zSlice.shape == (desiredDim, desiredDim), 'Shape {} is not correct'.format(zSlice.Shape)
             zSlice = zSlice.flatten()
-            zSlice = np.insert(zSlice, 0, age)
+            zSlice = np.insert(zSlice, 0, currentAge)
             flattenedImages[index, :] = zSlice
             index += 1
     print('Saving z axis training set...')
