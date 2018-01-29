@@ -13,7 +13,8 @@ class DataSetBIN(object):
             maxItemsInQueue=2000,
             minItemsInQueue=500,
             shuffle=True,
-            training=True
+            training=True,
+            axis=None
         ):
         # Define a file name queue
         self.binFileNames = binFileNames
@@ -34,9 +35,6 @@ class DataSetBIN(object):
                            imageDims)
         label.set_shape((1,))
 
-        if not training:
-            image = tf.pad(image, [[24, 0], [0, 0], [24, 0], [0, 0]], name='imagePad', mode='CONSTANT')
-
         # Define the batch operations
         if shuffle:
             self.imageBatchOperation, self.labelBatchOperation = tf.train.shuffle_batch(
@@ -53,6 +51,18 @@ class DataSetBIN(object):
                 num_threads=numReaderThreads,
                 capacity=maxItemsInQueue
             )
+
+        if not training:
+            images = tf.squeeze(self.imageBatchOperation, axis=0)
+            if axis == 0: #X AXIS
+                images = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
+            if axis == 1: #Y AXIS
+                images = tf.transpose(images, perm=[1, 0, 2])
+                images = tf.pad(images, [[0, 0], [24, 0], [24, 0], [0, 0]])
+            elif axis == 2: #Z AXIS
+                images = tf.transpose(images, perm=[2, 0, 1])
+                images = tf.pad(images, [[0,0], [24, 0], [0,0], [0,0]])
+            self.imageBatchOperation = images
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
@@ -87,5 +97,12 @@ class DataSetBIN(object):
 
 if __name__ == '__main__':
     fileNames = ['/data/psturm/structural/structural_test.bin']
-    testDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=False, training=False)
-    bootstrapDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=True, training=False)
+    testDataset = DataSetBIN(fileNames,
+                            imageDims=[121, 145, 121, 1],
+                            batchSize=1,
+                            maxItemsInQueue=75,
+                            minItemsInQueue=1,
+                            shuffle=False,
+                            training=False,
+                            axis=0)
+    
