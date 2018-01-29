@@ -13,15 +13,11 @@
             "DIMENSION": 264
         },
         "SLICES": {
-            "X_SLICES_TRAIN": "/data/psturm/structural/xAxisSlices/dataSet_train.bin",
-            "X_SLICES_VALD": "/data/psturm/structural/xAxisSlices/dataSet_vald.bin",
-            "X_SLICES_TEST": "/data/psturm/structural/xAxisSlices/dataSet_test.bin",
-            "Y_SLICES_TRAIN": "/data/psturm/structural/yAxisSlices/dataSet_train.bin",
-            "Y_SLICES_VALD": "/data/psturm/structural/yAxisSlices/dataSet_vald.bin",
-            "Y_SLICES_TEST": "/data/psturm/structural/yAxisSlices/dataSet_test.bin",
-            "Z_SLICES_TRAIN": "/data/psturm/structural/zAxisSlices/dataSet_train.bin",
-            "Z_SLICES_VALD": "/data/psturm/structural/zAxisSlices/dataSet_vald.bin",
-            "Z_SLICES_TEST": "/data/psturm/structural/zAxisSlices/dataSet_test.bin",
+            "X_SLICES_TRAIN": "/data/psturm/structural/xAxisSlices/train.bin",
+            "Y_SLICES_TRAIN": "/data/psturm/structural/yAxisSlices/train.bin",
+            "Z_SLICES_TRAIN": "/data/psturm/structural/zAxisSlices/train.bin",
+            "VALD": "/data/psturm/structural/structural_vald.bin",
+            "TEST": "/data/psturm/structural/structural_test.bin",
             "DIMENSION": 145
         },
         "STRUCTURAL": {
