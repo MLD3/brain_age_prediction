@@ -35,7 +35,7 @@ class DataSetBIN(object):
         label.set_shape((1,))
 
         if not training:
-            image = tf.pad(image, [[24, 0], [0, 0], [24, 0], [0, 0]], name='Image Padding', mode='CONSTANT')
+            image = tf.pad(image, [[24, 0], [0, 0], [24, 0], [0, 0]], name='imagePad', mode='CONSTANT')
 
         # Define the batch operations
         if shuffle:
@@ -89,4 +89,3 @@ if __name__ == '__main__':
     fileNames = ['/data/psturm/structural/structural_test.bin']
     testDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=False, training=False)
     bootstrapDataset = DataSetBIN(fileNames, imageDims=[121, 145, 121, 1], batchSize=1, maxItemsInQueue=1, minItemsInQueue=1, shuffle=True, training=False)
-    
