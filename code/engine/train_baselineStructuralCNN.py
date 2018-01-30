@@ -101,7 +101,7 @@ def RunTestOnDirs(modelTrainer,
             modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 if __name__ == '__main__':
-    ParseArgs()
+    ParseArgs('Run 3D CNN over structural MRI volumes')
     GlobalOpts.trainFiles = [get('DATA.BIN.TRAIN')]
     GlobalOpts.valdFiles = [get('DATA.BIN.VALD')]
     GlobalOpts.testFiles = [get('DATA.BIN.TEST')]

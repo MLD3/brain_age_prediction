@@ -99,7 +99,7 @@ def RunTestOnDirs(modelTrainer,
             modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 if __name__ == '__main__':
-    ParseArgs()
+    ParseArgs('Run 2D convolution tests over structural MRI slices', data=True)
     GlobalOpts.valdFiles = [get('DATA.BIN.VALD')]
     GlobalOpts.testFiles = [get('DATA.BIN.TEST')]
     GlobalOpts.trainImageDims = [145, 145, 1]
