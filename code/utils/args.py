@@ -15,7 +15,8 @@ def ParseArgs(description, data=False):
     if data:
         required.add_argument('--data', help='The data set to use. One of X, Y, Z, XYZ, 3D.', action='store', dest='data', required=True)
     args = parser.parse_args()
-    GlobalOpts.data = args.data
+    if data:
+        GlobalOpts.data = args.data
     GlobalOpts.summaryDir = args.summaryDir
     GlobalOpts.checkpointDir = args.checkpointDir
     GlobalOpts.gpuMemory = args.gpuMemory
