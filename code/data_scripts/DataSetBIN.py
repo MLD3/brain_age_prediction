@@ -53,15 +53,15 @@ class DataSetBIN(object):
 
         if spliceInputAlongAxis != None:
             images = tf.squeeze(self.imageBatchOperation, axis=0)
-            if axis == 0: #X AXIS
+            if spliceInputAlongAxis == 0: #X AXIS
                 images = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
-            if axis == 1: #Y AXIS
+            if spliceInputAlongAxis == 1: #Y AXIS
                 images = tf.transpose(images, perm=[1, 0, 2, 3])
                 images = tf.pad(images, [[0, 0], [24, 0], [24, 0], [0, 0]])
-            elif axis == 2: #Z AXIS
+            elif spliceInputAlongAxis == 2: #Z AXIS
                 images = tf.transpose(images, perm=[2, 0, 1, 3])
                 images = tf.pad(images, [[0,0], [24, 0], [0,0], [0,0]])
-            elif axis == 3: #Hack to specify all axes
+            elif spliceInputAlongAxis == 3: #Hack to specify all axes
                 imagesX = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
                 imagesY = tf.pad(tf.transpose(images, perm=[1, 0, 2, 3]),
                                  [[0, 0], [24, 0], [24, 0], [0, 0]])
