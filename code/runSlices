@@ -1,9 +1,5 @@
-python -m engine.train_baselineStructuralCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/model3D/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/model3D/ --gpuMemory 0.95 --numSteps 50000 --batchSize 4 > model3D_out
-
-python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/xAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/xAxis/ --gpuMemory 0.95 --numSteps 100000 --batchSize 64 --data X > xAxis_out
-
-python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/yAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/yAxis/ --gpuMemory 0.95 --numSteps 100000 --batchSize 64 --data Y > yAxis_out
-
-python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/zAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/zAxis/ --gpuMemory 0.95 --numSteps 100000 --batchSize 64 --data Z > zAxis_out
-
-python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/xyz/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/xyz/ --gpuMemory 0.95 --numSteps 100000 --batchSize 64 --data > xyz_out
+python -m engine.train_baselineStructuralCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/model3D/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/model3D/ --gpuMemory 0.95 --numSteps 100 --batchSize 4 > model3D_out
+python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/xAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/xAxis/ --gpuMemory 0.95 --numSteps 1000 --batchSize 64 --data X > xAxis_out
+python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/yAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/yAxis/ --gpuMemory 0.95 --numSteps 1000 --batchSize 64 --data Y > yAxis_out
+python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/zAxis/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/zAxis/ --gpuMemory 0.95 --numSteps 1000 --batchSize 64 --data Z > zAxis_out
+python -m engine.train_sliceCNN --summaryDir /home/psturm/brain_age_prediction/summaries/cnn_baseline/xyz/ --checkpointDir /home/psturm/brain_age_prediction/checkpoints/cnn_baseline/xyz/ --gpuMemory 0.95 --numSteps 1000 --batchSize 64 --data > xyz_out
