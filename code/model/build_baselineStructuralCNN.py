@@ -4,7 +4,7 @@ from utils.config import get
 from placeholders.shared_placeholders import *
 
 def standardBatchNorm(inputs, trainingPL, momentum=0.9, name=None):
-    return tf.layers.batch_normalization(inputs, training=trainingPL, momentum=momentum, name=name)
+    return tf.layers.batch_normalization(inputs, training=trainingPL, momentum=momentum, name=name, reuse=tf.AUTO_REUSE)
 
 def standardPool(inputs, kernel_size=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME', name=None):
     return tf.nn.max_pool3d(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
@@ -13,18 +13,18 @@ def standardConvolution(inputs, filters, kernel_size=(3,3,3), activation=tf.nn.e
     return tf.layers.conv3d(inputs=inputs, filters=filters, kernel_size=kernel_size,
                             strides=strides, padding=padding, activation=activation,
                             use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer(),
-                            bias_initializer=tf.zeros_initializer(), name=name)
+                            bias_initializer=tf.zeros_initializer(), name=name, reuse=tf.AUTO_REUSE)
 
 def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None):
     if use_bias:
         return tf.layers.dense(inputs=inputs, units=units, activation=activation,
                            bias_initializer=tf.zeros_initializer(),
                            kernel_initializer=tf.contrib.layers.xavier_initializer(),
-                           name=name)
+                           name=name, reuse=tf.AUTO_REUSE)
     else:
         return tf.layers.dense(inputs=inputs, units=units, activation=activation,
                            use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer(),
-                           bias_initializer=tf.zeros_initializer(), name=name)
+                           bias_initializer=tf.zeros_initializer(), name=name, reuse=tf.AUTO_REUSE)
 
 def standardBlock(inputs, trainingPL, blockNumber, filters):
     with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
@@ -42,10 +42,7 @@ def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
         weightShape = inputs.shape.as_list()
         weightShape[0] = 1
-        numberWeights = np.prod(weightShape)
-        attentionWeight = tf.Variable(tf.ones(shape=(numberWeights), name='attentionWeight'))
-        attentionWeight = tf.nn.softmax(attentionWeight, name='attentionSoftmax')
-        attentionWeight = tf.reshape(attentionWeight, shape=weightShape, name='reshapeAttention')
+        attentionWeight = tf.get_variable(tf.ones(shape=(weightShape), name='attentionWeight'))
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False, downscaleRate=None):

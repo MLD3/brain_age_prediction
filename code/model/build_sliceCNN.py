@@ -62,8 +62,10 @@ def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_
         ################## THIRD BLOCK ##################
         Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=32)
 
+        Block4 = block2D(Block3, trainingPL, blockNumber=4, filters=64)
+
         with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block3)
+            flattenedLayer = tf.layers.flatten(Block4)
             if optionalHiddenLayerUnits > 0:
                 optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
                 droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)

@@ -12,10 +12,11 @@
             "PATH": "../data/Matrices",
             "DIMENSION": 264
         },
-        "SLICES": {
+        "BIN": {
             "X_SLICES_TRAIN": "/data/psturm/structural/xAxisSlices/train.bin",
             "Y_SLICES_TRAIN": "/data/psturm/structural/yAxisSlices/train.bin",
             "Z_SLICES_TRAIN": "/data/psturm/structural/zAxisSlices/train.bin",
+            "TRAIN": "/data/psturm/structural/structural_train.bin",
             "VALD": "/data/psturm/structural/structural_vald.bin",
             "TEST": "/data/psturm/structural/structural_test.bin",
             "DIMENSION": 145
@@ -50,7 +51,7 @@
     },
     "TRAIN": {
         "DEFAULTS": {
-            "LARGE_NB_STEPS": 60000,
+            "LARGE_NB_STEPS": 100000,
             "NB_STEPS": 10000,
             "TEST_NB_STEPS": 500,
             "LEARNING_RATE": 0.0001

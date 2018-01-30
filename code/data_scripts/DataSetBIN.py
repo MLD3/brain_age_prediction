@@ -9,12 +9,11 @@ class DataSetBIN(object):
             bytesPerNumber=8,
             decodeType=tf.float64,
             numReaderThreads=16,
-            batchSize=32,
+            batchSize=64,
             maxItemsInQueue=2000,
             minItemsInQueue=500,
             shuffle=True,
-            training=True,
-            axis=None
+            spliceInputAlongAxis=None,
         ):
         # Define a file name queue
         self.binFileNames = binFileNames
@@ -52,7 +51,7 @@ class DataSetBIN(object):
                 capacity=maxItemsInQueue
             )
 
-        if not training:
+        if spliceInputAlongAxis != None:
             images = tf.squeeze(self.imageBatchOperation, axis=0)
             if axis == 0: #X AXIS
                 images = tf.pad(images, [[0,0], [0,0], [24, 0], [0,0]])
@@ -102,14 +101,3 @@ class DataSetBIN(object):
     def InitializeConstantData(self, sess):
         sess.run(self.constantImageVar.initializer)
         sess.run(self.constantLabelVar.initializer)
-
-if __name__ == '__main__':
-    fileNames = ['/data/psturm/structural/structural_test.bin']
-    testDataset = DataSetBIN(fileNames,
-                            imageDims=[121, 145, 121, 1],
-                            batchSize=1,
-                            maxItemsInQueue=75,
-                            minItemsInQueue=1,
-                            shuffle=False,
-                            training=False,
-                            axis=0)

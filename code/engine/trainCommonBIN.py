@@ -15,27 +15,25 @@ class ModelTrainerBIN(object):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 
     def DefineNewParams(self,
-                        saveName,
                         trainDataSet,
                         validationDataSet,
                         testDataSet,
-                        summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
-                        checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                        summaryDir,
+                        checkpointDir,
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
-                        batchStepsBetweenSummary=200
+                        batchStepsBetweenSummary=500
                         ):
         self.saveName = saveName
         self.trainDataSet = trainDataSet
         self.validationDataSet = validationDataSet
         self.testDataSet = testDataSet
 
-        if not os.path.exists('{}{}'.format(checkpointDir, self.dateString)):
-            os.makedirs('{}{}'.format(checkpointDir, self.dateString))
-        self.checkpointDir = "{}{}/{}".format(checkpointDir, self.dateString, self.saveName)
+        if not os.path.exists(checkpointDir):
+            os.makedirs(checkpointDir)
+        self.checkpointDir = checkpointDir
         self.numberOfSteps = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
-        summaryDir = '{}{}/{}/'.format(summaryDir, self.dateString, self.saveName)
         self.writer = tf.summary.FileWriter(summaryDir)
 
         self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')

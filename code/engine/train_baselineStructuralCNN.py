@@ -2,122 +2,114 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import math
-import argparse
+from utils.args import *
 from data_scripts.DataReader import *
 from data_scripts.DataPlotter import PlotTrainingValidationLoss
 from data_scripts.DataSetNPY import DataSetNPY
 from sklearn.model_selection import train_test_split, KFold
 from model.build_baselineStructuralCNN import baselineStructuralCNN
-from utils import saveModel
+from utils.saveModel import *
 from utils.config import get
 from placeholders.shared_placeholders import *
 from itertools import product
 from engine.trainCommonNPY import *
 
-def GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, learningRateName='LEARNING_RATE', stepCountName='NB_STEPS',
-                        batchSizeName='BATCH_SIZE', keepProbName='KEEP_PROB', optimizer='ADAM', optionalHiddenLayerUnits=0, useAttentionMap=False,
-                        downscaleRate=None):
-    ############ DEFINE PLACEHOLDERS, LOSS ############
-    predictionLayer = baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.%s' % keepProbName),
-                                            optionalHiddenLayerUnits=optionalHiddenLayerUnits, useAttentionMap=useAttentionMap, downscaleRate=downscaleRate)
-    lossFunction = tf.losses.mean_squared_error(labels=labelsPL, predictions=predictionLayer)
+def GetStructuralCNN(
+        trainDataSet,
+        valdDataSet,
+        testDataSet,
+        trainingPL,
+        learningRate=0.00005,
+        keepProb=0.6,
+        optionalHiddenLayerUnits=0,
+        downscaleRate=None):
+    trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
+    trainOutputLayer = baselineStructuralCNN(trainInputBatch,
+                                trainingPL,
+                                keepProbability=keepProb,
+                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                                downscaleRate=downscaleRate)
+    trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    with tf.variable_scope('optimizer'):
+        trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
 
-    ############ DEFINE OPTIMIZER ############
-    if optimizer == 'ADAM':
-        trainOperation = AdamOptimizer(lossFunction, get('TRAIN.CNN_BASELINE.%s' % learningRateName))
-    elif optimizer == 'GRAD_DECAY':
-        trainOperation = ScheduledGradOptimizer(lossFunction, baseLearningRate=get('TRAIN.CNN_BASELINE.%s' % learningRateName))
+    valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
+    valdOutputLayer = baselineStructuralCNN(valdInputBatch,
+                               trainingPL,
+                               keepProbability=keepProb,
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
+    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
+                                              predictions=valdOutputLayer)
 
-    ############ DEFINE LEARNING PARAMETERS ############
-    stepCount = get('TRAIN.CNN_BASELINE.%s' % stepCountName)
-    batchSize = get('TRAIN.CNN_BASELINE.%s' % batchSizeName)
+    testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
+    testOutputLayer = baselineStructuralCNN(testInputBatch,
+                               trainingPL,
+                               keepProbability=keepProb,
+                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                               downscaleRate=downscaleRate)
+    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
+                                              predictions=testOutputLayer)
 
-    return predictionLayer, lossFunction, trainOperation, stepCount, batchSize
+    return trainUpdateOp, trainLossOp, valdLossOp, testLossOp
+
+def RunTestOnDirs(modelTrainer,
+                  learningRate=0.00005,
+                  keepProb=0.6,
+                  optionalHiddenLayerUnits=0):
+    with tf.variable_scope(GlobalOpts.ModelScope):
+        with tf.variable_scope('TrainingInputs'):
+            trainDataSet = DataSetBIN(binFileNames=GlobalOpts.trainFiles,
+                                      imageDims=GlobalOpts.trainImageDims,
+                                      batchSize=GlobalOpts.trainBatchSize)
+        with tf.variable_scope('ValidationInputs'):
+            valdDataSet  = DataSetBIN(binFileNames=GlobalOpts.valdFiles,
+                                    imageDims=GlobalOpts.testImageDims,
+                                    batchSize=1,
+                                    maxItemsInQueue=75,
+                                    minItemsInQueue=1,
+                                    shuffle=False)
+        with tf.variable_scope('TestInputs'):
+            testDataSet  = DataSetBIN(binFileNames=GlobalOpts.testFiles,
+                                    imageDims=GlobalOpts.testImageDims,
+                                    batchSize=1,
+                                    maxItemsInQueue=75,
+                                    minItemsInQueue=1,
+                                    shuffle=False)
+        trainingPL = TrainingPlaceholder()
+        trainUpdateOp, trainLossOp, valdLossOp, testLossOp = \
+            GetSliceCNN(
+                trainDataSet,
+                valdDataSet,
+                testDataSet,
+                trainingPL,
+                learningRate=learningRate,
+                keepProb=keepProb,
+                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
+                downscaleRate=None)
+        modelTrainer.DefineNewParams(saveName,
+                                    trainDataSet,
+                                    valdDataSet,
+                                    testDataSet,
+                                    GlobalOpts.summaryDir,
+                                    GlobalOpts.checkpointDir,
+                                    GlobalOpts.numSteps)
+        WriteDefaultGraphToDir(dirName=GlobalOpts.summaryDir)
+        config  = tf.ConfigProto()
+        config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+        with tf.Session(config=config) as sess:
+            modelTrainer.TrainModel(sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run 3D Convolution Scaling Tests on sMRI')
-    parser.add_argument('--skewed', help='If specified, run skewed tests. Otherwise, run square tests.', action='store_true')
-    args = parser.parse_args()
+    ParseArgs()
+    GlobalOpts.trainFiles = [get('DATA.BIN.TRAIN')]
+    GlobalOpts.valdFiles = [get('DATA.BIN.VALD')]
+    GlobalOpts.testFiles = [get('DATA.BIN.TEST')]
+    GlobalOpts.trainImageDims = [121, 145, 121, 1]
+    GlobalOpts.testImageDims = [121, 145, 121, 1]
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.ModelScope = '3DModel'
+    GlobalOpts.axis = None
 
-    PhenotypicsDF = readCSVData(get('DATA.PHENOTYPICS.PATH'))
-    StructuralDataDir = get('DATA.STRUCTURAL.NUMPY_PATH')
-    fileList = np.array([str(subject) + '.npy' for subject in PhenotypicsDF['Subject'].tolist()])
-    labels = np.array(PhenotypicsDF['AgeYears'].tolist())
-    dataSet = DataSetNPY(numpyDirectory=StructuralDataDir, numpyFileList=fileList, labels=labels)
-
-    trainingPL = TrainingPlaceholder()
-    imagesPL, labelsPL = StructuralPlaceholders()
-    predictionLayers = []
-    trainOperations = []
-    lossFunctions = []
-    stepCountArray = []
-    batchSizeArray = []
-    saveNames = []
-
-    if not args.skewed:
-        with tf.variable_scope('3DConvolutionStandard'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE')
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-        with tf.variable_scope('3DConvolutionDownscale2x2x2'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=2)
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-        with tf.variable_scope('3DConvolutionDownscale3x3x3'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=3)
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-        with tf.variable_scope('3DConvolutionDownscale4x4x4'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=4)
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-    else:
-        with tf.variable_scope('3DConvolutionDownscale2x1x1'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[2,1,1])
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-        with tf.variable_scope('3DConvolutionDownscale1x2x1'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,2,1])
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-        with tf.variable_scope('3DConvolutionDownscale1x1x2'):
-            predictionLayer, lossFunction, trainOperation, stepCount, batchSize = GetCNNBaselineModel(imagesPL, trainingPL, labelsPL, batchSizeName='LARGE_BATCH_SIZE', downscaleRate=[1,1,2])
-            predictionLayers.append(predictionLayer)
-            trainOperations.append(trainOperation)
-            lossFunctions.append(lossFunction)
-            stepCountArray.append(stepCount)
-            batchSizeArray.append(batchSize)
-            saveNames.append(tf.contrib.framework.get_name_scope())
-
-    trainer = ModelTrainerNPY(summaryDir=get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), checkpointDir=get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
-    trainer.RunCrossValidation(dataSet, imagesPL, labelsPL, predictionLayers, trainOperations,
-                                     lossFunctions, trainingPL, stepCountArray, batchSizeArray, saveNames)
+    modelTrainer = ModelTrainerBIN()
+    RunTestOnDirs(modelTrainer)

@@ -15,3 +15,7 @@ def restore(sess, savePath):
     else:
         print('No checkpoint exists at path {}. Training from scratch...'.format(savePath))
     return saver
+
+def WriteDefaultGraphToDir(dirName):
+    writer = tf.summary.FileWriter(logdir=dirName, graph=tf.get_default_graph())
+    writer.close()
