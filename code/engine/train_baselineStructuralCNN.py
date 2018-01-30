@@ -73,7 +73,7 @@ def RunTestOnDirs(modelTrainer,
                                     shuffle=False)
         trainingPL = TrainingPlaceholder()
         trainUpdateOp, trainLossOp, valdLossOp, testLossOp = \
-            GetSliceCNN(
+            GetStructuralCNN(
                 trainDataSet,
                 valdDataSet,
                 testDataSet,
