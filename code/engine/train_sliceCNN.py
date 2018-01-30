@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetBIN import DataSetBIN
-from sklearn.model_selection import train_test_split, KFold
 from model.build_sliceCNN import SliceCNN
 from utils.saveModel import *
 from utils.config import get

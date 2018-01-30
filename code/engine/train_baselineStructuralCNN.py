@@ -1,18 +1,13 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-import math
 from utils.args import *
-from data_scripts.DataReader import *
-from data_scripts.DataPlotter import PlotTrainingValidationLoss
-from data_scripts.DataSetNPY import DataSetNPY
-from sklearn.model_selection import train_test_split, KFold
+from data_scripts.DataSetBIN import DataSetBIN
 from model.build_baselineStructuralCNN import baselineStructuralCNN
 from utils.saveModel import *
 from utils.config import get
+from engine.trainCommonBIN import ModelTrainerBIN
 from placeholders.shared_placeholders import *
-from itertools import product
-from engine.trainCommonNPY import *
 
 def GetStructuralCNN(
         trainDataSet,
