@@ -23,7 +23,6 @@ class ModelTrainerBIN(object):
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
                         batchStepsBetweenSummary=500
                         ):
-        self.saveName = saveName
         self.trainDataSet = trainDataSet
         self.validationDataSet = validationDataSet
         self.testDataSet = testDataSet
@@ -113,6 +112,4 @@ class ModelTrainerBIN(object):
         coord.request_stop()
         coord.join(threads)
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
-        print("Model {} had test performance: {}".format(
-            self.saveName,
-            testLoss))
+        print("Model had test performance: {}".format(testLoss))
