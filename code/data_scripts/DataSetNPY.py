@@ -6,6 +6,8 @@ class DataSetNPY(object):
     def __init__(self,
             filenames,
             imageBaseString,
+            imageBatchDims,
+            labelBatchDims=(-1,1)
             labelBaseString=get('DATA.LABELS'),
             batchSize=64,
             maxItemsInQueue=100,
@@ -15,8 +17,12 @@ class DataSetNPY(object):
         self.labelBaseString = labelBaseString
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
         dequeueOp = stringQueue.dequeue_many(batchSize)
-        self.imageBatchOperation = tf.py_func(self._loadImages, [dequeueOp], tf.float32)
-        self.labelBatchOperation = tf.py_func(self._loadLabels, [dequeueOp], tf.float32)
+        self.imageBatchOperation = tf.reshape(
+            tf.py_func(self._loadImages, [dequeueOp], tf.float32),
+            imageBatchDims)
+        self.labelBatchOperation = tf.reshape(
+            tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
+            labelBatchDims)
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation

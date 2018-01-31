@@ -56,16 +56,19 @@ def RunTestOnDirs(modelTrainer,
         with tf.variable_scope('TrainingInputs'):
             trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
                                       imageBaseString=GlobalOpts.imageBaseString,
+                                      imageBatchDims=GlobalOpts.imageBatchDims,
                                       batchSize=GlobalOpts.trainBatchSize)
         with tf.variable_scope('ValidationInputs'):
             valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
+                                    imageBatchDims=GlobalOpts.imageBatchDims,
                                     batchSize=1,
                                     maxItemsInQueue=75,
                                     shuffle=False)
         with tf.variable_scope('TestInputs'):
             testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
+                                    imageBatchDims=GlobalOpts.imageBatchDims,
                                     batchSize=1,
                                     maxItemsInQueue=75,
                                     shuffle=False)
@@ -98,8 +101,7 @@ if __name__ == '__main__':
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
-    GlobalOpts.trainImageDims = [121, 145, 121, 1]
-    GlobalOpts.testImageDims = [121, 145, 121, 1]
+    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.ModelScope = '3DModel'
     GlobalOpts.axis = None
