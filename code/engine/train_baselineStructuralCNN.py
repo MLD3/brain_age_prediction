@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetBIN import DataSetBIN
+from data_scripts.DataSetNPY import DataSetNPY
 from model.build_baselineStructuralCNN import baselineStructuralCNN
 from utils.saveModel import *
 from utils.config import get
@@ -54,22 +55,20 @@ def RunTestOnDirs(modelTrainer,
                   optionalHiddenLayerUnits=0):
     with tf.variable_scope(GlobalOpts.ModelScope):
         with tf.variable_scope('TrainingInputs'):
-            trainDataSet = DataSetBIN(binFileNames=GlobalOpts.trainFiles,
-                                      imageDims=GlobalOpts.trainImageDims,
+            trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
+                                      imageBaseString=GlobalOpts.imageBaseString,
                                       batchSize=GlobalOpts.trainBatchSize)
         with tf.variable_scope('ValidationInputs'):
-            valdDataSet  = DataSetBIN(binFileNames=GlobalOpts.valdFiles,
-                                    imageDims=GlobalOpts.testImageDims,
+            valdDataSet  = DataSetNPY(binFileNames=GlobalOpts.valdFiles,
+                                    imageBaseString=GlobalOpts.imageBaseString,
                                     batchSize=1,
                                     maxItemsInQueue=75,
-                                    minItemsInQueue=1,
                                     shuffle=False)
         with tf.variable_scope('TestInputs'):
-            testDataSet  = DataSetBIN(binFileNames=GlobalOpts.testFiles,
-                                    imageDims=GlobalOpts.testImageDims,
+            testDataSet  = DataSetNPY(binFileNames=GlobalOpts.testFiles,
+                                    imageBaseString=GlobalOpts.imageBaseString,
                                     batchSize=1,
                                     maxItemsInQueue=75,
-                                    minItemsInQueue=1,
                                     shuffle=False)
         trainingPL = TrainingPlaceholder()
         trainUpdateOp, trainLossOp, valdLossOp, testLossOp = \
@@ -96,9 +95,10 @@ def RunTestOnDirs(modelTrainer,
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
-    GlobalOpts.trainFiles = [get('DATA.BIN.TRAIN')]
-    GlobalOpts.valdFiles = [get('DATA.BIN.VALD')]
-    GlobalOpts.testFiles = [get('DATA.BIN.TEST')]
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
     GlobalOpts.trainImageDims = [121, 145, 121, 1]
     GlobalOpts.testImageDims = [121, 145, 121, 1]
     GlobalOpts.trainBatchSize = 4

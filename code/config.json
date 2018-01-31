@@ -6,6 +6,9 @@
     },
     "DATA": {
         "LABELS": "/data/psturm/labels/",
+        "TEST_LIST": "/data/psturm/test_list.npy",
+        "VALD_LIST": "/data/psturm/vald_list.npy",
+        "TRAIN_LIST": "/data/psturm/train_list.npy",
         "PHENOTYPICS": {
             "PATH": "/data/psturm/PNC_724_phenotypics.csv"
         },
