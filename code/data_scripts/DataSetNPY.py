@@ -7,7 +7,7 @@ class DataSetNPY(object):
             filenames,
             imageBaseString,
             imageBatchDims,
-            labelBatchDims=(-1,1)
+            labelBatchDims=(-1,1),
             labelBaseString=get('DATA.LABELS'),
             batchSize=64,
             maxItemsInQueue=100,
