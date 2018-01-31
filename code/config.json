@@ -5,6 +5,7 @@
         "DESCR": "Analysis of MRI images"
     },
     "DATA": {
+        "LABELS": "/data/psturm/labels/",
         "PHENOTYPICS": {
             "PATH": "/data/psturm/PNC_724_phenotypics.csv"
         },

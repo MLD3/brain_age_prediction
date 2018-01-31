@@ -54,11 +54,11 @@ def ConvertNPYToBinary(inFile, outFile, SubjectDataFrame, maxDims=121, midChar='
     trainingSet = accumulatedArrays[indices[10000:]]
     print("Training set shape: {}".format(trainingSet.shape))
 
-    print('Writing test set to file...')
+    print('Writing test set to file')
     testSet.tofile('{}_test.bin'.format(outFile))
-    print('Writing validation set to file...')
+    print('Writing validation set to file')
     validationSet.tofile('{}_vald.bin'.format(outFile))
-    print('Writing training set to file...')
+    print('Writing training set to file')
     trainingSet.tofile('{}_train.bin'.format(outFile))
 
 def SpliceNIIFilesAlongAxes(inFile, outFile, SubjectDataFrame):
@@ -122,11 +122,11 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     flattenedImages = brainImages.reshape((numRows, 145*145*145))
     flattenedImages = np.insert(flattenedImages, 0, ages, axis=1)
     print(flattenedImages.shape)
-    print('Saving test set...')
+    print('Saving test set')
     flattenedImages[testIndices].tofile('{}structural_test.bin'.format(outFile))
-    print('Saving validation set...')
+    print('Saving validation set')
     flattenedImages[valdIndices].tofile('{}structural_vald.bin'.format(outFile))
-    print('Saving training set...')
+    print('Saving training set')
     flattenedImages[trainIndices].tofile('{}structural_train.bin'.format(outFile))
     flattenedImages = None
 
@@ -149,7 +149,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
             xSlice = np.insert(xSlice, 0, currentAge)
             flattenedImages[index, :] = xSlice
             index += 1
-    print('Saving x axis training set...')
+    print('Saving x axis training set')
     flattenedImages.tofile('{}xAxisSlices/train.bin'.format(outFile))
 
     flattenedImages = np.zeros((numTraining * 145, 145 * 145 + 1))
@@ -166,7 +166,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
             ySlice = np.insert(ySlice, 0, currentAge)
             flattenedImages[index, :] = ySlice
             index += 1
-    print('Saving y axis training set...')
+    print('Saving y axis training set')
     flattenedImages.tofile('{}yAxisSlices/train.bin'.format(outFile))
 
     flattenedImages = np.zeros((numTraining * 121, 145 * 145 + 1))
@@ -183,8 +183,21 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
             zSlice = np.insert(zSlice, 0, currentAge)
             flattenedImages[index, :] = zSlice
             index += 1
-    print('Saving z axis training set...')
+    print('Saving z axis training set')
     flattenedImages.tofile('{}zAxisSlices/train.bin'.format(outFile))
+
+i = 0
+for _, row in df.iterrows():
+    subject = row['Subject']
+    age = row['AgeYears']
+    print('Reading subject {}'.format(subject), end='\r')
+    filename = 'numpyArrays/{}.npy'.format(subject)
+    nparray = np.load(filename)
+    nparray = nparray.flatten()
+    nparray = np.insert(nparray, 0, age)
+    accumulatedArrays[i, :] = nparray
+    i = i + 1
+
 
 
 if __name__ == '__main__':

@@ -73,31 +73,3 @@ class DataSetBIN(object):
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
-
-    def GetRandomResamples(self, batchSize=100):
-        """
-        Returns an operation that randomly samples the contained constant images/labels.
-        """
-        randomIndices = tf.random_uniform(shape=(batchSize,), minval=0, maxval=batchSize, dtype=tf.int32)
-        randomImages = tf.gather(self.imageBatchOperation, randomIndices)
-        randomLabels = tf.gather(self.labelBatchOperation, randomIndices)
-        return randomImages, randomLabels
-
-    ##### THE FUNCTIONS BELOW ARE DEPRECATED #####
-    def NextBatch(self, sess):
-        """
-        Returns the next batch of examples using sess. Assumes that
-        tf.train.start_queue_runners has already been called. If
-        it hasn't been called, this code will not execute properly.
-        """
-        return sess.run([self.imageBatchOperation, self.labelBatchOperation])
-
-    def GetConstantDataVariables(self, inType=tf.float64, dataShape=(5000, 145, 145, 1), labelShape=(5000, 1)):
-        self.constantImageVar = tf.Variable(self.imageBatchOperation, trainable=False, collections=[], name='imageVariable')
-        self.constantLabelVar = tf.Variable(self.labelBatchOperation, trainable=False, collections=[], name='labelVariable')
-
-        return self.constantImageVar, self.constantLabelVar
-
-    def InitializeConstantData(self, sess):
-        sess.run(self.constantImageVar.initializer)
-        sess.run(self.constantLabelVar.initializer)

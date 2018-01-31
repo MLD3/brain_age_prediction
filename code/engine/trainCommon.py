@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import math
 import os
-from data_scripts.DataSetBIN import DataSetBIN
 from sklearn.model_selection import train_test_split, KFold
 from utils import saveModel
 from utils.config import get
