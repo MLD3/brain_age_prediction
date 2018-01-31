@@ -6,7 +6,7 @@ from data_scripts.DataSetBIN import DataSetBIN
 from model.build_sliceCNN import SliceCNN
 from utils.saveModel import *
 from utils.config import get
-from engine.trainCommonBIN import ModelTrainerBIN
+from engine.trainCommon import ModelTrainer
 from placeholders.shared_placeholders import *
 
 def GetSliceCNN(
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     GlobalOpts.testImageDims = [121, 145, 121, 1]
     GlobalOpts.trainBatchSize = 64
 
-    modelTrainer = ModelTrainerBIN()
+    modelTrainer = ModelTrainer()
 
     if GlobalOpts.data == 'X':
         GlobalOpts.ModelScope = 'xAxisModel'

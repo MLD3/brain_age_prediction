@@ -9,7 +9,7 @@ from utils.config import get
 from placeholders.shared_placeholders import *
 from datetime import datetime
 
-class ModelTrainerBIN(object):
+class ModelTrainer(object):
     def __init__(self):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 

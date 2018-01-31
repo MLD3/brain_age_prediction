@@ -7,7 +7,7 @@ from data_scripts.DataSetNPY import DataSetNPY
 from model.build_baselineStructuralCNN import baselineStructuralCNN
 from utils.saveModel import *
 from utils.config import get
-from engine.trainCommonBIN import ModelTrainerBIN
+from engine.trainCommon import ModelTrainer
 from placeholders.shared_placeholders import *
 
 def GetStructuralCNN(
@@ -105,5 +105,5 @@ if __name__ == '__main__':
     GlobalOpts.ModelScope = '3DModel'
     GlobalOpts.axis = None
 
-    modelTrainer = ModelTrainerBIN()
+    modelTrainer = ModelTrainer()
     RunTestOnDirs(modelTrainer)
