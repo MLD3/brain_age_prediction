@@ -19,7 +19,7 @@ def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None)
 
 def convolution2D(inputs, filters, kernel_size=(3,3), activation=tf.nn.elu, strides=(1,1), name=None):
     return tf.layers.conv2d(inputs=inputs, filters=filters, kernel_size=kernel_size,
-                            strides=strides, padding='valid', activation=activation,
+                            strides=strides, padding='SAME', activation=activation,
                             use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer(),
                             bias_initializer=tf.zeros_initializer(), name=name, reuse=tf.AUTO_REUSE)
 
