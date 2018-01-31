@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from utils.args import *
-from data_scripts.DataSetBIN import DataSetBIN
 from data_scripts.DataSetNPY import DataSetNPY
 from model.build_baselineStructuralCNN import baselineStructuralCNN
 from utils.saveModel import *
@@ -59,13 +58,13 @@ def RunTestOnDirs(modelTrainer,
                                       imageBaseString=GlobalOpts.imageBaseString,
                                       batchSize=GlobalOpts.trainBatchSize)
         with tf.variable_scope('ValidationInputs'):
-            valdDataSet  = DataSetNPY(binFileNames=GlobalOpts.valdFiles,
+            valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
                                     batchSize=1,
                                     maxItemsInQueue=75,
                                     shuffle=False)
         with tf.variable_scope('TestInputs'):
-            testDataSet  = DataSetNPY(binFileNames=GlobalOpts.testFiles,
+            testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
                                     batchSize=1,
                                     maxItemsInQueue=75,
