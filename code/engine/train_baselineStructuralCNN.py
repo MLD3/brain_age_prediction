@@ -90,6 +90,7 @@ def RunTestOnDirs(modelTrainer):
         with tf.variable_scope(name):
             trainUpdateOp = GetTrainingOperation(trainLossOp, rate)
             trainUpdateOps.append(trainUpdateOp)
+            names.append(name)
 
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
