@@ -23,6 +23,7 @@ class ModelTrainer(object):
         if not os.path.exists(checkpointDir):
             os.makedirs(checkpointDir)
         self.checkpointDir = checkpointDir
+        self.summaryDir = summaryDir
         self.numberOfSteps = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
@@ -47,8 +48,8 @@ class ModelTrainer(object):
         print('STEP {}: saved model to path {}'.format(step, path))
 
     def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name):
-        writer = tf.summary.FileWriter('{}{}/'.format(summaryDir, name))
-        savePath = '{}{}/'.format(checkpointDir, name)
+        writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
+        savePath = '{}{}/'.format(self.checkpointDir, name)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
@@ -65,7 +66,7 @@ class ModelTrainer(object):
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
         # Restore a model if it exists in the indicated directory
-        saver = saveModel.restore(sess, self.checkpointDir)
+        saver = saveModel.restore(sess, savePath)
 
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
