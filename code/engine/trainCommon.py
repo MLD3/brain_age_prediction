@@ -14,25 +14,17 @@ class ModelTrainer(object):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 
     def DefineNewParams(self,
-                        trainDataSet,
-                        validationDataSet,
-                        testDataSet,
                         summaryDir,
                         checkpointDir,
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
                         batchStepsBetweenSummary=500
                         ):
-        self.trainDataSet = trainDataSet
-        self.validationDataSet = validationDataSet
-        self.testDataSet = testDataSet
 
         if not os.path.exists(checkpointDir):
             os.makedirs(checkpointDir)
         self.checkpointDir = checkpointDir
         self.numberOfSteps = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
-
-        self.writer = tf.summary.FileWriter(summaryDir)
 
         self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
         self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
@@ -47,14 +39,19 @@ class ModelTrainer(object):
         accumulatedLoss = accumulatedLoss / numberIters
         return accumulatedLoss
 
-    def SaveModel(self, sess, step, saver):
+    def SaveModel(self, sess, step, saver, path):
         """
         Saves the model to path every stepSize steps
         """
-        saver.save(sess, self.checkpointDir)
-        print('STEP {}: saved model to path {}'.format(step, self.checkpointDir))
+        saver.save(sess, path)
+        print('STEP {}: saved model to path {}'.format(step, path))
 
-    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp):
+    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name):
+        writer = tf.summary.FileWriter('{}{}/'.format(summaryDir, name))
+        savePath = '{}{}/'.format(checkpointDir, name)
+        if not os.path.exists(savePath):
+            os.makedirs(savePath)
+
         # Start the threads to read in data
         print('Starting queue runners...')
         coord = tf.train.Coordinator()
@@ -86,14 +83,14 @@ class ModelTrainer(object):
                             batchIndex,
                             trainingLoss,
                             validationLoss))
-                self.writer.add_summary(
+                writer.add_summary(
                     sess.run(
                         self.trainSummary,
                         feed_dict={
                             self.trainLossPlaceholder: trainingLoss
                         }),
                     batchIndex)
-                self.writer.add_summary(
+                writer.add_summary(
                     sess.run(
                         self.validationSummary,
                         feed_dict={
@@ -104,11 +101,35 @@ class ModelTrainer(object):
                 if validationLoss < bestValidationLoss:
                     bestLossStepIndex = batchIndex
                     bestValidationLoss = validationLoss
-                    self.SaveModel(sess, batchIndex, saver)
+                    self.SaveModel(sess, batchIndex, saver, savePath)
 
         testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
-        self.writer.close()
+        writer.close()
         coord.request_stop()
         coord.join(threads)
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
         print("Model had test performance: {}".format(testLoss))
+        return bestValidationLoss, testLoss
+
+    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOps, valdLossOps, testLossOps, names):
+        graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
+        graphWriter.close()
+
+        bestValidationLoss = math.inf
+        bestTestLoss = math.inf
+        bestIndex = 0
+        for i in range(len(trainUpdateOps)):
+            print('============TRAINING MODEL {}============'.format(names[i]))
+            validationLoss, testLoss = self.TrainModel(sess, trainingPL,
+                                                             trainUpdateOps[i],
+                                                             trainLossOps[i],
+                                                             valdLossOps[i],
+                                                             testLossOps[i],
+                                                             names[i])
+            if validationLoss < bestValidationLoss:
+                bestValidationLoss = validationLoss
+                bestTestLoss = testLoss
+                bestIndex = i
+        print('Best model was: {}'.format(names[bestIndex]))
+        print('Validation loss: {}'.format(bestValidationLoss))
+        print('Test loss: {}'.format(bestTestLoss))

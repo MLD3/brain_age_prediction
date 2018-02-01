@@ -74,3 +74,25 @@ def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_
             numberOfUnitsInOutputLayer = 1
             outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
+
+def PartialConvolveCNN(imagesPL, trainingPL):
+    with tf.variable_scope('ConvolutionalNetwork'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+
+        ################## FIRST BLOCK ##################
+        Block1 = block2D(imagesPL, trainingPL, blockNumber=1, filters=64)
+
+        ################## SECOND BLOCK ##################
+        Block2 = block2D(Block1, trainingPL, blockNumber=2, filters=32)
+
+        ################## THIRD BLOCK ##################
+        Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16)
+
+        Block4 = block2D(Block3, trainingPL, blockNumber=4, filters=8)
+
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block4)
+            numberOfUnitsInOutputLayer = 1
+            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+    return outputLayer
