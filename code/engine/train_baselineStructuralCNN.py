@@ -83,8 +83,7 @@ def RunTestOnDirs(modelTrainer):
             trainDataSet,
             valdDataSet,
             testDataSet,
-            trainingPL,
-            learningRate=rate)
+            trainingPL)
 
     for rate in learningRates:
         name = 'learningRate_{}'.format(rate)
