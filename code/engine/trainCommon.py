@@ -112,7 +112,7 @@ class ModelTrainer(object):
         print("Model had test performance: {}".format(testLoss))
         return bestValidationLoss, testLoss
 
-    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOps, valdLossOps, testLossOps, names):
+    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names):
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
@@ -123,9 +123,9 @@ class ModelTrainer(object):
             print('============TRAINING MODEL {}============'.format(names[i]))
             validationLoss, testLoss = self.TrainModel(sess, trainingPL,
                                                              trainUpdateOps[i],
-                                                             trainLossOps[i],
-                                                             valdLossOps[i],
-                                                             testLossOps[i],
+                                                             trainLossOp,
+                                                             valdLossOp,
+                                                             testLossOp,
                                                              names[i])
             if validationLoss < bestValidationLoss:
                 bestValidationLoss = validationLoss

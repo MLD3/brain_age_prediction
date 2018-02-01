@@ -9,12 +9,16 @@ from utils.config import get
 from engine.trainCommon import ModelTrainer
 from placeholders.shared_placeholders import *
 
+def GetTrainingOperation(trainLossOp, learningRate):
+    with tf.variable_scope('optimizer'):
+        trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
+    return trainUpdateOp
+
 def GetStructuralCNN(
         trainDataSet,
         valdDataSet,
         testDataSet,
         trainingPL,
-        learningRate=0.00005,
         keepProb=0.6,
         optionalHiddenLayerUnits=0,
         downscaleRate=None):
@@ -25,8 +29,6 @@ def GetStructuralCNN(
                                 optionalHiddenLayerUnits=optionalHiddenLayerUnits,
                                 downscaleRate=downscaleRate)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
-    with tf.variable_scope('optimizer'):
-        trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
     valdOutputLayer = baselineStructuralCNN(valdInputBatch,
@@ -46,7 +48,7 @@ def GetStructuralCNN(
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=testOutputLayer)
 
-    return trainUpdateOp, trainLossOp, valdLossOp, testLossOp
+    return trainLossOp, valdLossOp, testLossOp
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -75,22 +77,20 @@ def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
     learningRates = [0.01, 0.001, 0.0001, 0.00001, 0.000001]
-    names = []; trainUpdateOps = []; trainLossOps = []; valdLossOps = []; testLossOps = []
+    names = []; trainUpdateOps = [];
+    trainLossOp, valdLossOp, testLossOp = \
+        GetStructuralCNN(
+            trainDataSet,
+            valdDataSet,
+            testDataSet,
+            trainingPL,
+            learningRate=rate)
 
     for rate in learningRates:
         name = 'learningRate_{}'.format(rate)
         with tf.variable_scope(name):
-            trainUpdateOp, trainLossOp, valdLossOp, testLossOp = \
-                GetStructuralCNN(
-                    trainDataSet,
-                    valdDataSet,
-                    testDataSet,
-                    trainingPL,
-                    learningRate=rate)
+            trainUpdateOp = GetTrainingOperation(trainLossOp, rate)
             trainUpdateOps.append(trainUpdateOp)
-            trainLossOps.append(trainLossOp)
-            valdLossOps.append(valdLossOp)
-            testLossOps.append(testLossOp)
 
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
@@ -98,7 +98,7 @@ def RunTestOnDirs(modelTrainer):
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
-        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOps, valdLossOps, testLossOps, names)
+        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
