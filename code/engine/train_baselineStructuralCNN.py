@@ -102,8 +102,8 @@ def RunTestOnDirs(modelTrainer):
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR')
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR')
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D/'
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
