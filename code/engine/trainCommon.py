@@ -53,11 +53,6 @@ class ModelTrainer(object):
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
-        # Start the threads to read in data
-        print('Starting queue runners...')
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
         # Initialize relevant variables
         print('Initializing variables')
         sess.run(tf.global_variables_initializer())
@@ -106,8 +101,7 @@ class ModelTrainer(object):
 
         testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
         writer.close()
-        coord.request_stop()
-        coord.join(threads)
+
         print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
         print("Model had test performance: {}".format(testLoss))
         return bestValidationLoss, testLoss
@@ -115,6 +109,11 @@ class ModelTrainer(object):
     def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names):
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
+
+        # Start the threads to read in data
+        print('Starting queue runners...')
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         bestValidationLoss = math.inf
         bestTestLoss = math.inf
@@ -134,3 +133,5 @@ class ModelTrainer(object):
         print('Best model was: {}'.format(names[bestIndex]))
         print('Validation loss: {}'.format(bestValidationLoss))
         print('Test loss: {}'.format(bestTestLoss))
+        coord.request_stop()
+        coord.join(threads)
