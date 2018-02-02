@@ -112,6 +112,7 @@ if __name__ == '__main__':
             'flag': '--axis',
             'help': 'The axis to treat as channels (convolutions are preformed over the other two axes). One of X, Y, Z.',
             'action': 'store',
+            'type': str,
             'dest': 'axis',
             'required': True
             }]

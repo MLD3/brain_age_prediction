@@ -93,6 +93,7 @@ if __name__ == '__main__':
             'flag': '--data',
             'help': 'The data set to use. One of X, Y, Z, XYZ, 3D.',
             'action': 'store',
+            'type': str,
             'dest': 'data',
             'required': True
             }]
