@@ -4,3 +4,5 @@
 checkpoints/*
 *_out
 dataVisualizations/*
+*plots/
+*summaries/
