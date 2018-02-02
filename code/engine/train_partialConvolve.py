@@ -123,7 +123,6 @@ if __name__ == '__main__':
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
     GlobalOpts.imageBatchDims = (-1, 121, 145, 121)
     GlobalOpts.trainBatchSize = 8
-    GlobalOpts.axis = args.axis
     if GlobalOpts.axis == 'X':
         GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'xAxisChannels/'
         GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'xAxisChannels/'
