@@ -115,7 +115,7 @@ if __name__ == '__main__':
             'dest': 'axis',
             'required': True
             }]
-    ParseArgs('Run 2D CNN over different axes of MRI volumes')
+    ParseArgs('Run 2D CNN over different axes of MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
