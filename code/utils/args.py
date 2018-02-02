@@ -24,7 +24,5 @@ def ParseArgs(description, additionalArgs=[]):
                               dest=argDict['dest'],
                               required=argDict['required'])
     args = parser.parse_args()
-    if data:
-        GlobalOpts.data = args.data
     GlobalOpts.gpuMemory = args.gpuMemory
     GlobalOpts.numSteps = args.numSteps
