@@ -23,9 +23,6 @@ def ParseArgs(description, additionalArgs=[]):
                               type=argDict['type'],
                               dest=argDict['dest'],
                               required=argDict['required'])
-
-    if data:
-        required.add_argument('--data', help='The data set to use. One of X, Y, Z, XYZ, 3D.', action='store', dest='data', required=True)
     args = parser.parse_args()
     if data:
         GlobalOpts.data = args.data
