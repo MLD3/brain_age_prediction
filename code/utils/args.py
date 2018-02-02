@@ -23,7 +23,7 @@ def ParseArgs(description, additionalArgs=[]):
                               type=argDict['type'],
                               dest=argDict['dest'],
                               required=argDict['required'])
-    args = parser.parse_args
+    args = parser.parse_args()
     for argDict in additionalArgs:
         setattr(GlobalOpts, argDict['dest'], getattr(args, argDict['dest']))
     GlobalOpts.gpuMemory = args.gpuMemory
