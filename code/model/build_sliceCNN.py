@@ -63,7 +63,7 @@ def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_
         Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=32)
 
         with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block4)
+            flattenedLayer = tf.layers.flatten(Block3)
             if optionalHiddenLayerUnits > 0:
                 optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
                 droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
@@ -88,7 +88,7 @@ def PartialConvolveCNN(imagesPL, trainingPL):
         Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16)
 
         with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block4)
+            flattenedLayer = tf.layers.flatten(Block3)
             numberOfUnitsInOutputLayer = 1
             outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
