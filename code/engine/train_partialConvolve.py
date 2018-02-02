@@ -96,10 +96,7 @@ def RunTestOnDirs(modelTrainer):
             trainUpdateOps.append(trainUpdateOp)
             names.append(name)
 
-    modelTrainer.DefineNewParams(trainDataSet,
-                                valdDataSet,
-                                testDataSet,
-                                GlobalOpts.summaryDir,
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
                                 GlobalOpts.numSteps)
     config  = tf.ConfigProto()
