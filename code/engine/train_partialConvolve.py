@@ -30,7 +30,7 @@ def GetPartialConvolveCNN(
         trainDataSet,
         valdDataSet,
         testDataSet,
-        trainingPL
+        trainingPL,
         batchAxis='X'):
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
     trainInputBatch = ReshapeByAxis(trainInputBatch, batchAxis)
