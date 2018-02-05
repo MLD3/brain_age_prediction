@@ -24,6 +24,7 @@ def GetStructuralCNN(
         downscaleRate=None):
     kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
+    trainInputBatch = trainInputBatch[:, 0:121, 0:121, 0:121, :]
     trainOutputLayer = baselineStructuralCNN(trainInputBatch,
                                 trainingPL,
                                 keepProbability=keepProb,
@@ -33,6 +34,7 @@ def GetStructuralCNN(
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
+    valdInputBatch = valdInputBatch[:, 0:121, 0:121, 0:121, :]
     valdOutputLayer = baselineStructuralCNN(valdInputBatch,
                                trainingPL,
                                keepProbability=keepProb,
@@ -43,6 +45,7 @@ def GetStructuralCNN(
                                               predictions=valdOutputLayer)
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
+    testInputBatch = testInputBatch[:, 0:121, 0:121, 0:121, :]
     testOutputLayer = baselineStructuralCNN(testInputBatch,
                                trainingPL,
                                keepProbability=keepProb,

@@ -14,6 +14,9 @@ def ReshapeByAxis(inputLayer, batchAxis='X'):
     Puts the indicated axis last, assuming that the input layer is
     shaped as [batch, X, Y, Z]
     """
+    #Truncate the input to 121 pixels in each dimension
+    #to ensure comparison among models
+    inputLayer = inputLayer[:, 0:121, 0:121, 0:121]
     if batchAxis == 'X':
         return tf.transpose(inputLayer, perm=[0, 2, 3, 1])
     elif batchAxis == 'Y':
