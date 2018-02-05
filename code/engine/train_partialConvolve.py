@@ -140,15 +140,15 @@ if __name__ == '__main__':
     modelTrainer = ModelTrainer()
 
     GlobalOpts.kernelSize = 3
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
     RunTestOnDirs(modelTrainer)
 
     tf.reset_default_graph()
     GlobalOpts.kernelSize = 5
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
     RunTestOnDirs(modelTrainer)
 
     tf.reset_default_graph()
     GlobalOpts.kernelSize = 7
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
     RunTestOnDirs(modelTrainer)

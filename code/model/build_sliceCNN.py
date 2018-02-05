@@ -85,7 +85,7 @@ def PartialConvolveCNN(imagesPL, trainingPL, kernelSizes=[(3,3),(3,3),(3,3)]):
         Block2 = block2D(Block1, trainingPL, blockNumber=2, filters=32, kernelSize=kernelSizes[1])
 
         ################## THIRD BLOCK ##################
-        Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16, , kernelSize=kernelSizes[2])
+        Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16, kernelSize=kernelSizes[2])
 
         with tf.variable_scope('FullyConnectedLayers'):
             flattenedLayer = tf.layers.flatten(Block3)
