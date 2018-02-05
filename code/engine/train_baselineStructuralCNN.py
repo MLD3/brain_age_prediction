@@ -80,7 +80,7 @@ def GetDataSetInputs():
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
-    learningRates = [0.01, 0.001, 0.0001, 0.00001, 0.000001]
+    learningRates = [0.001, 0.0001, 0.00001]
     names = []; trainUpdateOps = [];
     trainLossOp, valdLossOp, testLossOp = \
         GetStructuralCNN(
@@ -105,24 +105,28 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
 if __name__ == '__main__':
-    additionalArgs = [{
-            'flag': '--kernelSize',
-            'help': 'The size of filters in the network. The usual choice is 3, which creates 3x3x3 filters.',
-            'action': 'store',
-            'type': int,
-            'dest': 'kernelSize',
-            'required': True
-            }]
     ParseArgs('Run 3D CNN over structural MRI volumes')
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D/'
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
     GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
-    GlobalOpts.axis = None
-
     modelTrainer = ModelTrainer()
+
+    GlobalOpts.kernelSize = 3
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_3x3x3/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_3x3x3/'
+    RunTestOnDirs(modelTrainer)
+
+    tf.reset_default_graph()
+    GlobalOpts.kernelSize = 5
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_5x5x5/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_5x5x5/'
+    RunTestOnDirs(modelTrainer)
+
+    tf.reset_default_graph()
+    GlobalOpts.kernelSize = 7
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_7x7x7/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_7x7x7/'
     RunTestOnDirs(modelTrainer)

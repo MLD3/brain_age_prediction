@@ -108,6 +108,19 @@ def RunTestOnDirs(modelTrainer):
     with tf.Session(config=config) as sess:
         modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
+def defineDirs(dirSuffix=''):
+    if GlobalOpts.axis == 'X':
+        GlobalOpts.summaryDir = '{}xAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
+        GlobalOpts.checkpointDir = '{}xAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
+    elif GlobalOpts.axis == 'Y':
+        GlobalOpts.summaryDir = '{}yAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
+        GlobalOpts.checkpointDir = '{}yAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
+    elif GlobalOpts.axis == 'Z':
+        GlobalOpts.summaryDir = '{}zAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
+        GlobalOpts.checkpointDir = '{}zAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
+    else:
+        raise ValueError('Unrecognized argument for parameter --axis: {}'.format(GlobalOpts.axis))
+
 if __name__ == '__main__':
     additionalArgs = [{
             'flag': '--axis',
@@ -115,14 +128,6 @@ if __name__ == '__main__':
             'action': 'store',
             'type': str,
             'dest': 'axis',
-            'required': True
-            },
-            {
-            'flag': '--kernelSize',
-            'help': 'The size of filters in the network. The usual choice is 3, which creates 3x3 filters.',
-            'action': 'store',
-            'type': int,
-            'dest': 'kernelSize',
             'required': True
             }]
     ParseArgs('Run 2D CNN over different axes of MRI volumes', additionalArgs=additionalArgs)
@@ -132,17 +137,18 @@ if __name__ == '__main__':
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
     GlobalOpts.imageBatchDims = (-1, 121, 145, 121)
     GlobalOpts.trainBatchSize = 8
-    if GlobalOpts.axis == 'X':
-        GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'xAxisChannels/'
-        GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'xAxisChannels/'
-    elif GlobalOpts.axis == 'Y':
-        GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'yAxisChannels/'
-        GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'yAxisChannels/'
-    elif GlobalOpts.axis == 'Z':
-        GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'zAxisChannels/'
-        GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'zAxisChannels/'
-    else:
-        raise ValueError('Unrecognized argument for parameter --axis: {}'.format(GlobalOpts.axis))
-
     modelTrainer = ModelTrainer()
+
+    GlobalOpts.kernelSize = 3
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
+    RunTestOnDirs(modelTrainer)
+
+    tf.reset_default_graph()
+    GlobalOpts.kernelSize = 5
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
+    RunTestOnDirs(modelTrainer)
+
+    tf.reset_default_graph()
+    GlobalOpts.kernelSize = 7
+    defineDirs('{}x{}'.format(GlobalOpts.kernelSize))
     RunTestOnDirs(modelTrainer)
