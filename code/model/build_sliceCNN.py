@@ -26,12 +26,12 @@ def convolution2D(inputs, filters, kernel_size=(3,3), activation=tf.nn.elu, stri
 def pool2D(inputs, kernel_size=[1,2,2,1], strides=[1,2,2,1], padding='SAME', name=None):
     return tf.nn.max_pool(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
 
-def block2D(inputs, trainingPL, blockNumber, filters):
+def block2D(inputs, trainingPL, blockNumber, filters, kernelSize=(3,3)):
     with tf.variable_scope('2DConvBlock{}'.format(blockNumber)):
         #### 3x3x3 Convolution ####
-        BlockConvolution1 = convolution2D(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber))
+        BlockConvolution1 = convolution2D(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber), kernel_size=kernelSize)
         #### 3x3x3 Convolution ####
-        BlockConvolution2 = convolution2D(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
+        BlockConvolution2 = convolution2D(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber), kernel_size=kernelSize)
         #### Batch Normalization ####
         BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
@@ -73,19 +73,19 @@ def SliceCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_
             outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
     return outputLayer
 
-def PartialConvolveCNN(imagesPL, trainingPL):
+def PartialConvolveCNN(imagesPL, trainingPL, kernelSizes=[(3,3),(3,3),(3,3)]):
     with tf.variable_scope('ConvolutionalNetwork'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
 
         ################## FIRST BLOCK ##################
-        Block1 = block2D(imagesPL, trainingPL, blockNumber=1, filters=64)
+        Block1 = block2D(imagesPL, trainingPL, blockNumber=1, filters=64, kernelSize=kernelSizes[0])
 
         ################## SECOND BLOCK ##################
-        Block2 = block2D(Block1, trainingPL, blockNumber=2, filters=32)
+        Block2 = block2D(Block1, trainingPL, blockNumber=2, filters=32, kernelSize=kernelSizes[1])
 
         ################## THIRD BLOCK ##################
-        Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16)
+        Block3 = block2D(Block2, trainingPL, blockNumber=3, filters=16, , kernelSize=kernelSizes[2])
 
         with tf.variable_scope('FullyConnectedLayers'):
             flattenedLayer = tf.layers.flatten(Block3)

@@ -32,23 +32,27 @@ def GetPartialConvolveCNN(
         testDataSet,
         trainingPL,
         batchAxis='X'):
+    kernelSizes = [(GlobalOpts.kernelSize, GlobalOpts.kernelSize)] * 3
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
     trainInputBatch = ReshapeByAxis(trainInputBatch, batchAxis)
     trainOutputLayer = PartialConvolveCNN(trainInputBatch,
-                                trainingPL)
+                                trainingPL,
+                                kernelSizes=kernelSizes)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
     valdInputBatch = ReshapeByAxis(valdInputBatch, batchAxis)
     valdOutputLayer = PartialConvolveCNN(valdInputBatch,
-                               trainingPL)
+                               trainingPL,
+                               kernelSizes=kernelSizes)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
                                               predictions=valdOutputLayer)
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
     testInputBatch = ReshapeByAxis(testInputBatch, batchAxis)
     testOutputLayer = PartialConvolveCNN(testInputBatch,
-                               trainingPL)
+                               trainingPL,
+                               kernelSizes=kernelSizes)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=testOutputLayer)
 
@@ -111,6 +115,14 @@ if __name__ == '__main__':
             'action': 'store',
             'type': str,
             'dest': 'axis',
+            'required': True
+            },
+            {
+            'flag': '--kernelSize',
+            'help': 'The size of filters in the network. The usual choice is 3, which creates 3x3 filters.',
+            'action': 'store',
+            'type': int,
+            'dest': 'kernelSize',
             'required': True
             }]
     ParseArgs('Run 2D CNN over different axes of MRI volumes', additionalArgs=additionalArgs)

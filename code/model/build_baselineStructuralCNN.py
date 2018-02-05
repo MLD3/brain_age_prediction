@@ -26,12 +26,18 @@ def standardDense(inputs, units, activation=tf.nn.elu, use_bias=True, name=None)
                            use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer(),
                            bias_initializer=tf.zeros_initializer(), name=name, reuse=tf.AUTO_REUSE)
 
-def standardBlock(inputs, trainingPL, blockNumber, filters):
+def standardBlock(inputs, trainingPL, blockNumber, filters, kernelSize=(3,3,3)):
     with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
         #### 3x3x3 Convolution ####
-        BlockConvolution1 = standardConvolution(inputs, filters=filters, name='Block{}Convolution1'.format(blockNumber))
+        BlockConvolution1 = standardConvolution(inputs,
+                                                filters=filters,
+                                                name='Block{}Convolution1'.format(blockNumber),
+                                                kernelSize=kernelSize)
         #### 3x3x3 Convolution ####
-        BlockConvolution2 = standardConvolution(BlockConvolution1, filters=filters, name='Block{}Convolution2'.format(blockNumber))
+        BlockConvolution2 = standardConvolution(BlockConvolution1,
+                                                filters=filters,
+                                                name='Block{}Convolution2'.format(blockNumber),
+                                                kernelSize=kernelSize)
         #### Batch Normalization ####
         BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
@@ -45,7 +51,14 @@ def attentionMap(inputs):
         attentionWeight = tf.get_variable(tf.ones(shape=(weightShape), name='attentionWeight'))
         return tf.multiply(inputs, attentionWeight)
 
-def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'), defaultActivation=tf.nn.elu, optionalHiddenLayerUnits=0, useAttentionMap=False, downscaleRate=None):
+def baselineStructuralCNN(imagesPL,
+                          trainingPL,
+                          keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'),
+                          defaultActivation=tf.nn.elu,
+                          optionalHiddenLayerUnits=0,
+                          useAttentionMap=False,
+                          downscaleRate=None,
+                          kernelSizes=[(3,3,3), (3,3,3), (3,3,3)]):
     with tf.variable_scope('ConvolutionalNetwork'):
         if downscaleRate:
             if isinstance(downscaleRate, int):
@@ -64,13 +77,13 @@ def baselineStructuralCNN(imagesPL, trainingPL, keepProbability=get('TRAIN.CNN_B
             imagesPL = attentionMap(imagesPL)
 
         ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
 
         ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
 
         ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
 
         ################## FOURTH BLOCK ##################
         # Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)

@@ -22,12 +22,14 @@ def GetStructuralCNN(
         keepProb=0.6,
         optionalHiddenLayerUnits=0,
         downscaleRate=None):
+    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
     trainOutputLayer = baselineStructuralCNN(trainInputBatch,
                                 trainingPL,
                                 keepProbability=keepProb,
                                 optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                downscaleRate=downscaleRate)
+                                downscaleRate=downscaleRate,
+                                kernelSizes=kernelSizes)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
@@ -35,7 +37,8 @@ def GetStructuralCNN(
                                trainingPL,
                                keepProbability=keepProb,
                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate)
+                               downscaleRate=downscaleRate,
+                               kernelSizes=kernelSizes)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
                                               predictions=valdOutputLayer)
 
@@ -44,7 +47,8 @@ def GetStructuralCNN(
                                trainingPL,
                                keepProbability=keepProb,
                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate)
+                               downscaleRate=downscaleRate,
+                               kernelSizes=kernelSizes)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=testOutputLayer)
 
@@ -101,6 +105,14 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
 if __name__ == '__main__':
+    additionalArgs = [{
+            'flag': '--kernelSize',
+            'help': 'The size of filters in the network. The usual choice is 3, which creates 3x3x3 filters.',
+            'action': 'store',
+            'type': int,
+            'dest': 'kernelSize',
+            'required': True
+            }]
     ParseArgs('Run 3D CNN over structural MRI volumes')
     GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D/'
     GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D/'
