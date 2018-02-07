@@ -34,7 +34,7 @@ def getMeanSquareError(inputBatch, labelBatch, trainingPL):
     outputLayer = PartialConvolveCNN(inputBatch,
                                 trainingPL,
                                 kernelSizes=kernelSizes)
-    return tf.losses.mean_square_error(labels=labelBatch, predictions=trainOutputLayer)
+    return tf.losses.mean_squared_error(labels=labelBatch, predictions=trainOutputLayer)
 
 def GetPartialConvolveCNN(
         trainDataSet,
