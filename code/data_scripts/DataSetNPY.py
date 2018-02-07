@@ -13,6 +13,10 @@ class DataSetNPY(object):
             maxItemsInQueue=100,
             shuffle=True
         ):
+        self.filenames = filenames
+        self.batchSize = batchSize
+        self.imageBatchDims = imageBatchDims
+        self.labelBatchDims = labelBatchDims
         self.imageBaseString = imageBaseString
         self.labelBaseString = labelBaseString
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
@@ -26,6 +30,21 @@ class DataSetNPY(object):
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
+
+    def GetRandomBatchOperations(self):
+        randomIndexOperation = tf.random_uniform(shape=(self.batchSize,),
+                                                dtype=tf.int32,
+                                                minval=0,
+                                                maxval=len(self.filenames))
+        filenameTensor = tf.constant(self.filenames, dtype=tf.string)
+        randomFilenames = tf.gather(filenameTensor, randomIndexOperation)
+        randomImageBatch = tf.reshape(
+            tf.py_func(self._loadImages, [randomFilenames], tf.float32),
+            self.imageBatchDims)
+        randomLabelBatch = tf.reshape(
+            tf.py_func(self._loadLabels, [randomFilenames], tf.float32),
+            self.labelBatchDims)
+        return randomImageBatch, randomLabelBatch
 
     def _loadImages(self, x):
         images = []

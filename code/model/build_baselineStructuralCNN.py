@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from utils.config import get
+from utils.patches import ExtractImagePatches3D
 from placeholders.shared_placeholders import *
 
 def standardBatchNorm(inputs, trainingPL, momentum=0.9, name=None):
@@ -98,6 +99,28 @@ def baselineStructuralCNN(imagesPL,
                 droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
                 flattenedLayer = droppedOutHiddenLayer
 
+            numberOfUnitsInOutputLayer = 1
+            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+        return outputLayer
+
+def partialCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)], strideSize=10):
+    with tf.variable_scope('PartialNetwork'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+        with tf.variable_scope('PatchExtraction'):
+            imagePatches = ExtractImagePatches3D(images, strideSize=strideSize)
+
+        ################## FIRST BLOCK ##################
+        Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
+
+        ################## SECOND BLOCK ##################
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
+
+        ################## THIRD BLOCK ##################
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
+
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block3)
             numberOfUnitsInOutputLayer = 1
             outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
         return outputLayer

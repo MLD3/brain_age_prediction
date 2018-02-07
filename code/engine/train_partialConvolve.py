@@ -3,62 +3,51 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_sliceCNN import PartialConvolveCNN
+from model.build_baselineStructuralCNN import partialCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
 from placeholders.shared_placeholders import *
-
-def ReshapeByAxis(inputLayer, batchAxis='X'):
-    """
-    Puts the indicated axis last, assuming that the input layer is
-    shaped as [batch, X, Y, Z]
-    """
-    #Truncate the input to 121 pixels in each dimension
-    #to ensure comparison among models
-    inputLayer = inputLayer[:, 0:121, 0:121, 0:121]
-    if batchAxis == 'X':
-        return tf.transpose(inputLayer, perm=[0, 2, 3, 1])
-    elif batchAxis == 'Y':
-        return tf.transpose(inputLayer, perm=[0, 1, 3, 2])
-    elif batchAxis == 'Z':
-        return inputLayer
 
 def GetTrainingOperation(trainLossOp, learningRate):
     with tf.variable_scope('optimizer'):
         trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
     return trainUpdateOp
 
-def GetPartialConvolveCNN(
+def GetStructuralCNN(
         trainDataSet,
         valdDataSet,
         testDataSet,
         trainingPL,
-        batchAxis='X'):
-    kernelSizes = [(GlobalOpts.kernelSize, GlobalOpts.kernelSize)] * 3
+        keepProb=0.6,
+        optionalHiddenLayerUnits=0,
+        downscaleRate=None):
+    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    trainInputBatch = ReshapeByAxis(trainInputBatch, batchAxis)
-    trainOutputLayer = PartialConvolveCNN(trainInputBatch,
+    trainInputBatch = trainInputBatch[:, 0:121, 0:121, 0:121, :]
+    trainOutputLayer = partialCNN(trainInputBatch,
                                 trainingPL,
-                                kernelSizes=kernelSizes)
+                                kernelSizes=kernelSizes,
+                                strideSize=GlobalOpts.strideSize)
     trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    valdInputBatch = ReshapeByAxis(valdInputBatch, batchAxis)
-    valdOutputLayer = PartialConvolveCNN(valdInputBatch,
+    valdInputBatch = valdInputBatch[:, 0:121, 0:121, 0:121, :]
+    valdOutputLayer = partialCNN(valdInputBatch,
                                trainingPL,
-                               kernelSizes=kernelSizes)
+                               kernelSizes=kernelSizes,
+                               strideSize=GlobalOpts.strideSize)
     valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
                                               predictions=valdOutputLayer)
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    testInputBatch = ReshapeByAxis(testInputBatch, batchAxis)
-    testOutputLayer = PartialConvolveCNN(testInputBatch,
+    testInputBatch = testInputBatch[:, 0:121, 0:121, 0:121, :]
+    testOutputLayer = partialCNN(testInputBatch,
                                trainingPL,
-                               kernelSizes=kernelSizes)
+                               kernelSizes=kernelSizes,
+                               strideSize=GlobalOpts.strideSize)
     testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
                                               predictions=testOutputLayer)
-
     return trainLossOp, valdLossOp, testLossOp
 
 def GetDataSetInputs():
@@ -87,15 +76,15 @@ def GetDataSetInputs():
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
-    learningRates = [0.01, 0.001, 0.0001, 0.00001, 0.000001]
+    learningRates = [0.001, 0.0001, 0.00001]
     names = []; trainUpdateOps = [];
     trainLossOp, valdLossOp, testLossOp = \
-        GetPartialConvolveCNN(
+        GetStructuralCNN(
             trainDataSet,
             valdDataSet,
             testDataSet,
-            trainingPL,
-            batchAxis=GlobalOpts.axis)
+            trainingPL)
+
     for rate in learningRates:
         name = 'learningRate_{}'.format(rate)
         with tf.variable_scope(name):
@@ -111,47 +100,48 @@ def RunTestOnDirs(modelTrainer):
     with tf.Session(config=config) as sess:
         modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
-def defineDirs(dirSuffix=''):
-    if GlobalOpts.axis == 'X':
-        GlobalOpts.summaryDir = '{}xAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
-        GlobalOpts.checkpointDir = '{}xAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
-    elif GlobalOpts.axis == 'Y':
-        GlobalOpts.summaryDir = '{}yAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
-        GlobalOpts.checkpointDir = '{}yAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
-    elif GlobalOpts.axis == 'Z':
-        GlobalOpts.summaryDir = '{}zAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), dirSuffix)
-        GlobalOpts.checkpointDir = '{}zAxisChannels{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), dirSuffix)
-    else:
-        raise ValueError('Unrecognized argument for parameter --axis: {}'.format(GlobalOpts.axis))
-
 if __name__ == '__main__':
-    additionalArgs = [{
-            'flag': '--axis',
-            'help': 'The axis to treat as channels (convolutions are preformed over the other two axes). One of X, Y, Z.',
-            'action': 'store',
-            'type': str,
-            'dest': 'axis',
-            'required': True
-            }]
-    ParseArgs('Run 2D CNN over different axes of MRI volumes', additionalArgs=additionalArgs)
+    ParseArgs('Run 3D CNN over structural MRI volumes')
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
-    GlobalOpts.imageBatchDims = (-1, 121, 145, 121)
-    GlobalOpts.trainBatchSize = 8
+    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.kernelSize = 3
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.kernelSize = 3
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
+    GlobalOpts.strideSize = 10
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride10/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride10/'
     RunTestOnDirs(modelTrainer)
 
+    GlobalOpts.strideSize = 15
     tf.reset_default_graph()
-    GlobalOpts.kernelSize = 5
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride15/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride15/'
     RunTestOnDirs(modelTrainer)
 
+    GlobalOpts.strideSize = 20
     tf.reset_default_graph()
-    GlobalOpts.kernelSize = 7
-    defineDirs('{}x{}'.format(GlobalOpts.kernelSize, GlobalOpts.kernelSize))
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride20/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride20/'
+    RunTestOnDirs(modelTrainer)
+
+    GlobalOpts.strideSize = 30
+    tf.reset_default_graph()
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride30/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride30/'
+    RunTestOnDirs(modelTrainer)
+
+    GlobalOpts.strideSize = 40
+    tf.reset_default_graph()
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride40/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride40/'
+    RunTestOnDirs(modelTrainer)
+
+    GlobalOpts.strideSize = 60
+    tf.reset_default_graph()
+    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride60/'
+    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride60/'
     RunTestOnDirs(modelTrainer)

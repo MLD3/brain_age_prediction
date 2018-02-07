@@ -32,6 +32,25 @@ class ModelTrainer(object):
         self.trainSummary = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
         self.validationSummary = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
 
+    def GetPerformanceCI(self, sess, lossOp):
+        N = 1000
+        confidence = 0.95
+        lowerIndex = int((1.0 - confidence) * 0.5 * N)
+        upperIndex = int((1.0 - (1.0 - confidence) * 0.5 ) * N)
+        bootstrapPerformances = np.zeros(N)
+
+        #Assumes that the loss operation returns the loss on a random example
+        #in the test set
+        for i in range(N):
+            print('Bootstrap performance iteration {} out of {}'.format(i, N), end='\r')
+            bootstrapPerformances[i] = GetPerformanceThroughSet(sess, lossOp)
+
+        bootstrapPerformances = np.sort(bootstrapPerformances)
+
+        pointPerformance = np.mean(bootstrapPerformances)
+
+        return pointPerformance, bootstrapPerformances[lowerIndex], bootstrapPerformances[upperIndex]
+
     def GetPerformanceThroughSet(self, sess, lossOp, numberIters=75):
         accumulatedLoss = 0
         for i in range(numberIters):
@@ -106,7 +125,7 @@ class ModelTrainer(object):
         print("Model had test performance: {}".format(testLoss))
         return bestValidationLoss, testLoss
 
-    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names):
+    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, bootstrapLossOp=None):
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
@@ -133,5 +152,11 @@ class ModelTrainer(object):
         print('Best model was: {}'.format(names[bestIndex]))
         print('Validation loss: {}'.format(bestValidationLoss))
         print('Test loss: {}'.format(bestTestLoss))
+        if bootstrapLossOp:
+            savePath = '{}{}/'.format(self.checkpointDir, names[bestIndex])
+            saver = saveModel.restore(sess, savePath)
+            print('Getting confidence intervals of best model...')
+            point, lower, upper = GetPerformanceCI(sess, bootstrapLossOp)
+            print('Bootstrap test performance of model was: {}, ({}, {})'.format(point, lower, upper))
         coord.request_stop()
         coord.join(threads)
