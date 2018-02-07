@@ -152,7 +152,7 @@ class ModelTrainer(object):
         print('Best model was: {}'.format(names[bestIndex]))
         print('Validation loss: {}'.format(bestValidationLoss))
         print('Test loss: {}'.format(bestTestLoss))
-        if bootstrapLossOp:
+        if bootstrapLossOp is not None:
             savePath = '{}{}/'.format(self.checkpointDir, names[bestIndex])
             saver = saveModel.restore(sess, savePath)
             print('Getting confidence intervals of best model...')
