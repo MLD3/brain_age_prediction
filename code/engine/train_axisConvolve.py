@@ -31,10 +31,10 @@ def GetTrainingOperation(trainLossOp, learningRate):
 
 def getMeanSquareError(inputBatch, labelBatch, trainingPL):
     kernelSizes = [(GlobalOpts.kernelSize, GlobalOpts.kernelSize)] * 3
-    outputLayer = PartialConvolveCNN(trainInputBatch,
+    outputLayer = PartialConvolveCNN(inputBatch,
                                 trainingPL,
                                 kernelSizes=kernelSizes)
-    return tf.losses.mean_square_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    return tf.losses.mean_square_error(labels=labelBatch, predictions=trainOutputLayer)
 
 def GetPartialConvolveCNN(
         trainDataSet,
