@@ -101,7 +101,15 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
 
 if __name__ == '__main__':
-    ParseArgs('Run 3D CNN over structural MRI volumes')
+    additionalArgs = [{
+            'flag': '--strideSize',
+            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+            'action': 'store',
+            'type': int,
+            'dest': 'strideSize',
+            'required': True
+            }]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -111,37 +119,10 @@ if __name__ == '__main__':
     GlobalOpts.kernelSize = 3
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.strideSize = 10
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride10/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride10/'
-    RunTestOnDirs(modelTrainer)
-
-    GlobalOpts.strideSize = 15
-    tf.reset_default_graph()
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride15/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride15/'
-    RunTestOnDirs(modelTrainer)
-
-    GlobalOpts.strideSize = 20
-    tf.reset_default_graph()
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride20/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride20/'
-    RunTestOnDirs(modelTrainer)
-
-    GlobalOpts.strideSize = 30
-    tf.reset_default_graph()
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride30/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride30/'
-    RunTestOnDirs(modelTrainer)
-
-    GlobalOpts.strideSize = 40
-    tf.reset_default_graph()
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride40/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride40/'
-    RunTestOnDirs(modelTrainer)
-
-    GlobalOpts.strideSize = 60
-    tf.reset_default_graph()
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'partial3D_stride60/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'partial3D_stride60/'
+    GlobalOpts.summaryDir = '{}partial3D_stride{}/'.format(
+                            get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                            GlobalOpts.strideSize)
+    GlobalOpts.checkpointDir = '{}partial3D_stride{}/'.format(
+                            get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                            GlobalOpts.strideSize)
     RunTestOnDirs(modelTrainer)
