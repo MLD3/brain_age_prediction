@@ -43,7 +43,7 @@ class ModelTrainer(object):
         #in the test set
         for i in range(N):
             print('Bootstrap performance iteration {} out of {}'.format(i, N), end='\r')
-            bootstrapPerformances[i] = GetPerformanceThroughSet(sess, lossOp)
+            bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, lossOp)
 
         bootstrapPerformances = np.sort(bootstrapPerformances)
 
