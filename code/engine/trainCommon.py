@@ -156,7 +156,7 @@ class ModelTrainer(object):
             savePath = '{}{}/'.format(self.checkpointDir, names[bestIndex])
             saver = saveModel.restore(sess, savePath)
             print('Getting confidence intervals of best model...')
-            point, lower, upper = GetPerformanceCI(sess, bootstrapLossOp)
+            point, lower, upper = self.GetPerformanceCI(sess, bootstrapLossOp)
             print('Bootstrap test performance of model was: {}, ({}, {})'.format(point, lower, upper))
         coord.request_stop()
         coord.join(threads)
