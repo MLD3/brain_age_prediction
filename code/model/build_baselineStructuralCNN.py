@@ -108,7 +108,7 @@ def depthPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)],
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
         with tf.variable_scope('PatchExtraction'):
-            imagePatches = ExtractImagePatches3D(images, strideSize=strideSize)
+            imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
 
         ################## FIRST BLOCK ##################
         Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
