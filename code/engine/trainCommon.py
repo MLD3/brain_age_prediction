@@ -42,7 +42,6 @@ class ModelTrainer(object):
         #Assumes that the loss operation returns the loss on a random example
         #in the test set
         for i in range(N):
-            print('Bootstrap performance iteration {} out of {}'.format(i, N), end='\r')
             bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, lossOp)
 
         bootstrapPerformances = np.sort(bootstrapPerformances)

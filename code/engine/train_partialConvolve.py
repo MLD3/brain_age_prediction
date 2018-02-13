@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import partialCNN
+from model.build_baselineStructuralCNN import depthPatchCNN, batchPatchCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -14,41 +14,33 @@ def GetTrainingOperation(trainLossOp, learningRate):
         trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
     return trainUpdateOp
 
-def GetStructuralCNN(
+def getMeanSquareError(inputBatch, labelBatch, trainingPL, cnn):
+    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
+    outputLayer = cnn(inputBatch,
+                      trainingPL,
+                      kernelSizes=kernelSizes,
+                      strideSize=GlobalOpts.strideSize)
+    return tf.losses.mean_squared_error(labels=labelBatch, predictions=outputLayer)
+
+def GetModelOps(
         trainDataSet,
         valdDataSet,
         testDataSet,
         trainingPL,
-        keepProb=0.6,
-        optionalHiddenLayerUnits=0,
-        downscaleRate=None):
-    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
+        cnn):
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    trainInputBatch = trainInputBatch[:, 0:121, 0:121, 0:121, :]
-    trainOutputLayer = partialCNN(trainInputBatch,
-                                trainingPL,
-                                kernelSizes=kernelSizes,
-                                strideSize=GlobalOpts.strideSize)
-    trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    trainLossOp = getMeanSquareError(trainInputBatch, trainLabelBatch, trainingPL, cnn)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    valdInputBatch = valdInputBatch[:, 0:121, 0:121, 0:121, :]
-    valdOutputLayer = partialCNN(valdInputBatch,
-                               trainingPL,
-                               kernelSizes=kernelSizes,
-                               strideSize=GlobalOpts.strideSize)
-    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
-                                              predictions=valdOutputLayer)
+    valdLossOp = getMeanSquareError(valdInputBatch, valdLabelBatch, trainingPL, cnn)
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    testInputBatch = testInputBatch[:, 0:121, 0:121, 0:121, :]
-    testOutputLayer = partialCNN(testInputBatch,
-                               trainingPL,
-                               kernelSizes=kernelSizes,
-                               strideSize=GlobalOpts.strideSize)
-    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
-                                              predictions=testOutputLayer)
-    return trainLossOp, valdLossOp, testLossOp
+    testLossOp = getMeanSquareError(testInputBatch, testLabelBatch, trainingPL, cnn)
+
+    bootstrapInputBatch, bootstrapLabelBatch = testDataSet.GetRandomBatchOperations()
+    bootstrapLossOp = getMeanSquareError(bootstrapInputBatch, bootstrapLabelBatch, trainingPL, cnn)
+
+    return trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -78,12 +70,13 @@ def RunTestOnDirs(modelTrainer):
     trainingPL = TrainingPlaceholder()
     learningRates = [0.001, 0.0001, 0.00001]
     names = []; trainUpdateOps = [];
-    trainLossOp, valdLossOp, testLossOp = \
-        GetStructuralCNN(
+    trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
+        GetModelOps(
             trainDataSet,
             valdDataSet,
             testDataSet,
-            trainingPL)
+            trainingPL,
+            GlobalOpts.cnn)
 
     for rate in learningRates:
         name = 'learningRate_{}'.format(rate)
@@ -98,7 +91,7 @@ def RunTestOnDirs(modelTrainer):
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
-        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
+        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, bootstrapLossOp)
 
 if __name__ == '__main__':
     additionalArgs = [{
@@ -108,21 +101,35 @@ if __name__ == '__main__':
             'type': int,
             'dest': 'strideSize',
             'required': True
+            },
+            {
+            'flag': '--concatType',
+            'help': 'Concatenation type for patches. One of depth, batch.',
+            'action': 'store',
+            'type': str,
+            'dest': 'concatType',
+            'required': True
             }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
     GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.kernelSize = 3
+    if GlobalOpts.concatType == 'depth':
+        GlobalOpts.cnn = depthPatchCNN
+    elif GlobalOpts.concatType = 'batch':
+        GlobalOpts.cnn = batchPatchCNN
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}partial3D_stride{}/'.format(
+    GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                            GlobalOpts.concatType,
                             GlobalOpts.strideSize)
-    GlobalOpts.checkpointDir = '{}partial3D_stride{}/'.format(
+    GlobalOpts.checkpointDir = '{}{}3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                            GlobalOpts.concatType,
                             GlobalOpts.strideSize)
     RunTestOnDirs(modelTrainer)

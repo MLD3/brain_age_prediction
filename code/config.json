@@ -27,6 +27,7 @@
         },
         "STRUCTURAL": {
             "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
+            "DOWNSAMPLE_PATH": "/data/psturm/structural/downsampledArrays/",
             "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
             "HEIGHT": 121,
             "WIDTH": 145,
