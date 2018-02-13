@@ -63,28 +63,29 @@ class ModelTrainer(object):
         Saves the model to path every stepSize steps
         """
         saver.save(sess, path)
-        print('STEP {}: saved model to path {}'.format(step, path))
+        print('STEP {}: saved model to path {}'.format(step, path), end='\r')
 
-    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name):
+    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, restore=False):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
         savePath = '{}{}/'.format(self.checkpointDir, name)
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
         # Initialize relevant variables
-        print('Initializing variables')
         sess.run(tf.global_variables_initializer())
 
         # Collect summary and graph update operations
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
-        # Restore a model if it exists in the indicated directory
-        saver = saveModel.restore(sess, savePath)
+        if restore:
+            # Restore a model if it exists in the indicated directory
+            saver = saveModel.restore(sess, savePath)
+        else:
+            print('Reading saved models is disabled. Training from scratch...')
 
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
 
-        print('Beginning Training...')
         for batchIndex in range(self.numberOfSteps):
             trainingLoss, _, _ = sess.run([trainLossOp, trainUpdateOp, extraUpdateOps], feed_dict={
                 trainingPL: True
@@ -96,7 +97,8 @@ class ModelTrainer(object):
                 print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
                             batchIndex,
                             trainingLoss,
-                            validationLoss))
+                            validationLoss),
+                            end='\r')
                 writer.add_summary(
                     sess.run(
                         self.trainSummary,
@@ -129,7 +131,6 @@ class ModelTrainer(object):
         graphWriter.close()
 
         # Start the threads to read in data
-        print('Starting queue runners...')
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
@@ -157,5 +158,29 @@ class ModelTrainer(object):
             print('Getting confidence intervals of best model...')
             point, lower, upper = self.GetPerformanceCI(sess, bootstrapLossOp)
             print('Bootstrap test performance of model was: {}, ({}, {})'.format(point, lower, upper))
+        coord.request_stop()
+        coord.join(threads)
+
+    def RepeatTrials(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, numIters=10):
+        graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
+        graphWriter.close()
+
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        valdLosses = []
+        testLosses = []
+        for i in range(numIters):
+            print('=========Training model, iteration {}========='.format(i))
+            validationLoss, testLoss = self.TrainModel(sess,
+                                                         trainingPL,
+                                                         trainUpdateOp,
+                                                         trainLossOp,
+                                                         valdLossOp,
+                                                         testLossOp,
+                                                         name)
+            valdLosses.append(validationLoss)
+            testLosses.append(testLoss)
+        print('Average Validation Performance: {} +- {}'.format(np.mean(valdLosses), np.std(valdLosses)))
+        print('Average Test Performance: {} +- {}'.format(np.mean(testLosses), np.std(testLosses)))
         coord.request_stop()
         coord.join(threads)

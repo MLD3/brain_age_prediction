@@ -68,8 +68,7 @@ def GetDataSetInputs():
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
-    learningRates = [0.0001]
-    names = []; trainUpdateOps = [];
+    learningRate = 0.0001
     trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
         GetModelOps(
             trainDataSet,
@@ -78,20 +77,22 @@ def RunTestOnDirs(modelTrainer):
             trainingPL,
             GlobalOpts.cnn)
 
-    for rate in learningRates:
-        name = 'learningRate_{}'.format(rate)
-        with tf.variable_scope(name):
-            trainUpdateOp = GetTrainingOperation(trainLossOp, rate)
-            trainUpdateOps.append(trainUpdateOp)
-            names.append(name)
-
+    trainUpdateOp = GetTrainingOperation(trainLossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
                                 GlobalOpts.numSteps)
+
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
-        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, None)
+        modelTrainer.RepeatTrials(sess,
+                                  trainingPL,
+                                  trainUpdateOp,
+                                  trainLossOp,
+                                  valdLossOp,
+                                  testLossOp,
+                                  name='{}{}'.format(GlobalOpts.concatType,
+                                                     GlobalOpts.strideSize))
 
 if __name__ == '__main__':
     additionalArgs = [{
