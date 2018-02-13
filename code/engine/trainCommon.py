@@ -67,9 +67,6 @@ class ModelTrainer(object):
 
     def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, restore=False):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
-        savePath = '{}{}/'.format(self.checkpointDir, name)
-        if not os.path.exists(savePath):
-            os.makedirs(savePath)
 
         # Initialize relevant variables
         sess.run(tf.global_variables_initializer())
@@ -78,6 +75,9 @@ class ModelTrainer(object):
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
         if restore:
+            savePath = '{}{}/'.format(self.checkpointDir, name)
+            if not os.path.exists(savePath):
+                os.makedirs(savePath)
             # Restore a model if it exists in the indicated directory
             saver = saveModel.restore(sess, savePath)
         else:
@@ -117,7 +117,8 @@ class ModelTrainer(object):
                 if validationLoss < bestValidationLoss:
                     bestLossStepIndex = batchIndex
                     bestValidationLoss = validationLoss
-                    self.SaveModel(sess, batchIndex, saver, savePath)
+                    if restore:
+                        self.SaveModel(sess, batchIndex, saver, savePath)
 
         testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
         writer.close()
@@ -144,7 +145,8 @@ class ModelTrainer(object):
                                                              trainLossOp,
                                                              valdLossOp,
                                                              testLossOp,
-                                                             names[i])
+                                                             names[i],
+                                                             restore=True)
             if validationLoss < bestValidationLoss:
                 bestValidationLoss = validationLoss
                 bestTestLoss = testLoss
