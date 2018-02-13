@@ -120,7 +120,7 @@ if __name__ == '__main__':
     GlobalOpts.kernelSize = 3
     if GlobalOpts.concatType == 'depth':
         GlobalOpts.cnn = depthPatchCNN
-    elif GlobalOpts.concatType = 'batch':
+    elif GlobalOpts.concatType == 'batch':
         GlobalOpts.cnn = batchPatchCNN
     modelTrainer = ModelTrainer()
 
