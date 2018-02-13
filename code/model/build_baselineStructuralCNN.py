@@ -33,12 +33,12 @@ def standardBlock(inputs, trainingPL, blockNumber, filters, kernelSize=(3,3,3)):
         BlockConvolution1 = standardConvolution(inputs,
                                                 filters=filters,
                                                 name='Block{}Convolution1'.format(blockNumber),
-                                                kernelSize=kernelSize)
+                                                kernel_size=kernelSize)
         #### 3x3x3 Convolution ####
         BlockConvolution2 = standardConvolution(BlockConvolution1,
                                                 filters=filters,
                                                 name='Block{}Convolution2'.format(blockNumber),
-                                                kernelSize=kernelSize)
+                                                kernel_size=kernelSize)
         #### Batch Normalization ####
         BlockBatchNorm = standardBatchNorm(BlockConvolution2, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         #### Max Pooling ####
