@@ -14,48 +14,32 @@ def GetTrainingOperation(trainLossOp, learningRate):
         trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
     return trainUpdateOp
 
+def getMeanSquareError(inputBatch, labelBatch, trainingPL):
+    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
+    outputLayer = baselineStructuralCNN(inputBatch,
+                      trainingPL,
+                      kernelSizes=kernelSizes)
+    return tf.losses.mean_squared_error(labels=labelBatch, predictions=outputLayer)
+
 def GetStructuralCNN(
         trainDataSet,
         valdDataSet,
         testDataSet,
-        trainingPL,
-        keepProb=0.6,
-        optionalHiddenLayerUnits=0,
-        downscaleRate=None):
+        trainingPL):
     kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    trainInputBatch = trainInputBatch[:, 0:121, 0:121, 0:121, :]
-    trainOutputLayer = baselineStructuralCNN(trainInputBatch,
-                                trainingPL,
-                                keepProbability=keepProb,
-                                optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                                downscaleRate=downscaleRate,
-                                kernelSizes=kernelSizes)
-    trainLossOp = tf.losses.mean_squared_error(labels=trainLabelBatch, predictions=trainOutputLayer)
+    trainLossOp = getMeanSquareError(trainInputBatch, trainLabelBatch, trainingPL)
 
     valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    valdInputBatch = valdInputBatch[:, 0:121, 0:121, 0:121, :]
-    valdOutputLayer = baselineStructuralCNN(valdInputBatch,
-                               trainingPL,
-                               keepProbability=keepProb,
-                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate,
-                               kernelSizes=kernelSizes)
-    valdLossOp = tf.losses.mean_squared_error(labels=valdLabelBatch,
-                                              predictions=valdOutputLayer)
+    valdLossOp = getMeanSquareError(valdInputBatch, valdLabelBatch, trainingPL)
 
     testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    testInputBatch = testInputBatch[:, 0:121, 0:121, 0:121, :]
-    testOutputLayer = baselineStructuralCNN(testInputBatch,
-                               trainingPL,
-                               keepProbability=keepProb,
-                               optionalHiddenLayerUnits=optionalHiddenLayerUnits,
-                               downscaleRate=downscaleRate,
-                               kernelSizes=kernelSizes)
-    testLossOp = tf.losses.mean_squared_error(labels=testLabelBatch,
-                                              predictions=testOutputLayer)
+    testLossOp = getMeanSquareError(testInputBatch, testLabelBatch, trainingPL)
 
-    return trainLossOp, valdLossOp, testLossOp
+    bootstrapInputBatch, bootstrapLabelBatch = testDataSet.GetRandomBatchOperations()
+    bootstrapLossOp = getMeanSquareError(bootstrapInputBatch, bootstrapLabelBatch, trainingPL)
+
+    return trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -83,9 +67,9 @@ def GetDataSetInputs():
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
-    learningRates = [0.001, 0.0001, 0.00001]
+    learningRates = [0.0001]
     names = []; trainUpdateOps = [];
-    trainLossOp, valdLossOp, testLossOp = \
+    trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
         GetStructuralCNN(
             trainDataSet,
             valdDataSet,
@@ -105,31 +89,19 @@ def RunTestOnDirs(modelTrainer):
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
-        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
+        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, bootstrapLossOp)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
-    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     GlobalOpts.trainBatchSize = 4
     modelTrainer = ModelTrainer()
 
     GlobalOpts.kernelSize = 3
     GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_3x3x3/'
     GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_3x3x3/'
-    RunTestOnDirs(modelTrainer)
-
-    tf.reset_default_graph()
-    GlobalOpts.kernelSize = 5
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_5x5x5/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_5x5x5/'
-    RunTestOnDirs(modelTrainer)
-
-    tf.reset_default_graph()
-    GlobalOpts.kernelSize = 7
-    GlobalOpts.summaryDir = get('TRAIN.CNN_BASELINE.SUMMARIES_DIR') + 'model3D_7x7x7/'
-    GlobalOpts.checkpointDir = get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR') + 'model3D_7x7x7/'
     RunTestOnDirs(modelTrainer)

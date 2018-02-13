@@ -68,7 +68,7 @@ def GetDataSetInputs():
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     trainingPL = TrainingPlaceholder()
-    learningRates = [0.001, 0.0001, 0.00001]
+    learningRates = [0.0001]
     names = []; trainUpdateOps = [];
     trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
         GetModelOps(
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
-    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.kernelSize = 3
     if GlobalOpts.concatType == 'depth':
