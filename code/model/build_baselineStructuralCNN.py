@@ -125,7 +125,7 @@ def depthPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)],
             outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
 
-def batchPatchCNN(imagesPL, trainingPL, strideSize=10):
+def batchPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)], strideSize=10):
     _, numRows, numCols, depth, _ = imagesPL.get_shape().as_list()
     outputBlocks = []
     rowIndex = strideSize
@@ -144,9 +144,9 @@ def batchPatchCNN(imagesPL, trainingPL, strideSize=10):
                                                 :]
 
                             with tf.variable_scope('CNN_Blocks'):
-                                Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=8)
-                                Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
-                                Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
+                                Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
+                                Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
+                                Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
                                 outputBlocks.append(Block3)
                             depthIndex += strideSize
                     colIndex += strideSize
