@@ -95,10 +95,10 @@ class ModelTrainer(object):
                 validationLoss = self.GetPerformanceThroughSet(sess, valdLossOp)
 
                 # print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
-                            batchIndex,
-                            trainingLoss,
-                            validationLoss),
-                            end='\r')
+                            # batchIndex,
+                            # trainingLoss,
+                            # validationLoss),
+                            # end='\r')
                 writer.add_summary(
                     sess.run(
                         self.trainSummary,
