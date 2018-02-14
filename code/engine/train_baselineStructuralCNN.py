@@ -66,8 +66,7 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='{}{}'.format(GlobalOpts.concatType,
-                                                     GlobalOpts.strideSize),
+                                  name='model3D_stride{}'.format(GlobalOpts.strideSize),
                                   numIters=1)
 
 if __name__ == '__main__':
