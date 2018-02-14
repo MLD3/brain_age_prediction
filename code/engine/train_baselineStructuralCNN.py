@@ -80,6 +80,6 @@ if __name__ == '__main__':
     modelTrainer = ModelTrainer()
 
     GlobalOpts.kernelSize = 3
-    GlobalOpts.summaryDir = '{}model3D_stride{}'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), GlobalOpts.kernelSize)
-    GlobalOpts.checkpointDir = '{}model3D_stride{}'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), GlobalOpts.kernelSize)
+    GlobalOpts.summaryDir = '{}model3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
+    GlobalOpts.checkpointDir = '{}model3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
     RunTestOnDirs(modelTrainer)
