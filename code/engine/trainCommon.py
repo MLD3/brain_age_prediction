@@ -179,7 +179,7 @@ class ModelTrainer(object):
                                                          trainLossOp,
                                                          valdLossOp,
                                                          testLossOp,
-                                                         name)
+                                                         '{}/run_{}'.format(name, i))
             valdLosses.append(validationLoss)
             testLosses.append(testLoss)
         print('Average Validation Performance: {} +- {}'.format(np.mean(valdLosses), np.std(valdLosses)))
