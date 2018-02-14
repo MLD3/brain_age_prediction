@@ -48,7 +48,7 @@ def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = DownsampledPlaceholders()
     trainingPL = TrainingPlaceholder()
-    lossOp = GetMSE(imagesPL, labelsPL, trainingPL, GlobalOpts.cnn)
+    lossOp = GetMSE(imagesPL, labelsPL, trainingPL)
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
