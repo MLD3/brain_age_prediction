@@ -94,6 +94,33 @@ def RunTestOnDirs(modelTrainer):
                                   name='{}{}'.format(GlobalOpts.concatType,
                                                      GlobalOpts.strideSize))
 
+def CompareLearningRates(modelTrainer):
+    trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    trainingPL = TrainingPlaceholder()
+    learningRates = [0.01, 0.001, 0.0001, 0.00001, 0.000001]
+    names = []; trainUpdateOps = [];
+    trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
+        GetModelOps(
+            trainDataSet,
+            valdDataSet,
+            testDataSet,
+            trainingPL,
+            GlobalOpts.cnn)
+    for rate in learningRates:
+        name = 'learningRate_{}'.format(rate)
+        with tf.variable_scope(name):
+            trainUpdateOp = GetTrainingOperation(trainLossOp, rate)
+            trainUpdateOps.append(trainUpdateOp)
+            names.append(name)
+
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
+                                GlobalOpts.checkpointDir,
+                                GlobalOpts.numSteps)
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+    with tf.Session(config=config) as sess:
+        modelTrainer.CompareRuns(sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names)
+
 if __name__ == '__main__':
     additionalArgs = [{
             'flag': '--strideSize',
@@ -133,4 +160,4 @@ if __name__ == '__main__':
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                             GlobalOpts.concatType,
                             GlobalOpts.strideSize)
-    RunTestOnDirs(modelTrainer)
+    CompareLearningRates(modelTrainer)
