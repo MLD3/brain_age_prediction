@@ -25,6 +25,11 @@ def StructuralPlaceholders():
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
     return (imagesPL, labelsPL)
 
+def DownsampledPlaceholders():
+    imagesPL = tf.placeholder(dtype=tf.float32, shape=(None, 61, 73, 61, 1), name='imagesPL')
+    labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
+    return (imagesPL, labelsPL)
+
 def SlicePlaceholders():
     """
     Returns input and output placeholders for the slice images in the /data directory.

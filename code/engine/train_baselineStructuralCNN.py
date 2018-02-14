@@ -9,37 +9,17 @@ from utils.config import get
 from engine.trainCommon import ModelTrainer
 from placeholders.shared_placeholders import *
 
-def GetTrainingOperation(trainLossOp, learningRate):
+def GetTrainingOperation(lossOp, learningRate):
     with tf.variable_scope('optimizer'):
-        trainUpdateOp = AdamOptimizer(trainLossOp, learningRate)
-    return trainUpdateOp
+        updateOp = AdamOptimizer(lossOp, learningRate)
+    return updateOp
 
-def getMeanSquareError(inputBatch, labelBatch, trainingPL):
+def GetMSE(imagesPL, labelsPL, trainingPL):
     kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
-    outputLayer = baselineStructuralCNN(inputBatch,
+    outputLayer = baselineStructuralCNN(imagesPL,
                       trainingPL,
                       kernelSizes=kernelSizes)
-    return tf.losses.mean_squared_error(labels=labelBatch, predictions=outputLayer)
-
-def GetStructuralCNN(
-        trainDataSet,
-        valdDataSet,
-        testDataSet,
-        trainingPL):
-    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
-    trainInputBatch, trainLabelBatch = trainDataSet.GetBatchOperations()
-    trainLossOp = getMeanSquareError(trainInputBatch, trainLabelBatch, trainingPL)
-
-    valdInputBatch, valdLabelBatch = valdDataSet.GetBatchOperations()
-    valdLossOp = getMeanSquareError(valdInputBatch, valdLabelBatch, trainingPL)
-
-    testInputBatch, testLabelBatch = testDataSet.GetBatchOperations()
-    testLossOp = getMeanSquareError(testInputBatch, testLabelBatch, trainingPL)
-
-    bootstrapInputBatch, bootstrapLabelBatch = testDataSet.GetRandomBatchOperations()
-    bootstrapLossOp = getMeanSquareError(bootstrapInputBatch, bootstrapLabelBatch, trainingPL)
-
-    return trainLossOp, valdLossOp, testLossOp, bootstrapLossOp
+    return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -66,30 +46,29 @@ def GetDataSetInputs():
 
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    imagesPL, labelsPL = DownsampledPlaceholders()
     trainingPL = TrainingPlaceholder()
+    lossOp = GetMSE(imagesPL, labelsPL, trainingPL, GlobalOpts.cnn)
     learningRate = 0.0001
-    trainLossOp, valdLossOp, testLossOp, bootstrapLossOp = \
-        GetStructuralCNN(
-            trainDataSet,
-            valdDataSet,
-            testDataSet,
-            trainingPL)
-
-    trainUpdateOp = GetTrainingOperation(trainLossOp, learningRate)
-
+    updateOp = GetTrainingOperation(lossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
+                                imagesPL,
+                                trainingPL,
+                                labelsPL,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet,
                                 GlobalOpts.numSteps)
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
         modelTrainer.RepeatTrials(sess,
-                                  trainingPL,
-                                  trainUpdateOp,
-                                  trainLossOp,
-                                  valdLossOp,
-                                  testLossOp,
-                                  name='model3D_{}'.format(GlobalOpts.kernelSize))
+                                  updateOp,
+                                  lossOp,
+                                  name='{}{}'.format(GlobalOpts.concatType,
+                                                     GlobalOpts.strideSize),
+                                  numIters=1)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')

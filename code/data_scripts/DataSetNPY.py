@@ -28,6 +28,9 @@ class DataSetNPY(object):
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
             labelBatchDims)
 
+    def NextBatch(self, sess):
+        return sess.run([self.imageBatchOperation, self.labelBatchOperation])
+
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
 

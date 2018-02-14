@@ -16,44 +16,54 @@ class ModelTrainer(object):
     def DefineNewParams(self,
                         summaryDir,
                         checkpointDir,
+                        imagesPL,
+                        trainingPL,
+                        labelsPL,
+                        trainSet,
+                        valdSet,
+                        testSet,
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
                         batchStepsBetweenSummary=500
                         ):
 
         if not os.path.exists(checkpointDir):
             os.makedirs(checkpointDir)
-        self.checkpointDir = checkpointDir
-        self.summaryDir = summaryDir
-        self.numberOfSteps = numberOfSteps
+        self.checkpointDir            = checkpointDir
+        self.summaryDir               = summaryDir
+        self.numberOfSteps            = numberOfSteps
         self.batchStepsBetweenSummary = batchStepsBetweenSummary
 
-        self.trainLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
-        self.validationLossPlaceholder = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
-        self.trainSummary = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
-        self.validationSummary = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
+        self.trainLossPlaceholder       = tf.placeholder(tf.float32, shape=(), name='trainLossPlaceholder')
+        self.validationLossPlaceholder  = tf.placeholder(tf.float32, shape=(), name='validationLossPlaceholder')
+        self.trainSummary               = tf.summary.scalar('trainingLoss', self.trainLossPlaceholder)
+        self.validationSummary          = tf.summary.scalar('validationLoss', self.validationLossPlaceholder)
+        self.imagesPL      = imagesPL
+        self.trainingPL    = trainingPL
+        self.labelsPL      = labelsPL
+        self.trainSet      = trainSet
+        self.valdSet       = valdSet
+        self.testSet       = testSet
 
-    def GetPerformanceCI(self, sess, lossOp):
-        N = 1000
-        confidence = 0.95
-        lowerIndex = int((1.0 - confidence) * 0.5 * N)
-        upperIndex = int((1.0 - (1.0 - confidence) * 0.5 ) * N)
-        bootstrapPerformances = np.zeros(N)
+    def GetFeedDict(self, sess, setType='train'):
+        if setType == 'train':
+            images, labels = self.trainSet.NextBatch(sess)
+            training = True
+        elif setType == 'vald':
+            images, labels = self.valdSet.NextBatch(sess)
+            training = False
+        elif setType == 'test':
+            images, labels = self.testSet.NextBatch(sess)
+            training = False
+        return {
+            self.imagesPL: images,
+            self.labelsPL: labels,
+            self.trainingPL: training
+        }
 
-        #Assumes that the loss operation returns the loss on a random example
-        #in the test set
-        for i in range(N):
-            bootstrapPerformances[i] = self.GetPerformanceThroughSet(sess, lossOp)
-
-        bootstrapPerformances = np.sort(bootstrapPerformances)
-
-        pointPerformance = np.mean(bootstrapPerformances)
-
-        return pointPerformance, bootstrapPerformances[lowerIndex], bootstrapPerformances[upperIndex]
-
-    def GetPerformanceThroughSet(self, sess, lossOp, numberIters=75):
+    def GetPerformanceThroughSet(self, sess, lossOp, setType='vald', numberIters=75):
         accumulatedLoss = 0
         for i in range(numberIters):
-            currentLoss = sess.run(lossOp)
+            currentLoss = sess.run(lossOp, feed_dict=self.GetFeedDict(sess, setType=setType))
             accumulatedLoss += currentLoss
         accumulatedLoss = accumulatedLoss / numberIters
         return accumulatedLoss
@@ -65,7 +75,7 @@ class ModelTrainer(object):
         saver.save(sess, path)
         print('STEP {}: saved model to path {}'.format(step, path), end='\r')
 
-    def TrainModel(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, restore=False):
+    def TrainModel(self, sess, updateOp, lossOp, name, restore=False):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
 
         # Initialize relevant variables
@@ -87,12 +97,11 @@ class ModelTrainer(object):
         bestLossStepIndex = 0
 
         for batchIndex in range(self.numberOfSteps):
-            trainingLoss, _, _ = sess.run([trainLossOp, trainUpdateOp, extraUpdateOps], feed_dict={
-                trainingPL: True
-                })
+            trainingLoss, _, _ = sess.run([lossOp, updateOp, extraUpdateOps],
+                                            feed_dict=self.GetFeedDict(sess))
 
             if batchIndex % self.batchStepsBetweenSummary == 0:
-                validationLoss = self.GetPerformanceThroughSet(sess, valdLossOp)
+                validationLoss = self.GetPerformanceThroughSet(sess, lossOp)
 
                 # print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
                             # batchIndex,
@@ -120,14 +129,14 @@ class ModelTrainer(object):
                     if restore:
                         self.SaveModel(sess, batchIndex, saver, savePath)
 
-        testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
+        testLoss = self.GetPerformanceThroughSet(sess, lossOp, setType='test')
         writer.close()
 
         # print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
         # print("Model had test performance: {}".format(testLoss))
         return bestValidationLoss, testLoss
 
-    def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, bootstrapLossOp=None):
+    def CompareRuns(self, sess, updateOps, lossOp, names):
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
@@ -140,13 +149,11 @@ class ModelTrainer(object):
         bestIndex = 0
         for i in range(len(trainUpdateOps)):
             print('============TRAINING MODEL {}============'.format(names[i]))
-            validationLoss, testLoss = self.TrainModel(sess, trainingPL,
-                                                             trainUpdateOps[i],
-                                                             trainLossOp,
-                                                             valdLossOp,
-                                                             testLossOp,
-                                                             names[i],
-                                                             restore=True)
+            validationLoss, testLoss = self.TrainModel(sess,
+                                                       updateOps[i],
+                                                       lossOp,
+                                                       names[i],
+                                                       restore=True)
             if validationLoss < bestValidationLoss:
                 bestValidationLoss = validationLoss
                 bestTestLoss = testLoss
@@ -154,16 +161,10 @@ class ModelTrainer(object):
         print('Best model was: {}'.format(names[bestIndex]))
         print('Validation loss: {}'.format(bestValidationLoss))
         print('Test loss: {}'.format(bestTestLoss))
-        if bootstrapLossOp is not None:
-            savePath = '{}{}/'.format(self.checkpointDir, names[bestIndex])
-            saver = saveModel.restore(sess, savePath)
-            print('Getting confidence intervals of best model...')
-            point, lower, upper = self.GetPerformanceCI(sess, bootstrapLossOp)
-            print('Bootstrap test performance of model was: {}, ({}, {})'.format(point, lower, upper))
         coord.request_stop()
         coord.join(threads)
 
-    def RepeatTrials(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, numIters=10):
+    def RepeatTrials(self, sess, updateOp, lossOp, name, numIters=10):
         print('TRAINING MODEL {}'.format(name))
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
@@ -175,12 +176,9 @@ class ModelTrainer(object):
         for i in range(numIters):
             # print('=========Training iteration {}========='.format(i))
             validationLoss, testLoss = self.TrainModel(sess,
-                                                         trainingPL,
-                                                         trainUpdateOp,
-                                                         trainLossOp,
-                                                         valdLossOp,
-                                                         testLossOp,
-                                                         '{}/run_{}'.format(name, i))
+                                                       updateOp,
+                                                       lossOp,
+                                                       '{}/run_{}'.format(name, i))
             valdLosses.append(validationLoss)
             testLosses.append(testLoss)
         print('Average Validation Performance: {} +- {}'.format(np.mean(valdLosses), np.std(valdLosses)))
