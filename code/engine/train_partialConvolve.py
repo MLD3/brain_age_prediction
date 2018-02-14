@@ -150,7 +150,7 @@ if __name__ == '__main__':
         GlobalOpts.cnn = depthPatchCNN
     elif GlobalOpts.concatType == 'batch':
         GlobalOpts.cnn = batchPatchCNN
-    elif GlobalOpts.concat == 'halfway':
+    elif GlobalOpts.concatType == 'halfway':
         GlobalOpts.cnn = PatchCNN2Batch1Depth
     modelTrainer = ModelTrainer()
 
