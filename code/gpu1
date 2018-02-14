@@ -1,0 +1,1 @@
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 5 --concatType 
