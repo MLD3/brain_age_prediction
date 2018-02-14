@@ -80,7 +80,7 @@ class ModelTrainer(object):
                 os.makedirs(savePath)
             # Restore a model if it exists in the indicated directory
             saver = saveModel.restore(sess, savePath)
-        else:
+        # else:
             # print('Reading saved models is disabled. Training from scratch...')
 
         bestValidationLoss = math.inf
