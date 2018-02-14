@@ -81,7 +81,7 @@ class ModelTrainer(object):
             # Restore a model if it exists in the indicated directory
             saver = saveModel.restore(sess, savePath)
         else:
-            print('Reading saved models is disabled. Training from scratch...')
+            # print('Reading saved models is disabled. Training from scratch...')
 
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
@@ -94,7 +94,7 @@ class ModelTrainer(object):
             if batchIndex % self.batchStepsBetweenSummary == 0:
                 validationLoss = self.GetPerformanceThroughSet(sess, valdLossOp)
 
-                print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
+                # print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
                             batchIndex,
                             trainingLoss,
                             validationLoss),
@@ -123,8 +123,8 @@ class ModelTrainer(object):
         testLoss = self.GetPerformanceThroughSet(sess, testLossOp)
         writer.close()
 
-        print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
-        print("Model had test performance: {}".format(testLoss))
+        # print("STEP {}: Best Validation Loss = {}".format(bestLossStepIndex, bestValidationLoss))
+        # print("Model had test performance: {}".format(testLoss))
         return bestValidationLoss, testLoss
 
     def CompareRuns(self, sess, trainingPL, trainUpdateOps, trainLossOp, valdLossOp, testLossOp, names, bootstrapLossOp=None):
@@ -164,6 +164,7 @@ class ModelTrainer(object):
         coord.join(threads)
 
     def RepeatTrials(self, sess, trainingPL, trainUpdateOp, trainLossOp, valdLossOp, testLossOp, name, numIters=10):
+        print('TRAINING MODEL {}'.format(name))
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
 
@@ -172,7 +173,7 @@ class ModelTrainer(object):
         valdLosses = []
         testLosses = []
         for i in range(numIters):
-            print('=========Training model, iteration {}========='.format(i))
+            # print('=========Training iteration {}========='.format(i))
             validationLoss, testLoss = self.TrainModel(sess,
                                                          trainingPL,
                                                          trainUpdateOp,

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import depthPatchCNN, batchPatchCNN
+from model.build_baselineStructuralCNN import depthPatchCNN, batchPatchCNN, PatchCNN2Batch1Depth
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -132,7 +132,7 @@ if __name__ == '__main__':
             },
             {
             'flag': '--concatType',
-            'help': 'Concatenation type for patches. One of depth, batch.',
+            'help': 'Concatenation type for patches. One of depth, batch, halfway.',
             'action': 'store',
             'type': str,
             'dest': 'concatType',
@@ -150,6 +150,8 @@ if __name__ == '__main__':
         GlobalOpts.cnn = depthPatchCNN
     elif GlobalOpts.concatType == 'batch':
         GlobalOpts.cnn = batchPatchCNN
+    elif GlobalOpts.concat = 'halfway':
+        GlobalOpts.cnn = PatchCNN2Batch1Depth
     modelTrainer = ModelTrainer()
 
     GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
@@ -160,4 +162,4 @@ if __name__ == '__main__':
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                             GlobalOpts.concatType,
                             GlobalOpts.strideSize)
-    CompareLearningRates(modelTrainer)
+    RunTestOnDirs(modelTrainer)

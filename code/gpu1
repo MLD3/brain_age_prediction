@@ -1,1 +1,8 @@
-python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 5 --concatType 
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 5 --concatType batch
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 10 --concatType batch
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 15 --concatType depth
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 20 --concatType depth
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 30 --concatType depth
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 15 --concatType halfway
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 20 --concatType halfway
+python -m engine.train_partialConvolve --gpuMemory 0.7 --numSteps 10001 --strideSize 30 --concatType halfway
