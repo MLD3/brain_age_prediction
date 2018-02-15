@@ -69,7 +69,7 @@ def RunTestOnDirs(modelTrainer):
                                   lossOp,
                                   name='{}{}'.format(GlobalOpts.concatType,
                                                      GlobalOpts.strideSize),
-                                  numIters=1)
+                                  numIters=10)
 
 
 

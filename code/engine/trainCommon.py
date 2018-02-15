@@ -103,11 +103,11 @@ class ModelTrainer(object):
             if batchIndex % self.batchStepsBetweenSummary == 0:
                 validationLoss = self.GetPerformanceThroughSet(sess, lossOp)
 
-                # print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
-                            # batchIndex,
-                            # trainingLoss,
-                            # validationLoss),
-                            # end='\r')
+                print('STEP {}: Training Loss = {}, Validation Loss = {}'.format(
+                            batchIndex,
+                            trainingLoss,
+                            validationLoss),
+                            end='\r')
                 writer.add_summary(
                     sess.run(
                         self.trainSummary,
@@ -174,14 +174,18 @@ class ModelTrainer(object):
         valdLosses = []
         testLosses = []
         for i in range(numIters):
-            # print('=========Training iteration {}========='.format(i))
+            print('=========Training iteration {}========='.format(i))
             validationLoss, testLoss = self.TrainModel(sess,
                                                        updateOp,
                                                        lossOp,
                                                        '{}/run_{}'.format(name, i))
             valdLosses.append(validationLoss)
             testLosses.append(testLoss)
+        outputFile = open('{}performance.txt'.format(self.summaryDir), 'w')
         print('Average Validation Performance: {} +- {}'.format(np.mean(valdLosses), np.std(valdLosses)))
         print('Average Test Performance: {} +- {}'.format(np.mean(testLosses), np.std(testLosses)))
+        outputFile.write('Average Validation Performance: {} +- {}\n'.format(np.mean(valdLosses), np.std(valdLosses)))
+        outputFile.write('Average Test Performance: {} +- {}\n'.format(np.mean(testLosses), np.std(testLosses)))
+        outputFile.close()
         coord.request_stop()
         coord.join(threads)

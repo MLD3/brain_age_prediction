@@ -67,7 +67,7 @@ def RunTestOnDirs(modelTrainer):
                                   updateOp,
                                   lossOp,
                                   name='model3D_stride{}'.format(GlobalOpts.kernelSize),
-                                  numIters=1)
+                                  numIters=10)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
