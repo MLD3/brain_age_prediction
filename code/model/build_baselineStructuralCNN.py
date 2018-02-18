@@ -78,13 +78,13 @@ def baselineStructuralCNN(imagesPL,
             imagesPL = attentionMap(imagesPL)
 
         ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=2*27, kernelSize=kernelSizes[0])
 
         ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=4*27, kernelSize=kernelSizes[1])
 
         ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8*27, kernelSize=kernelSizes[2])
 
         ################## FOURTH BLOCK ##################
         # Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
@@ -140,15 +140,15 @@ def batchPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)],
                             while depthIndex <= depth:
                                 with tf.variable_scope('Slice_Depth{}'.format(depthIndex)):
                                     imageSlice = imagesPL[:,
-                                                        rowIndex-strideSize:rowIndex,
-                                                        colIndex-strideSize:colIndex,
-                                                        depthIndex-strideSize:depthIndex,
+                                                        max(rowIndex-strideSize-3, 0):min(rowIndex + 3, numRows),
+                                                        max(colIndex-strideSize-3, 0):min(colIndex + 3, numCols),
+                                                        max(depthIndex-strideSize-3, 0):min(depthIndex + 3, depth),
                                                         :]
 
                                     with tf.variable_scope('CNN_Blocks'):
-                                        Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
-                                        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
-                                        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
+                                        Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=2, kernelSize=kernelSizes[0])
+                                        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=4, kernelSize=kernelSizes[1])
+                                        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8, kernelSize=kernelSizes[2])
                                         outputBlocks.append(Block3)
                                     depthIndex += strideSize
                             colIndex += strideSize

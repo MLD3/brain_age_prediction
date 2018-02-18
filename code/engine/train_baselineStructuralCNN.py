@@ -74,8 +74,9 @@ if __name__ == '__main__':
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
-    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
+    # GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
     modelTrainer = ModelTrainer()
 
