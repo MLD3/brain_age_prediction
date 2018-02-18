@@ -46,7 +46,7 @@ def GetDataSetInputs():
 
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
-    imagesPL, labelsPL = DownsampledPlaceholders()
+    imagesPL, labelsPL = StructuralPlaceholders()
     trainingPL = TrainingPlaceholder()
     lossOp = GetMSE(imagesPL, labelsPL, trainingPL)
     learningRate = 0.0001
