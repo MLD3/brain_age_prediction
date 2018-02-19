@@ -10,7 +10,7 @@ def standardBatchNorm(inputs, trainingPL, momentum=0.9, name=None):
 def standardPool(inputs, kernel_size=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME', name=None):
     return tf.nn.max_pool3d(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
 
-def standardConvolution(inputs, filters, kernel_size=(3,3,3), activation=tf.nn.elu, strides=(1,1,1), padding='SAME', name=None):
+def standardConvolution(inputs, filters, kernel_size=(3,3,3), activation=tf.nn.elu, strides=(1,1,1), padding='VALID', name=None):
     return tf.layers.conv3d(inputs=inputs, filters=filters, kernel_size=kernel_size,
                             strides=strides, padding=padding, activation=activation,
                             use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer(),
@@ -54,143 +54,41 @@ def attentionMap(inputs):
 
 def baselineStructuralCNN(imagesPL,
                           trainingPL,
-                          keepProbability=get('TRAIN.CNN_BASELINE.KEEP_PROB'),
-                          defaultActivation=tf.nn.elu,
-                          optionalHiddenLayerUnits=0,
-                          useAttentionMap=False,
-                          downscaleRate=None,
-                          kernelSizes=[(3,3,3), (3,3,3), (3,3,3)]):
+                          keepProbability=0.6):
     with tf.variable_scope('ConvolutionalNetwork'):
-        if downscaleRate:
-            if isinstance(downscaleRate, int):
-                downscaleSize = [1, downscaleRate, downscaleRate, downscaleRate, 1]
-                imagesPL = standardPool(imagesPL, kernel_size=downscaleSize, strides=downscaleSize)
-            elif isinstance(downscaleRate, (list, tuple)) and len(downscaleRate) == 3:
-                downscaleSize = [1, downscaleRate[0], downscaleRate[1], downscaleRate[2], 1]
-                imagesPL = standardPool(imagesPL, kernel_size=downscaleSize, strides=downscaleSize)
-            else:
-                raise ValueError('Unrecognized downscale rate: {}'.format(downscaleRate))
-
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
 
-        if useAttentionMap:
-            imagesPL = attentionMap(imagesPL)
-
-        ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=2*27, kernelSize=kernelSizes[0])
-
-        ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=4*27, kernelSize=kernelSizes[1])
-
-        ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8*27, kernelSize=kernelSizes[2])
-
-        ################## FOURTH BLOCK ##################
-        # Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
-
-        ################## FIFTH BLOCK ##################
-        # Block5 = standardBlock(Block4, trainingPL, blockNumber=5, filters=8)
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
 
         with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block3)
-            if optionalHiddenLayerUnits > 0:
-                optionalHiddenLayer = standardDense(inputs=flattenedLayer, units=optionalHiddenLayerUnits, activation=defaultActivation, name='optionalHiddenLayer')
-                droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=optionalHiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-                flattenedLayer = droppedOutHiddenLayer
-
-            numberOfUnitsInOutputLayer = 1
-            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            # droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(hiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
 
-def depthPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)], strideSize=10):
+def depthPatchCNN(imagesPL,
+                  trainingPL,
+                  keepProbability=0.6,
+                  strideSize=10):
     with tf.variable_scope('depthPatchCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
         with tf.variable_scope('PatchExtraction'):
             imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
 
-        ################## FIRST BLOCK ##################
-        Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
-
-        ################## SECOND BLOCK ##################
-        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
-
-        ################## THIRD BLOCK ##################
-        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
+        Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
 
         with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block3)
-            numberOfUnitsInOutputLayer = 1
-            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            # droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(hiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
-
-def batchPatchCNN(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)], strideSize=10):
-    with tf.variable_scope('batchPatchCNN'):
-        with tf.variable_scope('ConvolutionalLayers'):
-            _, numRows, numCols, depth, _ = imagesPL.get_shape().as_list()
-            outputBlocks = []
-            rowIndex = strideSize
-            while rowIndex <= numRows:
-                with tf.variable_scope('Slice_Row{}'.format(rowIndex)):
-                    colIndex = strideSize
-                    while colIndex <= numCols:
-                        with tf.variable_scope('Slice_Col{}'.format(colIndex)):
-                            depthIndex = strideSize
-                            while depthIndex <= depth:
-                                with tf.variable_scope('Slice_Depth{}'.format(depthIndex)):
-                                    imageSlice = imagesPL[:,
-                                                        max(rowIndex-strideSize-3, 0):min(rowIndex + 3, numRows),
-                                                        max(colIndex-strideSize-3, 0):min(colIndex + 3, numCols),
-                                                        max(depthIndex-strideSize-3, 0):min(depthIndex + 3, depth),
-                                                        :]
-
-                                    with tf.variable_scope('CNN_Blocks'):
-                                        Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=2, kernelSize=kernelSizes[0])
-                                        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=4, kernelSize=kernelSizes[1])
-                                        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=8, kernelSize=kernelSizes[2])
-                                        outputBlocks.append(Block3)
-                                    depthIndex += strideSize
-                            colIndex += strideSize
-                rowIndex += strideSize
-            concatLayer = tf.concat(outputBlocks, axis=4)
-        with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(concatLayer)
-            numberOfUnitsInOutputLayer = 1
-            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
-    return outputLayer
-
-def PatchCNN2Batch1Depth(imagesPL, trainingPL, kernelSizes=[(3,3,3), (3,3,3), (3,3,3)], strideSize=10):
-    with tf.variable_scope('PatchCNN2Batch1Depth'):
-        with tf.variable_scope('ConvolutionalLayers'):
-            _, numRows, numCols, depth, _ = imagesPL.get_shape().as_list()
-            outputBlocks = []
-            rowIndex = strideSize
-            while rowIndex <= numRows:
-                with tf.variable_scope('Slice_Row{}'.format(rowIndex)):
-                    colIndex = strideSize
-                    while colIndex <= numCols:
-                        with tf.variable_scope('Slice_Col{}'.format(colIndex)):
-                            depthIndex = strideSize
-                            while depthIndex <= depth:
-                                with tf.variable_scope('Slice_Depth{}'.format(depthIndex)):
-                                    imageSlice = imagesPL[:,
-                                                        rowIndex-strideSize:rowIndex,
-                                                        colIndex-strideSize:colIndex,
-                                                        depthIndex-strideSize:depthIndex,
-                                                        :]
-
-                                    with tf.variable_scope('CNN_Blocks'):
-                                        Block1 = standardBlock(imageSlice, trainingPL, blockNumber=1, filters=8, kernelSize=kernelSizes[0])
-                                        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16, kernelSize=kernelSizes[1])
-                                        outputBlocks.append(Block2)
-                                    depthIndex += strideSize
-                            colIndex += strideSize
-                rowIndex += strideSize
-            concatLayer = tf.concat(outputBlocks, axis=4)
-            Block3 = standardBlock(concatLayer, trainingPL, blockNumber=3, filters=32, kernelSize=kernelSizes[2])
-        with tf.variable_scope('FullyConnectedLayers'):
-            flattenedLayer = tf.layers.flatten(Block3)
-            numberOfUnitsInOutputLayer = 1
-            outputLayer = standardDense(flattenedLayer, units=numberOfUnitsInOutputLayer, activation=None, use_bias=False, name='outputLayer')
-    return outputLayer

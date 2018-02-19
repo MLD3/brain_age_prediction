@@ -15,10 +15,8 @@ def GetTrainingOperation(lossOp, learningRate):
     return updateOp
 
 def GetMSE(imagesPL, labelsPL, trainingPL):
-    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     outputLayer = baselineStructuralCNN(imagesPL,
-                      trainingPL,
-                      kernelSizes=kernelSizes)
+                      trainingPL)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
 def GetDataSetInputs():
@@ -66,7 +64,7 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='model3D_stride{}'.format(GlobalOpts.kernelSize),
+                                  name='baseline3D',
                                   numIters=10)
 
 if __name__ == '__main__':
@@ -74,13 +72,12 @@ if __name__ == '__main__':
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
-    # GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
-    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.kernelSize = 3
-    GlobalOpts.summaryDir = '{}model3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
-    GlobalOpts.checkpointDir = '{}model3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
+    GlobalOpts.summaryDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
+    GlobalOpts.checkpointDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
     RunTestOnDirs(modelTrainer)

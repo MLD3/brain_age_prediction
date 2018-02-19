@@ -15,10 +15,8 @@ def GetTrainingOperation(lossOp, learningRate):
     return updateOp
 
 def GetMSE(imagesPL, labelsPL, trainingPL, cnn):
-    kernelSizes = [(GlobalOpts.kernelSize, ) * 3] * 3
     outputLayer = cnn(imagesPL,
                       trainingPL,
-                      kernelSizes=kernelSizes,
                       strideSize=GlobalOpts.strideSize)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
@@ -67,11 +65,8 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='{}{}'.format(GlobalOpts.concatType,
-                                                     GlobalOpts.strideSize),
+                                  name='depth{}'.format(GlobalOpts.strideSize),
                                   numIters=10)
-
-
 
 if __name__ == '__main__':
     additionalArgs = [{
@@ -81,38 +76,22 @@ if __name__ == '__main__':
             'type': int,
             'dest': 'strideSize',
             'required': True
-            },
-            {
-            'flag': '--concatType',
-            'help': 'Concatenation type for patches. One of depth, batch, halfway.',
-            'action': 'store',
-            'type': str,
-            'dest': 'concatType',
-            'required': True
             }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
-    # GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
-    GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
-    GlobalOpts.kernelSize = 3
-    if GlobalOpts.concatType == 'depth':
-        GlobalOpts.cnn = depthPatchCNN
-    elif GlobalOpts.concatType == 'batch':
-        GlobalOpts.cnn = batchPatchCNN
-    elif GlobalOpts.concatType == 'halfway':
-        GlobalOpts.cnn = PatchCNN2Batch1Depth
+    GlobalOpts.cnn = depthPatchCNN
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
+    GlobalOpts.summaryDir = '{}depth3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
-                            GlobalOpts.concatType,
                             GlobalOpts.strideSize)
-    GlobalOpts.checkpointDir = '{}{}3D_stride{}/'.format(
+    GlobalOpts.checkpointDir = '{}depth3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
-                            GlobalOpts.concatType,
                             GlobalOpts.strideSize)
     RunTestOnDirs(modelTrainer)
