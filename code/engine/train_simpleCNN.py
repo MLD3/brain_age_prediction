@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import depthPatchCNN
+from model.build_baselineStructuralCNN import simpleCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -14,10 +14,9 @@ def GetTrainingOperation(lossOp, learningRate):
         updateOp = AdamOptimizer(lossOp, learningRate)
     return updateOp
 
-def GetMSE(imagesPL, labelsPL, trainingPL, cnn):
-    outputLayer = cnn(imagesPL,
-                      trainingPL,
-                      strideSize=GlobalOpts.strideSize)
+def GetMSE(imagesPL, labelsPL, trainingPL):
+    outputLayer = simpleCNN(imagesPL,
+                      trainingPL)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
 def GetDataSetInputs():
@@ -47,7 +46,7 @@ def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
     trainingPL = TrainingPlaceholder()
-    lossOp = GetMSE(imagesPL, labelsPL, trainingPL, GlobalOpts.cnn)
+    lossOp = GetMSE(imagesPL, labelsPL, trainingPL)
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
@@ -65,19 +64,11 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='depth{}'.format(GlobalOpts.strideSize),
-                                  numIters=3)
+                                  name='simple3D',
+                                  numIters=1)
 
 if __name__ == '__main__':
-    additionalArgs = [{
-            'flag': '--strideSize',
-            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
-            'action': 'store',
-            'type': int,
-            'dest': 'strideSize',
-            'required': True
-            }]
-    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    ParseArgs('Run 3D CNN over structural MRI volumes')
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -85,13 +76,8 @@ if __name__ == '__main__':
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
-    GlobalOpts.cnn = depthPatchCNN
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}depth3D_stride{}/'.format(
-                            get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
-                            GlobalOpts.strideSize)
-    GlobalOpts.checkpointDir = '{}depth3D_stride{}/'.format(
-                            get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
-                            GlobalOpts.strideSize)
+    GlobalOpts.summaryDir = '{}simple3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
+    GlobalOpts.checkpointDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
     RunTestOnDirs(modelTrainer)

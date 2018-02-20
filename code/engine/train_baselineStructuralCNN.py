@@ -44,7 +44,7 @@ def GetDataSetInputs():
 
 def RunTestOnDirs(modelTrainer):
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
-    imagesPL, labelsPL = StructuralPlaceholders()
+    imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
     trainingPL = TrainingPlaceholder()
     lossOp = GetMSE(imagesPL, labelsPL, trainingPL)
     learningRate = 0.0001
@@ -65,7 +65,7 @@ def RunTestOnDirs(modelTrainer):
                                   updateOp,
                                   lossOp,
                                   name='baseline3D',
-                                  numIters=10)
+                                  numIters=3)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')

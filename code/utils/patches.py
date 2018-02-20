@@ -14,11 +14,11 @@ def ExtractImagePatches3D(images, strideSize, kernelSize=3):
     """
     _, numRows, numCols, depth, _ = images.get_shape().as_list()
     patches = []
-    rowIndex = strideSize
+    rowIndex = strideSize + kernelSize
     while rowIndex <= numRows:
-        colIndex = strideSize
+        colIndex = strideSize + kernelSize
         while colIndex <= numCols:
-            depthIndex = strideSize
+            depthIndex = strideSize + kernelSize
             while depthIndex <= depth:
                 # Extract an image slice of size
                 # [batchSize, strideSize, strideSize, strideSize, numChannels]

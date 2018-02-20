@@ -17,18 +17,16 @@ def TimecoursePlaceholders():
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
     return (timecoursePL, labelsPL)
 
-def StructuralPlaceholders():
+def StructuralPlaceholders(imageShape):
     """
     Returns input and output placeholders for the structural images in the /data directory.
     """
-    imagesPL = tf.placeholder(dtype=tf.float32, shape=(None, get('DATA.STRUCTURAL.HEIGHT'), get('DATA.STRUCTURAL.WIDTH'), get('DATA.STRUCTURAL.DEPTH'), 1), name='imagesPL')
+    imageShape = list(imageShape)
+    imageShape = [None if x == -1 else x for x in imageShape]
+    imagesPL = tf.placeholder(dtype=tf.float32, shape=imageShape, name='imagesPL')
     labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
     return (imagesPL, labelsPL)
 
-def DownsampledPlaceholders():
-    imagesPL = tf.placeholder(dtype=tf.float32, shape=(None, 61, 73, 61, 1), name='imagesPL')
-    labelsPL = tf.placeholder(dtype=tf.float32, shape=(None,1), name='labelsPL')
-    return (imagesPL, labelsPL)
 
 def SlicePlaceholders():
     """
