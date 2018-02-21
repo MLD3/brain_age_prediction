@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import baselineStructuralCNN
+from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -15,7 +15,7 @@ def GetTrainingOperation(lossOp, learningRate):
     return updateOp
 
 def GetMSE(imagesPL, labelsPL, trainingPL):
-    outputLayer = baselineStructuralCNN(imagesPL,
+    outputLayer = GlobalOpts.cnn(imagesPL,
                       trainingPL)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
@@ -64,11 +64,20 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='baseline3D',
-                                  numIters=3)
+                                  name='{}baseline3D'.format(GlobalOpts.type),
+                                  numIters=5)
 
 if __name__ == '__main__':
-    ParseArgs('Run 3D CNN over structural MRI volumes')
+    additionalArgs = [
+            {
+            'flag': '--type',
+            'help': 'One of: standard, reverse, constant.',
+            'action': 'store',
+            'type': str,
+            'dest': 'type',
+            'required': True
+            }]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -76,8 +85,14 @@ if __name__ == '__main__':
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
+    if GlobalOpts.type == 'standard':
+        GlobalOpts.cnn = baselineStructuralCNN
+    elif GlobalOpts.type == 'reverse':
+        GlobalOpts.cnn = reverseBaseline
+    elif GlobalOpts.type == 'constant':
+        GlobalOpts.cnn = constantBaseline
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
-    GlobalOpts.checkpointDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
+    GlobalOpts.summaryDir = '{}{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), GlobalOpts.type)
+    GlobalOpts.checkpointDir = '{}{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), GlobalOpts.type)
     RunTestOnDirs(modelTrainer)

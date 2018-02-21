@@ -65,8 +65,7 @@ def baselineStructuralCNN(imagesPL,
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
 
-        Block0 = standardBlock(imagesPL, trainingPL, blockNumber=0, filters=8, normalize=False, pool=False)
-        Block1 = standardBlock(Block0, trainingPL, blockNumber=1, filters=8)
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
         Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
@@ -74,8 +73,46 @@ def baselineStructuralCNN(imagesPL,
         with tf.variable_scope('FullyConnectedLayers'):
             flattenedLayer = tf.layers.flatten(Block4)
             hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
-            # droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-            outputLayer = standardDense(hiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
+        return outputLayer
+
+def constantBaseline(imagesPL,
+                          trainingPL,
+                          keepProbability=0.6):
+    with tf.variable_scope('ConvolutionalNetwork'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=64)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=64)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=64)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
+        
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
+        return outputLayer
+    
+def reverseBaseline(imagesPL,
+                          trainingPL,
+                          keepProbability=0.6):
+    with tf.variable_scope('ConvolutionalNetwork'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+
+        Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=64)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=32)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=16)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
+        
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
 
 def depthPatchCNN(imagesPL,
@@ -86,9 +123,8 @@ def depthPatchCNN(imagesPL,
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
         
-        Block0 = standardBlock(imagesPL, trainingPL, blockNumber=0, filters=8, normalize=False, pool=False)
         with tf.variable_scope('PatchExtraction'):
-            imagePatches = ExtractImagePatches3D(Block0, strideSize=strideSize)
+            imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
         
         Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
@@ -98,8 +134,8 @@ def depthPatchCNN(imagesPL,
         with tf.variable_scope('FullyConnectedLayers'):
             flattenedLayer = tf.layers.flatten(Block4)
             hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
-            # droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-            outputLayer = standardDense(hiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
 
 def simpleCNN(imagesPL,
@@ -119,4 +155,50 @@ def simpleCNN(imagesPL,
                                         activation=None,
                                         use_bias=False,
                                         name='outputLayer')
+        return outputLayer
+    
+def reverseDepthCNN(imagesPL,
+                    trainingPL,
+                    keepProbability=0.6,
+                    strideSize=10):
+    with tf.variable_scope('depthPatchCNN'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+        
+        with tf.variable_scope('PatchExtraction'):
+            imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
+        
+        Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=64)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=32)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=16)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=8)
+
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
+        return outputLayer
+
+def constantDepthCNN(imagesPL,
+                    trainingPL,
+                    keepProbability=0.6,
+                    strideSize=10):
+    with tf.variable_scope('depthPatchCNN'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+        
+        with tf.variable_scope('PatchExtraction'):
+            imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
+        
+        Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=64)
+        Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=64)
+        Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=64)
+        Block4 = standardBlock(Block3, trainingPL, blockNumber=4, filters=64)
+
+        with tf.variable_scope('FullyConnectedLayers'):
+            flattenedLayer = tf.layers.flatten(Block4)
+            hiddenLayer = standardDense(inputs=flattenedLayer, units=256, name='hiddenLayer')
+            droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+            outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer

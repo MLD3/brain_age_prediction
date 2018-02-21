@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import depthPatchCNN
+from model.build_baselineStructuralCNN import depthPatchCNN, reverseDepthCNN, constantDepthCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -65,8 +65,8 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='depth{}'.format(GlobalOpts.strideSize),
-                                  numIters=3)
+                                  name='{}{}'.format(GlobalOpts.type, GlobalOpts.strideSize),
+                                  numIters=5)
 
 if __name__ == '__main__':
     additionalArgs = [{
@@ -75,6 +75,14 @@ if __name__ == '__main__':
             'action': 'store',
             'type': int,
             'dest': 'strideSize',
+            'required': True
+            },
+            {
+            'flag': '--type',
+            'help': 'One of: depth, reverse, constant.',
+            'action': 'store',
+            'type': str,
+            'dest': 'type',
             'required': True
             }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -85,13 +93,21 @@ if __name__ == '__main__':
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
-    GlobalOpts.cnn = depthPatchCNN
+    if GlobalOpts.type == 'depth':
+        GlobalOpts.cnn = depthPatchCNN
+    elif GlobalOpts.type == 'reverse':
+        GlobalOpts.cnn = reverseDepthCNN
+    elif GlobalOpts.type == 'constant':
+        GlobalOpts.cnn = constantDepthCNN
+        
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}depth3D_stride{}/'.format(
+    GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                            GlobalOpts.type,
                             GlobalOpts.strideSize)
-    GlobalOpts.checkpointDir = '{}depth3D_stride{}/'.format(
+    GlobalOpts.checkpointDir = '{}{}3D_stride{}/'.format(
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                            GlobalOpts.type,
                             GlobalOpts.strideSize)
     RunTestOnDirs(modelTrainer)

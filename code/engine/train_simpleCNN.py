@@ -65,7 +65,7 @@ def RunTestOnDirs(modelTrainer):
                                   updateOp,
                                   lossOp,
                                   name='simple3D',
-                                  numIters=1)
+                                  numIters=5)
 
 if __name__ == '__main__':
     ParseArgs('Run 3D CNN over structural MRI volumes')
