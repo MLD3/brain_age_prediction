@@ -11,7 +11,8 @@ class DataSetNPY(object):
             labelBaseString=get('DATA.LABELS'),
             batchSize=64,
             maxItemsInQueue=100,
-            shuffle=True
+            shuffle=True,
+            augment='none'
         ):
         self.filenames = filenames
         self.batchSize = batchSize
@@ -27,9 +28,14 @@ class DataSetNPY(object):
         self.labelBatchOperation = tf.reshape(
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
             labelBatchDims)
+        if augment != 'none':
+            self.CreateAugmentOperations(augmentation=augment)
 
     def NextBatch(self, sess):
-        return sess.run([self.imageBatchOperation, self.labelBatchOperation])
+        if augment == 'none':
+            return sess.run([self.imageBatchOperation, self.labelBatchOperation])
+        else:
+            return sess.run([self.augmentedImageOperation, self.labelBatchOperation])
 
     def GetBatchOperations(self):
         return self.imageBatchOperation, self.labelBatchOperation
@@ -48,6 +54,39 @@ class DataSetNPY(object):
             tf.py_func(self._loadLabels, [randomFilenames], tf.float32),
             self.labelBatchDims)
         return randomImageBatch, randomLabelBatch
+
+    def CreateAugmentOperations(self, augmentation='flip'):
+        with tf.variable_scope('DataAugmentation'):
+            if augmentation == 'flip':
+                augmentedImageOperation = tf.reverse(self.imageBatchOperation,
+                                                     axis=[1],
+                                                     name='flip')
+            elif augmentation == 'translate':
+                imageRank = 3
+                maxPad = 6
+                minPad = 0
+                randomPadding = tf.random_uniform(shape=(3, 2),
+                                                  minval=minPad,
+                                                  maxval=maxPad + 1,
+                                                  dtype=tf.int32)
+                randomPadding = tf.pad(randomPadding, paddings=[[1, 1], [0, 0]])
+                paddedImageOperation = tf.pad(self.imageBatchOperation, randomPadding)
+                sliceBegin = randomPadding[:, 1]
+                sliceEnd = self.imageBatchDims
+                augmentedImageOperation = tf.slice(paddedImageOperation,
+                                                sliceBegin,
+                                                sliceEnd)
+
+            chooseOperation = tf.cond(
+                tf.equal(
+                    tf.ones(shape=(), dtype=tf.int32),
+                    tf.random_uniform(shape=(), dtype=tf.int32, minval=0, maxval=2)
+                ),
+                lambda: augmentedImageOperation,
+                lambda: self.imageBatchOperation,
+                name='ChooseAugmentation'
+            )
+            self.augmentedImageOperation = tf.reshape(chooseOperation, self.imageBatchDims)
 
     def _loadImages(self, x):
         images = []

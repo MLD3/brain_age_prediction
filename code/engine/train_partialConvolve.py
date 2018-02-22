@@ -26,7 +26,8 @@ def GetDataSetInputs():
             trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
                                       imageBaseString=GlobalOpts.imageBaseString,
                                       imageBatchDims=GlobalOpts.imageBatchDims,
-                                      batchSize=GlobalOpts.trainBatchSize)
+                                      batchSize=GlobalOpts.trainBatchSize,
+                                      augment=GlobalOpts.augment)
         with tf.variable_scope('ValidationInputs'):
             valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
@@ -84,6 +85,14 @@ if __name__ == '__main__':
             'type': str,
             'dest': 'type',
             'required': True
+            },
+            {
+            'flag': '--augment',
+            'help': 'One of: none, translate, flip.',
+            'action': 'store',
+            'type': str,
+            'dest': 'augment',
+            'required': True
             }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
@@ -99,7 +108,7 @@ if __name__ == '__main__':
         GlobalOpts.cnn = reverseDepthCNN
     elif GlobalOpts.type == 'constant':
         GlobalOpts.cnn = constantDepthCNN
-        
+
     modelTrainer = ModelTrainer()
 
     GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
