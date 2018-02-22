@@ -66,7 +66,7 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='{}{}'.format(GlobalOpts.type, GlobalOpts.strideSize),
+                                  name='{}{}{}'.format(GlobalOpts.type, GlobalOpts.strideSize, GlobalOpts.augment),
                                   numIters=5)
 
 if __name__ == '__main__':
@@ -111,12 +111,14 @@ if __name__ == '__main__':
 
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}{}3D_stride{}/'.format(
+    GlobalOpts.summaryDir = '{}{}3D_stride{}_augment{}/'.format(
                             get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                             GlobalOpts.type,
-                            GlobalOpts.strideSize)
-    GlobalOpts.checkpointDir = '{}{}3D_stride{}/'.format(
+                            GlobalOpts.strideSize,
+                            GlobalOpts.augment)
+    GlobalOpts.checkpointDir = '{}{}3D_stride{}_augment{}/'.format(
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                             GlobalOpts.type,
-                            GlobalOpts.strideSize)
+                            GlobalOpts.strideSize,
+                            GlobalOpts.augment)
     RunTestOnDirs(modelTrainer)

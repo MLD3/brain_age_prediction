@@ -65,7 +65,7 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='{}baseline3D'.format(GlobalOpts.type),
+                                  name='{}baseline3D{}'.format(GlobalOpts.type, GlobalOpts.augment),
                                   numIters=5)
 
 if __name__ == '__main__':
@@ -102,6 +102,10 @@ if __name__ == '__main__':
         GlobalOpts.cnn = constantBaseline
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'), GlobalOpts.type)
-    GlobalOpts.checkpointDir = '{}{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'), GlobalOpts.type)
+    GlobalOpts.summaryDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     GlobalOpts.type,
+                                                     GlobalOpts.augment)
+    GlobalOpts.checkpointDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                                                     GlobalOpts.type,
+                                                     GlobalOpts.augment)
     RunTestOnDirs(modelTrainer)
