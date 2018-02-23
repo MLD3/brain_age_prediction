@@ -75,7 +75,7 @@ class ModelTrainer(object):
         saver.save(sess, path)
         print('STEP {}: saved model to path {}'.format(step, path), end='\r')
 
-    def TrainModel(self, sess, updateOp, lossOp, name, restore=False):
+    def TrainModel(self, sess, updateOp, lossOp, name):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
 
         # Initialize relevant variables
@@ -84,14 +84,10 @@ class ModelTrainer(object):
         # Collect summary and graph update operations
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
-        if restore:
-            savePath = '{}{}/'.format(self.checkpointDir, name)
-            if not os.path.exists(savePath):
-                os.makedirs(savePath)
-            # Restore a model if it exists in the indicated directory
-            saver = saveModel.restore(sess, savePath)
-        # else:
-            # print('Reading saved models is disabled. Training from scratch...')
+        saver = tf.train.Saver()
+        savePath = '{}{}/'.format(self.checkpointDir, name)
+        if not os.path.exists(savePath):
+            os.makedirs(savePath)
 
         bestValidationLoss = math.inf
         bestLossStepIndex = 0
@@ -126,9 +122,9 @@ class ModelTrainer(object):
                 if validationLoss < bestValidationLoss:
                     bestLossStepIndex = batchIndex
                     bestValidationLoss = validationLoss
-                    if restore:
-                        self.SaveModel(sess, batchIndex, saver, savePath)
+                    self.SaveModel(sess, batchIndex, saver, savePath)
 
+        saveModel.restore(sess, saver, savePath)
         testLoss = self.GetPerformanceThroughSet(sess, lossOp, setType='test')
         writer.close()
 
@@ -152,8 +148,7 @@ class ModelTrainer(object):
             validationLoss, testLoss = self.TrainModel(sess,
                                                        updateOps[i],
                                                        lossOp,
-                                                       names[i],
-                                                       restore=True)
+                                                       names[i])
             if validationLoss < bestValidationLoss:
                 bestValidationLoss = validationLoss
                 bestTestLoss = testLoss
