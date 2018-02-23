@@ -28,11 +28,12 @@ class DataSetNPY(object):
         self.labelBatchOperation = tf.reshape(
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
             labelBatchDims)
-        if augment != 'none':
+        self.augment = augment
+        if self.augment != 'none':
             self.CreateAugmentOperations(augmentation=augment)
 
     def NextBatch(self, sess):
-        if augment == 'none':
+        if self.augment == 'none':
             return sess.run([self.imageBatchOperation, self.labelBatchOperation])
         else:
             return sess.run([self.augmentedImageOperation, self.labelBatchOperation])

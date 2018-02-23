@@ -55,7 +55,7 @@ def attentionMap(inputs):
     with tf.variable_scope('attentionMap'):
         weightShape = inputs.shape.as_list()
         weightShape[0] = 1
-        attentionWeight = tf.get_variable(tf.ones(shape=(weightShape), name='attentionWeight'))
+        attentionWeight = tf.ones(shape=weightShape, name='attentionWeight')
         return tf.multiply(inputs, attentionWeight)
 
 def baselineStructuralCNN(imagesPL,
@@ -64,7 +64,7 @@ def baselineStructuralCNN(imagesPL,
     with tf.variable_scope('ConvolutionalNetwork'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=8)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
@@ -83,7 +83,7 @@ def constantBaseline(imagesPL,
     with tf.variable_scope('ConvolutionalNetwork'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=64)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=64)
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=64)
@@ -102,7 +102,7 @@ def reverseBaseline(imagesPL,
     with tf.variable_scope('ConvolutionalNetwork'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         Block1 = standardBlock(imagesPL, trainingPL, blockNumber=1, filters=64)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=32)
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=16)
@@ -122,10 +122,10 @@ def depthPatchCNN(imagesPL,
     with tf.variable_scope('depthPatchCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         with tf.variable_scope('PatchExtraction'):
             imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
-
+        
         Block1 = standardBlock(imagePatches, trainingPL, blockNumber=1, filters=8)
         Block2 = standardBlock(Block1, trainingPL, blockNumber=2, filters=16)
         Block3 = standardBlock(Block2, trainingPL, blockNumber=3, filters=32)
@@ -164,7 +164,7 @@ def reverseDepthCNN(imagesPL,
     with tf.variable_scope('depthPatchCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         with tf.variable_scope('PatchExtraction'):
             imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
 
@@ -187,7 +187,7 @@ def constantDepthCNN(imagesPL,
     with tf.variable_scope('depthPatchCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-
+        imagesPL = attentionMap(imagesPL)
         with tf.variable_scope('PatchExtraction'):
             imagePatches = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
 
