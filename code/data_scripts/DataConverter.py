@@ -4,9 +4,9 @@ import pandas as pd
 
 def ConvertNIItoCSV(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
-        subject = row['Subject']
+        subject = row['SUB_ID']
         print('Saving Subject {}'.format(subject))
-        fileName = inFile + str(subject) + '.nii'
+        fileName = '{}00{}_wmmprage.nii'.format(inFile, str(subject))
         NIIimage = nib.load(fileName)
         imageArray = NIIimage.get_data()
         outFileName = outFile + str(subject)

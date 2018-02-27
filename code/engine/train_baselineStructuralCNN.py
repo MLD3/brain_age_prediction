@@ -65,10 +65,9 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='{}baseline3D{}'.format(GlobalOpts.type, GlobalOpts.augment),
+                                  name=GlobalOpts.name,
                                   numIters=5)
-
-if __name__ == '__main__':
+def compareAugmentations():
     additionalArgs = [
             {
             'flag': '--type',
@@ -109,3 +108,41 @@ if __name__ == '__main__':
                                                      GlobalOpts.type,
                                                      GlobalOpts.augment)
     RunTestOnDirs(modelTrainer)
+
+def compareDownsampling():
+    additionalArgs = [
+        {
+        'flag': '--downscaleRate',
+        'help': 'One of 1, 2, 3.',
+        'action': 'store',
+        'type': int,
+        'dest': 'downscaleRate',
+        'required': True
+        }
+    ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = 'baseline3D_scale{}'.format(GlobalOpts.downscaleRate)
+    if GlobalOpts.downscaleRate == 1:
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
+        GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    elif GlobalOpts.downscaleRate == 2:
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+        GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    elif GlobalOpts.downscaleRate == 3:
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
+        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
+    
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.cnn = baselineStructuralCNN
+    modelTrainer = ModelTrainer()
+
+    GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                                                     GlobalOpts.name)
+    RunTestOnDirs(modelTrainer)
+    
