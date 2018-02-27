@@ -202,3 +202,27 @@ def constantDepthCNN(imagesPL,
             droppedOutHiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
             outputLayer = standardDense(droppedOutHiddenLayer, units=1, activation=None, use_bias=False, name='outputLayer')
         return outputLayer
+
+def customCNN(imagesPL,
+              trainingPL,
+              strideSize,
+              convolutionalFilters,
+              fullyConnectedLayers,
+              keepProbability=0.6):
+    with tf.variable_scope('customCNN'):
+        if imagesPL.dtype != tf.float32:
+            imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+        if strideSize is not None:
+            with tf.variable_scope('PatchExtraction'):
+                imagesPL = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
+        index = 0
+        for numFilters in convolutionalLayers:
+            imagesPL = standardBlock(imagesPL, trainingPL, blockNumber=index, filters=numFilters)
+            index += 1
+        with tf.variable_scope('FullyConnectedLayers'):
+            hiddenLayer = tf.layers.flatten(imagesPL)
+            for numUnits in fullyConnectedLayers:
+                hiddenLayer = standardDense(hiddenLayer, units=numUnits, name='hiddenLayer{}'.format(numUnits))
+                hiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
+        outputLayer = standardDense(hiddenLayer, units=1, activation=None, use_bias=False)
+        return outputLayer

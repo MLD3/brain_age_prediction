@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline
+from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline, customCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -145,4 +145,79 @@ def compareDownsampling():
     GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                                                      GlobalOpts.name)
     RunTestOnDirs(modelTrainer)
+
+def GetCustomMSE(imagesPL, labelsPL, trainingPL, convLayers, fullyConnectedLayers):
+    outputLayer = customCNN(imagesPL,
+                            trainingPL,
+                            GlobalOpts.strideSize, 
+                            convLayers,
+                            fullyConnectedLayers)
+    return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+
+def compareArchitectures():
+    additionalArgs = [
+        {
+        'flag': '--strideSize',
+        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'action': 'store',
+        'type': int,
+        'dest': 'strideSize',
+        'required': True
+        },
+        {
+        'flag': '--type',
+        'help': 'One of: traditional, reverse, hourglass, diamond',
+        'action': 'store',
+        'type': str,
+        'dest': 'type',
+        'required': True
+        }]
+    if GlobalOpts.strideSize <= 0:
+        GlobalOpts.strideSize = None
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.name = '{}_stride{}'.format(GlobalOpts.type, GlobalOpts.strideSize)
+    modelTrainer = ModelTrainer()
+    GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                                                     GlobalOpts.name)
+    trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
+    trainingPL = TrainingPlaceholder()
     
+    fullyConnectedLayers = [256]
+    if GlobalOpts.type == 'traditional':
+        convLayers = [4, 8, 16]
+    elif GlobalOpts.type == 'reverse':
+        convLayers = [16, 8, 4]
+    elif GlobalOpts.type == 'hourglass':
+        convLayers = [12, 4, 12]
+    elif GlobalOpts.type == 'diamond':
+        convLayers = [6, 16, 6]
+        
+    lossOp = GetCustomMSE(imagesPL, labelsPL, trainingPL, convLayers, fullyConnectedLayers)
+    
+    learningRate = 0.0001
+    updateOp = GetTrainingOperation(lossOp, learningRate)
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
+                                GlobalOpts.checkpointDir,
+                                imagesPL,
+                                trainingPL,
+                                labelsPL,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet,
+                                GlobalOpts.numSteps)
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+    with tf.Session(config=config) as sess:
+        modelTrainer.RepeatTrials(sess,
+                                  updateOp,
+                                  lossOp,
+                                  name=GlobalOpts.name,
+                                  numIters=5)
