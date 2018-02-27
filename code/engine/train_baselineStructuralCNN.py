@@ -172,14 +172,16 @@ def compareArchitectures():
         'dest': 'type',
         'required': True
         }]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     if GlobalOpts.strideSize <= 0:
         GlobalOpts.strideSize = None
-    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.augment = 'none'
     GlobalOpts.name = '{}_stride{}'.format(GlobalOpts.type, GlobalOpts.strideSize)
     modelTrainer = ModelTrainer()
     GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),

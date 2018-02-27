@@ -206,7 +206,7 @@ def constantDepthCNN(imagesPL,
 def customCNN(imagesPL,
               trainingPL,
               strideSize,
-              convolutionalFilters,
+              convolutionalLayers,
               fullyConnectedLayers,
               keepProbability=0.6):
     with tf.variable_scope('customCNN'):
