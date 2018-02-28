@@ -223,3 +223,107 @@ def compareArchitectures():
                                   lossOp,
                                   name=GlobalOpts.name,
                                   numIters=5)
+        
+def comparePools():
+    additionalArgs = [
+        {
+        'flag': '--strideSize',
+        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'action': 'store',
+        'type': int,
+        'dest': 'strideSize',
+        'required': True
+        },
+        {
+        'flag': '--poolType',
+        'help': 'One of: MAX, AVERAGE, none',
+        'action': 'store',
+        'type': str,
+        'dest': 'poolType',
+        'required': True
+        },
+        {
+        'flag': '--poolStride',
+        'help': 'The stride length to use for pooling, 1 or 2.',
+        'action': 'store',
+        'type': int,
+        'dest': 'poolStride',
+        'required': True
+        },
+        {
+        'flag': '--convStride',
+        'help': 'The stride length to use for convolutions, 1 or 2.',
+        'action': 'store',
+        'type': int,
+        'dest': 'convStride',
+        'required': True
+        },
+        {
+        'flag': '--type',
+        'help': 'One of: traditional, reverse',
+        'action': 'store',
+        'type': str,
+        'dest': 'type',
+        'required': True
+        }
+        ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    if GlobalOpts.strideSize <= 0:
+        GlobalOpts.strideSize = None
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = '{}_slice{}_pool{}{}_conv{}'.format(GlobalOpts.type, 
+                                                          GlobalOpts.strideSize,
+                                                          GlobalOpts.poolType,
+                                                          GlobalOpts.poolStride,
+                                                          GlobalOpts.convStride)
+    modelTrainer = ModelTrainer()
+    GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                                                     GlobalOpts.name)
+    trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
+    trainingPL = TrainingPlaceholder()
+    
+    fullyConnectedLayers = [256]
+    
+    if GlobalOpts.type == 'traditional':
+        convLayers = [8, 16, 32]
+    elif GlobalOpts.type == 'reverse':
+        convLayers = [32, 16, 8]
+        
+    outputLayer = customCNN(imagesPL,
+                            trainingPL,
+                            GlobalOpts.strideSize, 
+                            convLayers,
+                            fullyConnectedLayers,
+                            convStrides=(GlobalOpts.convStride, ) * 4,
+                            poolStrides=(GlobalOpts.poolStride, ) * 4,
+                            poolType=GlobalOpts.poolType)
+    lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+    
+    learningRate = 0.0001
+    updateOp = GetTrainingOperation(lossOp, learningRate)
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
+                                GlobalOpts.checkpointDir,
+                                imagesPL,
+                                trainingPL,
+                                labelsPL,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet,
+                                GlobalOpts.numSteps)
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+    with tf.Session(config=config) as sess:
+        modelTrainer.RepeatTrials(sess,
+                                  updateOp,
+                                  lossOp,
+                                  name=GlobalOpts.name,
+                                  numIters=5)

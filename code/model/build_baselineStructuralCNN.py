@@ -10,6 +10,9 @@ def standardBatchNorm(inputs, trainingPL, momentum=0.9, name=None):
 def standardPool(inputs, kernel_size=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME', name=None):
     return tf.nn.max_pool3d(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
 
+def avgPool(inputs, kernel_size=[1,2,2,2,1], strides=[1,2,2,2,1], padding='SAME', name=None):
+    return tf.nn.avg_pool3d(inputs, ksize=kernel_size, strides=strides, padding=padding, name=name)
+
 def standardConvolution(inputs, filters, kernel_size=(3,3,3), activation=tf.nn.elu, strides=(1,1,1), padding='SAME', name=None):
     return tf.layers.conv3d(inputs=inputs, filters=filters, kernel_size=kernel_size,
                             strides=strides, padding=padding, activation=activation,
@@ -32,23 +35,29 @@ def standardBlock(inputs,
                   blockNumber,
                   filters,
                   kernelSize=(3,3,3),
+                  kernelStrides=(1,1,1),
                   normalize=True,
-                  pool=True):
+                  poolStrides=[1,2,2,2,1],
+                  poolType='MAX'):
     with tf.variable_scope('ConvBlock{}'.format(blockNumber)):
         BlockConvolution1 = standardConvolution(inputs,
                                                 filters=filters,
                                                 name='Block{}Convolution1'.format(blockNumber),
-                                                kernel_size=kernelSize)
+                                                kernel_size=kernelSize,
+                                                strides=kernelStrides)
         BlockConvolution2 = standardConvolution(BlockConvolution1,
                                                 filters=filters,
                                                 name='Block{}Convolution2'.format(blockNumber),
-                                                kernel_size=kernelSize)
+                                                kernel_size=kernelSize,
+                                                strides=kernelStrides)
         outputLayer = BlockConvolution2
 
         if normalize:
             outputLayer = standardBatchNorm(outputLayer, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
-        if pool:
-            outputLayer = standardPool(outputLayer, name='Block{}MaxPool'.format(blockNumber))
+        if poolType=='MAX':
+            outputLayer = standardPool(outputLayer, strides=poolStrides, name='Block{}MaxPool'.format(blockNumber))
+        elif poolType=='AVERAGE':
+            outputLayer = avgPool(outputLayer, strides=poolStrides, name='Block{}AvgPool'.format(blockNumber))
         return outputLayer
 
 def attentionMap(inputs):
@@ -208,7 +217,10 @@ def customCNN(imagesPL,
               strideSize,
               convolutionalLayers,
               fullyConnectedLayers,
-              keepProbability=0.6):
+              keepProbability=0.6,
+              convStrides=None,
+              poolStrides=None,
+              poolType='MAX'):
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
@@ -217,7 +229,14 @@ def customCNN(imagesPL,
                 imagesPL = ExtractImagePatches3D(imagesPL, strideSize=strideSize)
         index = 0
         for numFilters in convolutionalLayers:
-            imagesPL = standardBlock(imagesPL, trainingPL, blockNumber=index, filters=numFilters)
+            convStride = (1,1,1)
+            if convStrides is not None:
+                convStride = (convStrides[index],) * 3
+            poolStride = [1,2,2,2,1]
+            if poolStrides is not None:
+                poolStride = [1, poolStrides[index], poolStrides[index], poolStrides[index], 1]
+            
+            imagesPL = standardBlock(imagesPL, trainingPL, blockNumber=index, filters=numFilters, poolType=poolType, kernelStrides=convStride, poolStrides=poolStride)
             index += 1
         with tf.variable_scope('FullyConnectedLayers'):
             hiddenLayer = tf.layers.flatten(imagesPL)
