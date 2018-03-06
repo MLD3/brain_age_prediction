@@ -16,6 +16,8 @@
             "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
             "DOWNSAMPLE_PATH": "/data/psturm/structural/downsampledArrays/",
             "EXTRA_SMALL_PATH": "/data/psturm/structural/extraSmallArrays/",
+            "MAX_PATH": "/data/psturm/structural/maxpoolArrays/",
+            "AVG_PATH": "/data/psturm/structural/avgpoolArrays/",
             "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
             "HEIGHT": 121,
             "WIDTH": 145,

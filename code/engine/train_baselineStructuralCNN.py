@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline, customCNN
+from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline, customCNN, attentionMapCNN, deepCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -145,6 +145,41 @@ def compareDownsampling():
     GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                                                      GlobalOpts.name)
     RunTestOnDirs(modelTrainer)
+    
+def compareSamplingType():
+    additionalArgs = [
+        {
+        'flag': '--sampleType',
+        'help': 'One of max, avg, sample.',
+        'action': 'store',
+        'type': str,
+        'dest': 'sampleType',
+        'required': True
+        }
+    ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = 'baseline3D_{}'.format(GlobalOpts.sampleType)
+    GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
+    if GlobalOpts.sampleType == 'max':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
+    elif GlobalOpts.sampleType == 'avg':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
+    elif GlobalOpts.sampleType == 'sample':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
+    
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.cnn = baselineStructuralCNN
+    modelTrainer = ModelTrainer()
+
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/sample_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format('../summaries/sample_comp/',
+                                                     GlobalOpts.name)
+    RunTestOnDirs(modelTrainer)
 
 def GetCustomMSE(imagesPL, labelsPL, trainingPL, convLayers, fullyConnectedLayers):
     outputLayer = customCNN(imagesPL,
@@ -175,6 +210,8 @@ def compareArchitectures():
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     if GlobalOpts.strideSize <= 0:
         GlobalOpts.strideSize = None
+        GlobalOpts.cnn = baselineStructuralCNN
+        
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -283,9 +320,9 @@ def comparePools():
                                                           GlobalOpts.poolStride,
                                                           GlobalOpts.convStride)
     modelTrainer = ModelTrainer()
-    GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/pool_comp/',
                                                      GlobalOpts.name)
-    GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+    GlobalOpts.checkpointDir = '{}{}/'.format('../checkpoints/pool_comp/',
                                                      GlobalOpts.name)
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
@@ -306,6 +343,165 @@ def comparePools():
                             convStrides=(GlobalOpts.convStride, ) * 4,
                             poolStrides=(GlobalOpts.poolStride, ) * 4,
                             poolType=GlobalOpts.poolType)
+    lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+    
+    learningRate = 0.0001
+    updateOp = GetTrainingOperation(lossOp, learningRate)
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
+                                GlobalOpts.checkpointDir,
+                                imagesPL,
+                                trainingPL,
+                                labelsPL,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet,
+                                GlobalOpts.numSteps)
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+    with tf.Session(config=config) as sess:
+        modelTrainer.RepeatTrials(sess,
+                                  updateOp,
+                                  lossOp,
+                                  name=GlobalOpts.name,
+                                  numIters=5)
+
+def compareAttention():
+    additionalArgs = [
+        {
+        'flag': '--strideSize',
+        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'action': 'store',
+        'type': int,
+        'dest': 'strideSize',
+        'required': True
+        },
+        {
+        'flag': '--type',
+        'help': 'One of: traditional, reverse',
+        'action': 'store',
+        'type': str,
+        'dest': 'type',
+        'required': True
+        },
+        {
+        'flag': '--attention',
+        'help': 'One of: 0, 1, 2, 3',
+        'action': 'store',
+        'type': int,
+        'dest': 'attention',
+        'required': True
+        }
+        ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    if GlobalOpts.strideSize <= 0:
+        GlobalOpts.strideSize = None
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = 'attention{}_{}_stride{}'.format(GlobalOpts.attention, 
+                                                       GlobalOpts.type, 
+                                                       GlobalOpts.strideSize)
+    modelTrainer = ModelTrainer()
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/attention_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format('../checkpoints/attention_comp/',
+                                                     GlobalOpts.name)
+    trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
+    trainingPL = TrainingPlaceholder()
+        
+    if GlobalOpts.type == 'traditional':
+        convLayers = [8, 16, 32, 64]
+    elif GlobalOpts.type == 'reverse':
+        convLayers = [64, 32, 16, 8]
+    
+    randomAttentionStarter=False
+    if GlobalOpts.attention == 0:
+        attentionMapBools=[True, False, False, False]
+    elif GlobalOpts.attention == 1:
+        attentionMapBools=[False, True, False, False]
+    elif GlobalOpts.attention == 2:
+        attentionMapBools=[True, True, False, False]
+    elif GlobalOpts.attention == 3:
+        attentionMapBools=[False, False, False, False]
+        randomAttentionStarter=True
+        
+    outputLayer = attentionMapCNN(imagesPL,
+                            trainingPL,
+                            GlobalOpts.strideSize, 
+                            convLayers,
+                            attentionMapBools,
+                            randomAttentionStarter=randomAttentionStarter)
+    lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+    
+    learningRate = 0.0001
+    updateOp = GetTrainingOperation(lossOp, learningRate)
+    modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
+                                GlobalOpts.checkpointDir,
+                                imagesPL,
+                                trainingPL,
+                                labelsPL,
+                                trainDataSet,
+                                valdDataSet,
+                                testDataSet,
+                                GlobalOpts.numSteps)
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
+    with tf.Session(config=config) as sess:
+        modelTrainer.RepeatTrials(sess,
+                                  updateOp,
+                                  lossOp,
+                                  name=GlobalOpts.name,
+                                  numIters=5)
+
+def compareDeep():
+    additionalArgs = [
+        {
+        'flag': '--strideSize',
+        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'action': 'store',
+        'type': int,
+        'dest': 'strideSize',
+        'required': True
+        },
+        {
+        'flag': '--reverse',
+        'help': '0 (False) or 1 (True).',
+        'action': 'store',
+        'type': int,
+        'dest': 'reverse',
+        'required': True
+        }]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    if GlobalOpts.strideSize <= 0:
+        GlobalOpts.strideSize = None
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
+    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.augment = 'none'
+    GlobalOpts.reverse = (GlobalOpts.reverse == 1)
+    GlobalOpts.name = 'deep_stride{}_reverse{}'.format(GlobalOpts.strideSize, 
+                                                       GlobalOpts.reverse)
+    modelTrainer = ModelTrainer()
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/deep_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format('../checkpoints/deep_comp/',
+                                                     GlobalOpts.name)
+    trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
+    imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
+    trainingPL = TrainingPlaceholder()
+
+    outputLayer = deepCNN(imagesPL,
+                            trainingPL,
+                            GlobalOpts.strideSize, 
+                            reverse=GlobalOpts.reverse)
     lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
     
     learningRate = 0.0001

@@ -33,3 +33,30 @@ def ExtractImagePatches3D(images, strideSize, kernelSize=3):
         rowIndex += strideSize
     imagePatches = tf.concat(patches, axis=4)
     return imagePatches
+
+def ExtractImagePatchesScale(images, scale=2, kernelSize=3):
+    _, numRows, numCols, depth, _ = images.get_shape().as_list()
+    patches = []
+    rowStride = int((numRows - 2 * kernelSize) / scale)
+    colStride = int((numCols - 2 * kernelSize) / scale)
+    depthStride = int((depth - 2 * kernelSize) / scale)
+    
+    rowIndex = rowStride + kernelSize
+    while rowIndex <= numRows:
+        colIndex = colStride + kernelSize
+        while colIndex <= numCols:
+            depthIndex = depthStride + kernelSize
+            while depthIndex <= depth:
+                # Extract an image slice of size
+                # [batchSize, rowStride, colStride, depthStride, numChannels]
+                imageSlice = images[:,
+                                    max(rowIndex-rowStride-kernelSize, 0):min(rowIndex+kernelSize, numRows),
+                                    max(colIndex-colStride-kernelSize, 0):min(colIndex+kernelSize, numCols),
+                                    max(depthIndex-depthStride-kernelSize, 0):min(depthIndex+kernelSize, depth),
+                                    :]
+                patches.append(imageSlice)
+                depthIndex += depthStride
+            colIndex += colStride
+        rowIndex += rowStride
+    imagePatches = tf.concat(patches, axis=4)
+    return imagePatches

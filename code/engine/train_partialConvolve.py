@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import depthPatchCNN, reverseDepthCNN, constantDepthCNN
+from model.build_baselineStructuralCNN import *
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -179,4 +179,58 @@ def compareDownsampling():
     GlobalOpts.checkpointDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                                                      GlobalOpts.name)
     RunTestOnDirs(modelTrainer)
+    
+def compareSamplingType():
+    additionalArgs = [{
+            'flag': '--strideSize',
+            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+            'action': 'store',
+            'type': int,
+            'dest': 'strideSize',
+            'required': True
+            },
+            {
+            'flag': '--type',
+            'help': 'One of: depth, reverse',
+            'action': 'store',
+            'type': str,
+            'dest': 'type',
+            'required': True
+            },
+            {
+            'flag': '--sampleType',
+            'help': 'One of max, avg, sample.',
+            'action': 'store',
+            'type': str,
+            'dest': 'sampleType',
+            'required': True
+            }
+            ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = '{}_stride{}_{}'.format(GlobalOpts.type, GlobalOpts.strideSize, GlobalOpts.sampleType)
+    GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
+    if GlobalOpts.sampleType == 'max':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
+    elif GlobalOpts.sampleType == 'avg':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
+    elif GlobalOpts.sampleType == 'sample':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
         
+    
+    GlobalOpts.trainBatchSize = 4
+    if GlobalOpts.type == 'depth':
+        GlobalOpts.cnn = depthPatchCNN
+    elif GlobalOpts.type == 'reverse':
+        GlobalOpts.cnn = reverseDepthCNN
+
+    modelTrainer = ModelTrainer()
+
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/sample_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format('../summaries/sample_comp/',
+                                                     GlobalOpts.name)
+    RunTestOnDirs(modelTrainer)
