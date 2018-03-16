@@ -10,8 +10,9 @@ from placeholders.shared_placeholders import *
 from datetime import datetime
 
 class PrintOps(object):
-    def __init__(self, ops, names):
+    def __init__(self, ops, updateOps, names):
         self.ops = ops
+        self.updateOps = updateOps
         self.names = names
         self.valdPlaceholders = [None] * len(names)
         self.valdSummaries = [None] * len(names)
@@ -72,7 +73,7 @@ class ModelTrainer(object):
         }
 
     def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None):
-        accumulatedOps = np.zeros(shape=(len(printOps.ops),))
+        sess.run(tf.local_variables_initializer())
         if setType == 'vald':
             feed_dict = feed_dict=self.GetFeedDict(sess, setType=setType)
             numberIters = self.valdSet.maxItemsInQueue
@@ -84,10 +85,9 @@ class ModelTrainer(object):
             numberIters = 1
 
         for i in range(numberIters):
-            opValues = sess.run(printOps.ops, feed_dict=feed_dict)
-            accumulatedOps += opValues
+            sess.run(printOps.updateOps, feed_dict=feed_dict)
 
-        accumulatedOps = accumulatedOps / numberIters
+        accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
         opValueDict = {}
         for i in range(len(printOps.ops)):
