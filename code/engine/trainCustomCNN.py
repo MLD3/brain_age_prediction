@@ -94,7 +94,7 @@ def compareCustomCNN():
                             fullyConnectedLayers,
                             poolType=GlobalOpts.poolType)
     lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-    MAEOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
+    MAEOp = tf.reduce_mean(tf.abs(tf.subtract(labelsPL, outputLayer)))
     printOps = PrintOps(ops=[lossOp, MAEOp], names=['loss', 'MAE'])
 
     learningRate = 0.0001
