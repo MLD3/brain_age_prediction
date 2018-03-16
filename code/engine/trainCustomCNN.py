@@ -71,20 +71,21 @@ def comparePools():
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.augment = 'none'
     GlobalOpts.name = '{}Scale{}'.format(GlobalOpts.type, GlobalOpts.scale)
-    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/pool_comp/',
+    summaryName = 'test_comp'
+    GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
-    GlobalOpts.checkpointDir = '{}{}/'.format('../checkpoints/pool_comp/',
+    GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
+    GlobalOpts.numberTestItems = 75
+    GlobalOpts.numberValdItems = 75
     GlobalOpts.poolType = 'AVERAGE'
+
     modelTrainer = ModelTrainer()
-
-
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
     trainingPL = TrainingPlaceholder()
 
     fullyConnectedLayers = [256, 1]
-
     if GlobalOpts.type == 'traditional':
         convLayers = [8, 16, 32, 64]
     elif GlobalOpts.type == 'reverse':
