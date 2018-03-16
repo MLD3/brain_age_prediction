@@ -127,7 +127,7 @@ class ModelTrainer(object):
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)
             _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
-
+            
             if batchIndex % self.batchStepsBetweenSummary == 0:
                 opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps,
                                     setType='train', batchTrainFeedDict=batchTrainFeedDict)

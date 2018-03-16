@@ -80,6 +80,27 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
                                                      GlobalOpts.name)
     GlobalOpts.augment = 'none'
 
+def GetOps(labelsPL, outputLayer):
+    if GlobalOpts.data == 'PNC':
+        lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+        MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+        MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
+        printOps = PrintOps(ops=[MSEOp, MAEOp],
+            updateOps=[MSEUpdateOp, MAEUpdateOp],
+            names=['loss', 'MAE'])
+    else:
+        oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
+        lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
+        labelClasses = tf.argmax(input=oneHotLabels, axis=1)
+        predictionClasses = tf.argmax(input=outputLayer, axis=1)
+        accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
+        aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
+        errorOp = 1.0 - accuracyOp
+        printOps = PrintOps(ops=[errorOp, aucOp],
+            updateOps=[accuracyUpdateOp, aucUpdateOp],
+            names=['loss', 'AUC'])
+    return lossOp, printOps
+
 def compareCustomCNN():
     additionalArgs = [
         {
@@ -119,7 +140,7 @@ def compareCustomCNN():
         convLayers = [8, 16, 32, 64]
     elif GlobalOpts.type == 'reverse':
         convLayers = [64, 32, 16, 8]
-    if data == 'PNC':
+    if GlobalOpts.data == 'PNC':
         fullyConnectedLayers = [256, 1]
     else:
         fullyConnectedLayers = [256, 2]
@@ -130,25 +151,7 @@ def compareCustomCNN():
                             convLayers,
                             fullyConnectedLayers,
                             poolType=GlobalOpts.poolType)
-    if data == 'PNC':
-        lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-        MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-        MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
-        printOps = PrintOps(ops=[MSEOp, MAEOp],
-            updateOps=[MSEUpdateOp, MAEUpdateOp],
-            names=['loss', 'MAE'])
-    else:
-        oneHotLabels = tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2)
-        lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
-        labelClasses = tf.argmax(inputs=oneHotLabels, axis=1)
-        predictionClasses = tf.argmax(inputs=outputLayer, axis=1)
-        accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
-        aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
-        errorOp = 1.0 - accuracyOp
-        printOps = PrintOps(ops=[errorOp, aucOp],
-            updateOps=[accuracyOp, aucUpdateOp],
-            names=['loss', 'AUC'])
-
+    lossOp, printOps = GetOps(labelsPL, outputLayer)
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
