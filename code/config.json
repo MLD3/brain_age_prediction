@@ -25,6 +25,32 @@
             "DEPTH": 121
         }
     },
+    "ABIDE": {
+      "ABIDE1": {
+          "NUM_TRAIN": 697,
+          "NUM_TEST":  200,
+          "NUM_VALD":  200,
+          "LABELS": "/data/psturm/ABIDE/ABIDE1/binary_labels/",
+          "AGES": "/data/psturm/ABIDE/ABIDE1/ages/",
+          "TEST_LIST": "/data/psturm/ABIDE/ABIDE1/test_list.npy",
+          "VALD_LIST": "/data/psturm/ABIDE/ABIDE1/vald_list.npy",
+          "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE1/train_list.npy",
+          "AVG_POOL2": "/data/psturm/ABIDE/ABIDE1/avgpool2x2x2/",
+          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE1/avgpool3x3x3/"
+      },
+      "ABIDE2": {
+          "NUM_TRAIN": 554,
+          "NUM_TEST":  180,
+          "NUM_VALD":  180,
+          "LABELS": "/data/psturm/ABIDE/ABIDE2/binary_labels/",
+          "AGES": "/data/psturm/ABIDE/ABIDE2/ages/",
+          "TEST_LIST": "/data/psturm/ABIDE/ABIDE2/test_list.npy",
+          "VALD_LIST": "/data/psturm/ABIDE/ABIDE2/vald_list.npy",
+          "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE2/train_list.npy",
+          "AVG_POOL2": "/data/psturm/ABIDE/ABIDE2/avgpool2x2x2/",
+          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/"
+      }
+    },
     "TRAIN": {
         "DEFAULTS": {
             "LARGE_NB_STEPS": 100000,

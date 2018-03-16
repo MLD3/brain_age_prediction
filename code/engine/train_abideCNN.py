@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import simpleCNN
+from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline, customCNN, attentionMapCNN, deepCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import ModelTrainer
@@ -15,7 +15,7 @@ def GetTrainingOperation(lossOp, learningRate):
     return updateOp
 
 def GetMSE(imagesPL, labelsPL, trainingPL):
-    outputLayer = simpleCNN(imagesPL,
+    outputLayer = GlobalOpts.cnn(imagesPL,
                       trainingPL)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
@@ -25,7 +25,8 @@ def GetDataSetInputs():
             trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
                                       imageBaseString=GlobalOpts.imageBaseString,
                                       imageBatchDims=GlobalOpts.imageBatchDims,
-                                      batchSize=GlobalOpts.trainBatchSize)
+                                      batchSize=GlobalOpts.trainBatchSize,
+                                      augment=GlobalOpts.augment)
         with tf.variable_scope('ValidationInputs'):
             valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
@@ -64,11 +65,27 @@ def RunTestOnDirs(modelTrainer):
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
                                   lossOp,
-                                  name='simple3D',
+                                  name=GlobalOpts.name,
                                   numIters=5)
-
-if __name__ == '__main__':
-    ParseArgs('Run 3D CNN over structural MRI volumes')
+def compareAugmentations():
+    additionalArgs = [
+            {
+            'flag': '--type',
+            'help': 'One of: standard, reverse, constant.',
+            'action': 'store',
+            'type': str,
+            'dest': 'type',
+            'required': True
+            },
+            {
+            'flag': '--augment',
+            'help': 'One of: none, translate, flip.',
+            'action': 'store',
+            'type': str,
+            'dest': 'augment',
+            'required': True
+            }]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -76,8 +93,18 @@ if __name__ == '__main__':
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     GlobalOpts.trainBatchSize = 4
+    if GlobalOpts.type == 'standard':
+        GlobalOpts.cnn = baselineStructuralCNN
+    elif GlobalOpts.type == 'reverse':
+        GlobalOpts.cnn = reverseBaseline
+    elif GlobalOpts.type == 'constant':
+        GlobalOpts.cnn = constantBaseline
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}simple3D/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'))
-    GlobalOpts.checkpointDir = '{}baseline3D/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'))
+    GlobalOpts.summaryDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
+                                                     GlobalOpts.type,
+                                                     GlobalOpts.augment)
+    GlobalOpts.checkpointDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
+                                                     GlobalOpts.type,
+                                                     GlobalOpts.augment)
     RunTestOnDirs(modelTrainer)
