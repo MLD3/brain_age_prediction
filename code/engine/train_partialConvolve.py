@@ -17,7 +17,7 @@ def GetTrainingOperation(lossOp, learningRate):
 def GetMSE(imagesPL, labelsPL, trainingPL, cnn):
     outputLayer = cnn(imagesPL,
                       trainingPL,
-                      strideSize=GlobalOpts.strideSize)
+                      scale=GlobalOpts.scale)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
 def GetDataSetInputs():
@@ -69,12 +69,13 @@ def RunTestOnDirs(modelTrainer):
                                   name=GlobalOpts.name,
                                   numIters=5)
 def compareAugmentations():
-    additionalArgs = [{
-            'flag': '--strideSize',
-            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+    additionalArgs = [
+            {
+            'flag': '--scale',
+            'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
             'action': 'store',
             'type': int,
-            'dest': 'strideSize',
+            'dest': 'scale',
             'required': True
             },
             {
@@ -110,25 +111,26 @@ def compareAugmentations():
 
     modelTrainer = ModelTrainer()
 
-    GlobalOpts.summaryDir = '{}{}3D_stride{}_augment{}/'.format(
+    GlobalOpts.summaryDir = '{}{}3D_scale{}_augment{}/'.format(
                             get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                             GlobalOpts.type,
-                            GlobalOpts.strideSize,
+                            GlobalOpts.scale,
                             GlobalOpts.augment)
-    GlobalOpts.checkpointDir = '{}{}3D_stride{}_augment{}/'.format(
+    GlobalOpts.checkpointDir = '{}{}3D_scale{}_augment{}/'.format(
                             get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
                             GlobalOpts.type,
-                            GlobalOpts.strideSize,
+                            GlobalOpts.scale,
                             GlobalOpts.augment)
     RunTestOnDirs(modelTrainer)
     
 def compareDownsampling():
-    additionalArgs = [{
-            'flag': '--strideSize',
-            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+    additionalArgs = [
+            {
+            'flag': '--scale',
+            'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
             'action': 'store',
             'type': int,
-            'dest': 'strideSize',
+            'dest': 'scale',
             'required': True
             },
             {
@@ -153,7 +155,7 @@ def compareDownsampling():
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.augment = 'none'
-    GlobalOpts.name = '{}_stride{}_scale{}'.format(GlobalOpts.type, GlobalOpts.strideSize, GlobalOpts.downscaleRate)
+    GlobalOpts.name = '{}_scale{}_sample{}'.format(GlobalOpts.type, GlobalOpts.scale, GlobalOpts.downscaleRate)
     if GlobalOpts.downscaleRate == 1:
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NUMPY_PATH')
         GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
@@ -181,12 +183,13 @@ def compareDownsampling():
     RunTestOnDirs(modelTrainer)
     
 def compareSamplingType():
-    additionalArgs = [{
-            'flag': '--strideSize',
-            'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+    additionalArgs = [
+            {
+            'flag': '--scale',
+            'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
             'action': 'store',
             'type': int,
-            'dest': 'strideSize',
+            'dest': 'scale',
             'required': True
             },
             {
@@ -199,7 +202,7 @@ def compareSamplingType():
             },
             {
             'flag': '--sampleType',
-            'help': 'One of max, avg, sample.',
+            'help': 'One of max, avg, sample, norm.',
             'action': 'store',
             'type': str,
             'dest': 'sampleType',
@@ -211,7 +214,7 @@ def compareSamplingType():
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
     GlobalOpts.augment = 'none'
-    GlobalOpts.name = '{}_stride{}_{}'.format(GlobalOpts.type, GlobalOpts.strideSize, GlobalOpts.sampleType)
+    GlobalOpts.name = '{}_scale{}_{}'.format(GlobalOpts.type, GlobalOpts.scale, GlobalOpts.sampleType)
     GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
     if GlobalOpts.sampleType == 'max':
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
@@ -219,6 +222,8 @@ def compareSamplingType():
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
     elif GlobalOpts.sampleType == 'sample':
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
+    elif GlobalOpts.sampleType == 'norm':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NORM_PATH')
         
     
     GlobalOpts.trainBatchSize = 4

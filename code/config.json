@@ -19,6 +19,7 @@
             "MAX_PATH": "/data/psturm/structural/maxpoolArrays/",
             "AVG_PATH": "/data/psturm/structural/avgpoolArrays/",
             "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
+            "NORM_PATH": "/data/psturm/structural/meanNorm3x3Arrays/",
             "HEIGHT": 121,
             "WIDTH": 145,
             "DEPTH": 121

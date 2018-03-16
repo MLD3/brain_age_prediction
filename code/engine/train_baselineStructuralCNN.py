@@ -150,7 +150,7 @@ def compareSamplingType():
     additionalArgs = [
         {
         'flag': '--sampleType',
-        'help': 'One of max, avg, sample.',
+        'help': 'One of max, avg, sample, norm.',
         'action': 'store',
         'type': str,
         'dest': 'sampleType',
@@ -170,6 +170,8 @@ def compareSamplingType():
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
     elif GlobalOpts.sampleType == 'sample':
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
+    elif GlobalOpts.sampleType == 'norm':
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NORM_PATH')
     
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.cnn = baselineStructuralCNN
@@ -184,7 +186,7 @@ def compareSamplingType():
 def GetCustomMSE(imagesPL, labelsPL, trainingPL, convLayers, fullyConnectedLayers):
     outputLayer = customCNN(imagesPL,
                             trainingPL,
-                            GlobalOpts.strideSize, 
+                            GlobalOpts.scale, 
                             convLayers,
                             fullyConnectedLayers)
     return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
@@ -192,11 +194,11 @@ def GetCustomMSE(imagesPL, labelsPL, trainingPL, convLayers, fullyConnectedLayer
 def compareArchitectures():
     additionalArgs = [
         {
-        'flag': '--strideSize',
-        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'flag': '--scale',
+        'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
         'action': 'store',
         'type': int,
-        'dest': 'strideSize',
+        'dest': 'scale',
         'required': True
         },
         {
@@ -208,8 +210,7 @@ def compareArchitectures():
         'required': True
         }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    if GlobalOpts.strideSize <= 0:
-        GlobalOpts.strideSize = None
+    if GlobalOpts.scale == 1:
         GlobalOpts.cnn = baselineStructuralCNN
         
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
@@ -219,7 +220,7 @@ def compareArchitectures():
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.augment = 'none'
-    GlobalOpts.name = '{}_stride{}'.format(GlobalOpts.type, GlobalOpts.strideSize)
+    GlobalOpts.name = '{}_scale{}'.format(GlobalOpts.type, GlobalOpts.scale)
     modelTrainer = ModelTrainer()
     GlobalOpts.summaryDir = '{}{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
                                                      GlobalOpts.name)
@@ -264,11 +265,11 @@ def compareArchitectures():
 def comparePools():
     additionalArgs = [
         {
-        'flag': '--strideSize',
-        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'flag': '--scale',
+        'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
         'action': 'store',
         'type': int,
-        'dest': 'strideSize',
+        'dest': 'scale',
         'required': True
         },
         {
@@ -305,8 +306,6 @@ def comparePools():
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    if GlobalOpts.strideSize <= 0:
-        GlobalOpts.strideSize = None
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -315,7 +314,7 @@ def comparePools():
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.augment = 'none'
     GlobalOpts.name = '{}_slice{}_pool{}{}_conv{}'.format(GlobalOpts.type, 
-                                                          GlobalOpts.strideSize,
+                                                          GlobalOpts.scale,
                                                           GlobalOpts.poolType,
                                                           GlobalOpts.poolStride,
                                                           GlobalOpts.convStride)
@@ -337,7 +336,7 @@ def comparePools():
         
     outputLayer = customCNN(imagesPL,
                             trainingPL,
-                            GlobalOpts.strideSize, 
+                            GlobalOpts.scale, 
                             convLayers,
                             fullyConnectedLayers,
                             convStrides=(GlobalOpts.convStride, ) * 4,
@@ -368,11 +367,11 @@ def comparePools():
 def compareAttention():
     additionalArgs = [
         {
-        'flag': '--strideSize',
-        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'flag': '--scale',
+        'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
         'action': 'store',
         'type': int,
-        'dest': 'strideSize',
+        'dest': 'scale',
         'required': True
         },
         {
@@ -393,8 +392,6 @@ def compareAttention():
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    if GlobalOpts.strideSize <= 0:
-        GlobalOpts.strideSize = None
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
@@ -402,9 +399,9 @@ def compareAttention():
     GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
     GlobalOpts.trainBatchSize = 4
     GlobalOpts.augment = 'none'
-    GlobalOpts.name = 'attention{}_{}_stride{}'.format(GlobalOpts.attention, 
+    GlobalOpts.name = 'attention{}_{}_scale{}'.format(GlobalOpts.attention, 
                                                        GlobalOpts.type, 
-                                                       GlobalOpts.strideSize)
+                                                       GlobalOpts.scale)
     modelTrainer = ModelTrainer()
     GlobalOpts.summaryDir = '{}{}/'.format('../summaries/attention_comp/',
                                                      GlobalOpts.name)
@@ -432,7 +429,7 @@ def compareAttention():
         
     outputLayer = attentionMapCNN(imagesPL,
                             trainingPL,
-                            GlobalOpts.strideSize, 
+                            GlobalOpts.scale, 
                             convLayers,
                             attentionMapBools,
                             randomAttentionStarter=randomAttentionStarter)
@@ -461,11 +458,11 @@ def compareAttention():
 def compareDeep():
     additionalArgs = [
         {
-        'flag': '--strideSize',
-        'help': 'The stride to chunk MRI images into. Typical values are 10, 15, 20, 30, 40, 60.',
+        'flag': '--scale',
+        'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
         'action': 'store',
         'type': int,
-        'dest': 'strideSize',
+        'dest': 'scale',
         'required': True
         },
         {
@@ -477,17 +474,15 @@ def compareDeep():
         'required': True
         }]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    if GlobalOpts.strideSize <= 0:
-        GlobalOpts.strideSize = None
     GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
     GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
     GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
-    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
-    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NORM_PATH')
+    GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
+    GlobalOpts.trainBatchSize = 8
     GlobalOpts.augment = 'none'
     GlobalOpts.reverse = (GlobalOpts.reverse == 1)
-    GlobalOpts.name = 'deep_stride{}_reverse{}'.format(GlobalOpts.strideSize, 
+    GlobalOpts.name = 'deep_scale{}_reverse{}'.format(GlobalOpts.scale, 
                                                        GlobalOpts.reverse)
     modelTrainer = ModelTrainer()
     GlobalOpts.summaryDir = '{}{}/'.format('../summaries/deep_comp/',
@@ -500,7 +495,7 @@ def compareDeep():
 
     outputLayer = deepCNN(imagesPL,
                             trainingPL,
-                            GlobalOpts.strideSize, 
+                            GlobalOpts.scale, 
                             reverse=GlobalOpts.reverse)
     lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
     

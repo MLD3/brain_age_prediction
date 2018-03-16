@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-def ExtractImagePatches3D(images, strideSize, kernelSize=3):
+def ExtractImagePatchesDEPRECATED(images, strideSize, kernelSize=3):
     """
         images: a 5D tensor of shape (batchSize, numRows, numCols, depth, numChannels)
         returns: a 5D tensor of shape (batchSize, strideSize, strideSize, strideSize, numChannels * numPatches)
@@ -34,7 +34,9 @@ def ExtractImagePatches3D(images, strideSize, kernelSize=3):
     imagePatches = tf.concat(patches, axis=4)
     return imagePatches
 
-def ExtractImagePatchesScale(images, scale=2, kernelSize=3):
+def ExtractImagePatches3D(images, scale=2, kernelSize=3):
+    if scale == 1:
+        return images
     _, numRows, numCols, depth, _ = images.get_shape().as_list()
     patches = []
     rowStride = int((numRows - 2 * kernelSize) / scale)
