@@ -25,6 +25,29 @@ def plotValdPerformances():
     plt.ylabel('Mean Square Error')
     plt.show()
 
+def plotDownsamplingPerformances():
+    x_vals      = np.array([1, 2, 3])
+    baseline    = np.array([3.541, 3.229, 3.848])
+    baseline_err= np.array([0.279, 0.338, 0.486])
+    depth       = np.array([3.359, 3.531, 3.923])
+    depth_err   = np.array([0.274, 0.408, 0.356])
+    reverse     = np.array([2.692, 2.884, 2.878])
+    reverse_err = np.array([0.326, 0.171, 0.121])
+
+    base_line = plt.errorbar(x_vals, baseline, yerr=baseline_err, fmt='-bo', capsize=4)
+    depth_line = plt.errorbar(x_vals + 0.05, depth, yerr=depth_err, fmt='-ro', capsize=4)
+    rever_line = plt.errorbar(x_vals - 0.05, reverse, yerr=reverse_err, fmt='-go', capsize=4)
+
+    base_line.set_label('Baseline')
+    depth_line.set_label('Depth Slicing')
+    rever_line.set_label('Reverse Slicing')
+    ax = plt.gca()
+    ax.legend()
+    plt.title('Comparison of 3D models on MRI imaging data')
+    plt.xlabel('Downsampling rate')
+    plt.ylabel('Mean Square Error')
+    plt.show()
+
 def plotTestPerformances():
     y_pos=np.arange(6)
     names=np.array(['depth_stride9', 'constant_stride6', 'reverse_stride_27', 'baseline', 'r_baseline', 'c_baseline'])
@@ -38,31 +61,31 @@ def plotTestPerformances():
     plt.show()
 
 def plotTrainingTime():
-    x_vals      = np.array([6, 9, 13, 18, 27, 60])
-    constant    = np.array([37, 23.5, 23, 26, 43, 210])
-    depth       = np.array([31, 21, 20, 20, 23, 64])
-    reverse     = np.array([37, 23.5, 23, 25.5, 40, 189])
+    x_vals      = np.array([1, 2, 3])
+    baseline    = np.array([480, 65, 30])
+    depth       = np.array([130, 23, 15])
+    reverse     = np.array([270, 40, 21])
 
-    [constant_line]   = plt.plot(x_vals, constant, '-bo')
+    [base_line]       = plt.plot(x_vals, baseline, '-bo')
     [depth_line]      = plt.plot(x_vals, depth, '-ro')
     [reverse_line]    = plt.plot(x_vals, reverse, '-go')
 
-    constant_line.set_label('Constant Filters')
-    depth_line.set_label('Normal Filters')
-    reverse_line.set_label('Reverse Filters')
+    base_line.set_label('Baseline')
+    depth_line.set_label('Depth Slicing')
+    reverse_line.set_label('Reverse Slicing')
     ax = plt.gca()
     ax.legend()
 
-    for xy in zip(x_vals, constant):
-        ax.annotate('{}'.format(xy[1]), xy=(xy[0]-1, xy[1]+5), textcoords='data')
+    for xy in zip(x_vals, baseline):
+        ax.annotate('{}'.format(xy[1]), xy=(xy[0], xy[1]+7), textcoords='data')
     for xy in zip(x_vals, depth):
-        ax.annotate('{}'.format(xy[1]), xy=(xy[0], xy[1]-6), textcoords='data')
+        ax.annotate('{}'.format(xy[1]), xy=(xy[0], xy[1]-13), textcoords='data')
     for xy in zip(x_vals, reverse):
-        ax.annotate('{}'.format(xy[1]), xy=(xy[0]-1, xy[1]+1), textcoords='data')
+        ax.annotate('{}'.format(xy[1]), xy=(xy[0]+0.01, xy[1]), textcoords='data')
 
     plt.title('Comparison of time taken by 3D models on MRI imaging data')
-    plt.xlabel('Stride Size')
-    plt.ylabel('Time (minutes) / 10k iterations')
+    plt.xlabel('Downsampling Rate')
+    plt.ylabel('Time (minutes) / 50k iterations')
     plt.show()
 
 def plotNumberParams():
@@ -126,4 +149,4 @@ def scatterParamPerformance():
     plt.show()
 
 if __name__ == '__main__':
-    scatterParamPerformance()
+    plotTrainingTime()

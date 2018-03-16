@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
-from model.build_baselineStructuralCNN import baselineStructuralCNN, reverseBaseline, constantBaseline, customCNN, attentionMapCNN, deepCNN
+from model.buildCustomCNN import customCNN
 from utils.saveModel import *
 from utils.config import get
-from engine.trainCommon import ModelTrainer
+from engine.trainCommon import *
 from placeholders.shared_placeholders import *
 
 def GetTrainingOperation(lossOp, learningRate):
@@ -32,22 +32,73 @@ def GetDataSetInputs():
                                     imageBaseString=GlobalOpts.imageBaseString,
                                     imageBatchDims=GlobalOpts.imageBatchDims,
                                     batchSize=1,
-                                    maxItemsInQueue=75,
+                                    maxItemsInQueue=GlobalOpts.numberValdItems,
                                     shuffle=False)
         with tf.variable_scope('TestInputs'):
             testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
                                     imageBaseString=GlobalOpts.imageBaseString,
                                     imageBatchDims=GlobalOpts.imageBatchDims,
                                     batchSize=1,
-                                    maxItemsInQueue=75,
+                                    maxItemsInQueue=GlobalOpts.numberTestItems,
                                     shuffle=False)
     return trainDataSet, valdDataSet, testDataSet
 
-def RunTestOnDirs(modelTrainer):
+def comparePools():
+    additionalArgs = [
+        {
+        'flag': '--scale',
+        'help': 'The scale at which to slice dimensions. For example, a scale of 2 means that each dimension will be devided into 2 distinct regions, for a total of 8 contiguous chunks.',
+        'action': 'store',
+        'type': int,
+        'dest': 'scale',
+        'required': True
+        },
+        {
+        'flag': '--type',
+        'help': 'One of: traditional, reverse',
+        'action': 'store',
+        'type': str,
+        'dest': 'type',
+        'required': True
+        }
+        ]
+    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
+    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
+    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NORM_PATH')
+    GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
+    GlobalOpts.trainBatchSize = 4
+    GlobalOpts.augment = 'none'
+    GlobalOpts.name = '{}Scale{}'.format(GlobalOpts.type, GlobalOpts.scale)
+    GlobalOpts.summaryDir = '{}{}/'.format('../summaries/pool_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.checkpointDir = '{}{}/'.format('../checkpoints/pool_comp/',
+                                                     GlobalOpts.name)
+    GlobalOpts.poolType = 'AVERAGE'
+    modelTrainer = ModelTrainer()
+
+
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
     trainingPL = TrainingPlaceholder()
-    lossOp = GetMSE(imagesPL, labelsPL, trainingPL)
+
+    fullyConnectedLayers = [256, 1]
+
+    if GlobalOpts.type == 'traditional':
+        convLayers = [8, 16, 32, 64]
+    elif GlobalOpts.type == 'reverse':
+        convLayers = [64, 32, 16, 8]
+
+    outputLayer = customCNN(imagesPL,
+                            trainingPL,
+                            GlobalOpts.scale,
+                            convLayers,
+                            fullyConnectedLayers,
+                            poolType=GlobalOpts.poolType)
+    lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+    printOps = PrintOps(ops=[lossOp], names=['loss'])
+
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
@@ -64,47 +115,6 @@ def RunTestOnDirs(modelTrainer):
     with tf.Session(config=config) as sess:
         modelTrainer.RepeatTrials(sess,
                                   updateOp,
-                                  lossOp,
+                                  printOps,
                                   name=GlobalOpts.name,
                                   numIters=5)
-def compareAugmentations():
-    additionalArgs = [
-            {
-            'flag': '--type',
-            'help': 'One of: standard, reverse, constant.',
-            'action': 'store',
-            'type': str,
-            'dest': 'type',
-            'required': True
-            },
-            {
-            'flag': '--augment',
-            'help': 'One of: none, translate, flip.',
-            'action': 'store',
-            'type': str,
-            'dest': 'augment',
-            'required': True
-            }]
-    ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
-    GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
-    GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-    GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.DOWNSAMPLE_PATH')
-    GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
-    # GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
-    GlobalOpts.trainBatchSize = 4
-    if GlobalOpts.type == 'standard':
-        GlobalOpts.cnn = baselineStructuralCNN
-    elif GlobalOpts.type == 'reverse':
-        GlobalOpts.cnn = reverseBaseline
-    elif GlobalOpts.type == 'constant':
-        GlobalOpts.cnn = constantBaseline
-    modelTrainer = ModelTrainer()
-
-    GlobalOpts.summaryDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.SUMMARIES_DIR'),
-                                                     GlobalOpts.type,
-                                                     GlobalOpts.augment)
-    GlobalOpts.checkpointDir = '{}{}baseline3D_augment{}/'.format(get('TRAIN.CNN_BASELINE.CHECKPOINT_DIR'),
-                                                     GlobalOpts.type,
-                                                     GlobalOpts.augment)
-    RunTestOnDirs(modelTrainer)
