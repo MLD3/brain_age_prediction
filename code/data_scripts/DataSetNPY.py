@@ -20,6 +20,7 @@ class DataSetNPY(object):
         self.labelBatchDims = labelBatchDims
         self.imageBaseString = imageBaseString
         self.labelBaseString = labelBaseString
+        self.maxItemsInQueue = maxItemsInQueue
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
         dequeueOp = stringQueue.dequeue_many(batchSize)
         self.imageBatchOperation = tf.reshape(

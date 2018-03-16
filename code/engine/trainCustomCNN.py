@@ -14,10 +14,6 @@ def GetTrainingOperation(lossOp, learningRate):
         updateOp = AdamOptimizer(lossOp, learningRate)
     return updateOp
 
-def GetMSE(imagesPL, labelsPL, trainingPL):
-    outputLayer = GlobalOpts.cnn(imagesPL,
-                      trainingPL)
-    return tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -98,7 +94,8 @@ def compareCustomCNN():
                             fullyConnectedLayers,
                             poolType=GlobalOpts.poolType)
     lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-    printOps = PrintOps(ops=[lossOp], names=['loss'])
+    MAEOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
+    printOps = PrintOps(ops=[lossOp, MAEOp], names=['loss', 'MAE'])
 
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)

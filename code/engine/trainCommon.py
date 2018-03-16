@@ -71,11 +71,20 @@ class ModelTrainer(object):
             self.trainingPL: training
         }
 
-    def GetPerformanceThroughSet(self, sess, printOps, setType='vald', numberIters=75): #TODO: CHANGE NUMBER ITERS DYNAMICALLY
+    def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None):
         accumulatedOps = np.zeros(shape=(len(printOps.ops),))
+        if setType == 'vald':
+            feed_dict = feed_dict=self.GetFeedDict(sess, setType=setType)
+            numberIters = self.valdSet.maxItemsInQueue
+        elif setType == 'test':
+            feed_dict = feed_dict=self.GetFeedDict(sess, setType=setType)
+            numberIters = self.testSet.maxItemsInQueue
+        elif setType == 'train':
+            feed_dict = batchTrainFeedDict
+            numberIters = 1
 
         for i in range(numberIters):
-            opValues = sess.run(printOps, feed_dict=self.GetFeedDict(sess, setType=setType))
+            opValues = sess.run(printOps, feed_dict=feed_dict)
             accumulatedOps += opValues
 
         accumulatedOps = accumulatedOps / numberIters
@@ -113,10 +122,12 @@ class ModelTrainer(object):
         bestLossStepIndex = 0
 
         for batchIndex in range(self.numberOfSteps):
-            _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=self.GetFeedDict(sess))
+            batchTrainFeedDict = self.GetFeedDict(sess)
+            _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
 
             if batchIndex % self.batchStepsBetweenSummary == 0:
-                opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps, setType='train')
+                opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps,
+                                    setType='train', batchTrainFeedDict=batchTrainFeedDict)
                 writer.add_summary(
                     sess.run(
                         printOps.mergedTrainSummary,
