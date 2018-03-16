@@ -3,7 +3,7 @@ import numpy as np
 from utils.config import get
 from utils.patches import ExtractImagePatches3D
 from placeholders.shared_placeholders import *
-from buildCommon import *
+from model.buildCommon import *
 
 def customCNN(imagesPL,
               trainingPL,
@@ -17,7 +17,7 @@ def customCNN(imagesPL,
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
-        if strideSize is not None:
+        if scale is not None:
             with tf.variable_scope('PatchExtraction'):
                 imagesPL = ExtractImagePatches3D(imagesPL, scale=scale)
         index = 0

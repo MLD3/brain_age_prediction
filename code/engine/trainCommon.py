@@ -75,7 +75,7 @@ class ModelTrainer(object):
         accumulatedOps = np.zeros(shape=(len(printOps.ops),))
 
         for i in range(numberIters):
-            opValues = sess.run(printOps, feed_dict=self.GetFeedDict(sess, setType=setType))
+            opValues = sess.run(printOps.ops, feed_dict=self.GetFeedDict(sess, setType=setType))
             accumulatedOps += opValues
 
         accumulatedOps = accumulatedOps / numberIters
@@ -83,7 +83,10 @@ class ModelTrainer(object):
         opValueDict = {}
         for i in range(len(printOps.ops)):
             opValueDict[printOps.names[i]] = accumulatedOps[i]
-            summaryFeedDict[printOps.placeholders[i]] = accumulatedOps[i]
+            if setType == 'vald':
+                summaryFeedDict[printOps.valdPlaceholders[i]] = accumulatedOps[i]
+            elif setType == 'train':
+                summaryFeedDict[printOps.trainPlaceholders[i]] = accumulatedOps[i]
 
         return opValueDict, summaryFeedDict
 
