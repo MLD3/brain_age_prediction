@@ -43,7 +43,7 @@ def GetDataSetInputs():
                                     shuffle=False)
     return trainDataSet, valdDataSet, testDataSet
 
-def comparePools():
+def compareCustomCNN():
     additionalArgs = [
         {
         'flag': '--scale',
