@@ -7,3 +7,4 @@ dataVisualizations/*
 *plots/
 *summaries/
 .ipynb_checkpoints*
+*.sh
