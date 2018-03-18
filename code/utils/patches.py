@@ -34,7 +34,7 @@ def ExtractImagePatchesDEPRECATED(images, strideSize, kernelSize=3):
     imagePatches = tf.concat(patches, axis=4)
     return imagePatches
 
-def ExtractImagePatches3D(images, scale=2, kernelSize=3):
+def ExtractImagePatches3D(images, scale=2, kernelSize=3, sliceIndex=None, align=False):
     if scale == 1:
         return images
     _, numRows, numCols, depth, _ = images.get_shape().as_list()
@@ -42,6 +42,11 @@ def ExtractImagePatches3D(images, scale=2, kernelSize=3):
     rowStride = int((numRows - 2 * kernelSize) / scale)
     colStride = int((numCols - 2 * kernelSize) / scale)
     depthStride = int((depth - 2 * kernelSize) / scale)
+    runningIndex = 0
+    X = 1
+    Y = 2
+    Z = 3
+    alignAxes=[None, [Z], [Y], [Y, Z], [X], [X, Z], [X, Y], [X, Y, Z]]
     
     rowIndex = rowStride + kernelSize
     while rowIndex <= numRows:
@@ -56,6 +61,12 @@ def ExtractImagePatches3D(images, scale=2, kernelSize=3):
                                     max(colIndex-colStride-kernelSize, 0):min(colIndex+kernelSize, numCols),
                                     max(depthIndex-depthStride-kernelSize, 0):min(depthIndex+kernelSize, depth),
                                     :]
+                if sliceIndex is not None and sliceIndex == runningIndex:
+                    return imageSlice
+                if align and alignAxes[runningIndex] is not None:
+                    imageSlice = tf.reverse(imageSlice, axis=alignAxes[runningIndex])
+                
+                runningIndex += 1
                 patches.append(imageSlice)
                 depthIndex += depthStride
             colIndex += colStride

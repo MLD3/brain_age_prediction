@@ -50,8 +50,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.labelBaseString = get('DATA.LABELS')
         GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.trainBatchSize = 4
-        GlobalOpts.numberTestItems = 75
-        GlobalOpts.numberValdItems = 75
+        GlobalOpts.numberTestItems = 100
+        GlobalOpts.numberValdItems = 100
     elif data == 'ABIDE1':
         GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE1.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE1.VALD_LIST')).tolist()
@@ -72,8 +72,12 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.trainBatchSize = 4
         GlobalOpts.numberTestItems = get('ABIDE.ABIDE2.NUM_TEST')
         GlobalOpts.numberValdItems = get('ABIDE.ABIDE2.NUM_VALD')
-    GlobalOpts.poolType = 'AVERAGE'
+    GlobalOpts.poolType = 'MAX'
     GlobalOpts.name = '{}Scale{}Data{}'.format(GlobalOpts.type, GlobalOpts.scale, data)
+    if GlobalOpts.sliceIndex is not None:
+        GlobalOpts.name = '{}Slice{}'.format(GlobalOpts.name, GlobalOpts.sliceIndex)
+    if GlobalOpts.align:
+        GlobalOpts.name = '{}Aligned'.format(GlobalOpts.name)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
@@ -120,16 +124,42 @@ def compareCustomCNN():
         'required': True
         },
         {
+        'flag': '--summaryName',
+        'help': 'The file name to put the results of this run into.',
+        'action': 'store',
+        'type': str,
+        'dest': 'summaryName',
+        'required': True
+        },
+        {
         'flag': '--data',
         'help': 'One of: PNC, ABIDE1, ABIDE2',
         'action': 'store',
         'type': str,
         'dest': 'data',
         'required': True
+        },
+        {
+        'flag': '--sliceIndex',
+        'help': 'Set this to an integer to select a single brain region as opposed to concatenating all regions along the depth channel.',
+        'action': 'store',
+        'type': int,
+        'dest': 'sliceIndex',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--align',
+        'help': 'Set to true to align channels.',
+        'action': 'store',
+        'type': int,
+        'dest': 'align',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
-    DefineDataOpts(data=GlobalOpts.data)
+    DefineDataOpts(data=GlobalOpts.data, summaryName=GlobalOpts.summaryName)
 
     modelTrainer = ModelTrainer()
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
@@ -150,7 +180,9 @@ def compareCustomCNN():
                             GlobalOpts.scale,
                             convLayers,
                             fullyConnectedLayers,
-                            poolType=GlobalOpts.poolType)
+                            poolType=GlobalOpts.poolType,
+                            sliceIndex=GlobalOpts.sliceIndex,
+                            align=GlobalOpts.align)
     lossOp, printOps = GetOps(labelsPL, outputLayer)
     learningRate = 0.0001
     updateOp = GetTrainingOperation(lossOp, learningRate)

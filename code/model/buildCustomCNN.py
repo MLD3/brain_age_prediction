@@ -13,13 +13,15 @@ def customCNN(imagesPL,
               keepProbability=0.6,
               convStrides=None,
               poolStrides=None,
-              poolType='MAX'):
+              poolType='MAX',
+              sliceIndex=None,
+              align=False):
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
         if scale is not None:
             with tf.variable_scope('PatchExtraction'):
-                imagesPL = ExtractImagePatches3D(imagesPL, scale=scale)
+                imagesPL = ExtractImagePatches3D(imagesPL, scale=scale, sliceIndex=sliceIndex, align=align)
         index = 0
         for numFilters in convolutionalLayers:
             convStride = (1,1,1)
@@ -36,6 +38,6 @@ def customCNN(imagesPL,
             for numUnits in fullyConnectedLayers[:-1]:
                 hiddenLayer = standardDense(hiddenLayer, units=numUnits, name='hiddenLayer{}'.format(numUnits))
                 hiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)
-        outputUnits = fullyConnectedLayers[-1]
-        outputLayer = standardDense(hiddenLayer, units=outputUnits, activation=None, use_bias=False)
+            outputUnits = fullyConnectedLayers[-1]
+            outputLayer = standardDense(hiddenLayer, units=outputUnits, activation=None, use_bias=False, name='outputLayer')
         return outputLayer

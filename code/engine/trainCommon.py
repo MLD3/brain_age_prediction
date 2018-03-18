@@ -8,6 +8,7 @@ from utils import saveModel
 from utils.config import get
 from placeholders.shared_placeholders import *
 from datetime import datetime
+from utils.args import *
 
 class PrintOps(object):
     def __init__(self, ops, updateOps, names):
@@ -74,17 +75,21 @@ class ModelTrainer(object):
 
     def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None):
         sess.run(tf.local_variables_initializer())
+        accumulatedOps = sess.run(printOps.ops)
         if setType == 'vald':
-            feed_dict = feed_dict=self.GetFeedDict(sess, setType=setType)
             numberIters = self.valdSet.maxItemsInQueue
         elif setType == 'test':
-            feed_dict = feed_dict=self.GetFeedDict(sess, setType=setType)
             numberIters = self.testSet.maxItemsInQueue
         elif setType == 'train':
-            feed_dict = batchTrainFeedDict
             numberIters = 1
-
+        
         for i in range(numberIters):
+            if setType == 'vald':
+                feed_dict = self.GetFeedDict(sess, setType=setType)
+            elif setType == 'test':
+                feed_dict = self.GetFeedDict(sess, setType=setType)
+            elif setType == 'train':
+                feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
 
         accumulatedOps = sess.run(printOps.ops)
@@ -190,17 +195,17 @@ class ModelTrainer(object):
         outputFile = open('{}performance.txt'.format(self.summaryDir), 'w')
 
         print("==============Validation Set Operations, Best==============")
-        outputFile.write("==============Validation Set Operations, Best==============")
+        outputFile.write("==============Validation Set Operations, Best==============\n")
         for opName in bestValdOpDict:
             outputString = '{}: {} +- {}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]))
             print(outputString)
-            outputFile.write(outputString)
+            outputFile.write(outputString + '\n')
         print("==============Test Set Operations, Best==============")
-        outputFile.write("==============Test Set Operations, Best==============")
+        outputFile.write("==============Test Set Operations, Best==============\n")
         for opName in bestTestOpDict:
             outputString = '{}: {} +- {}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]))
             print(outputString)
-            outputFile.write(outputString)
+            outputFile.write(outputString + '\n')
         outputFile.close()
         coord.request_stop()
         coord.join(threads)
