@@ -65,9 +65,9 @@ def ExtractImagePatches3D(images, scale=2, kernelSize=3, sliceIndex=None, align=
                     return imageSlice
                 if align and alignAxes[runningIndex] is not None:
                     imageSlice = tf.reverse(imageSlice, axis=alignAxes[runningIndex])
-                
-                runningIndex += 1
+
                 patches.append(imageSlice)
+                runningIndex += 1
                 depthIndex += depthStride
             colIndex += colStride
         rowIndex += rowStride

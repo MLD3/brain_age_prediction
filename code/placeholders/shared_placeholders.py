@@ -59,8 +59,9 @@ def AdamOptimizer(loss, learningRate, clipGrads=False):
         gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
         trainOperation = optimizer.apply_gradients(zip(gradients, variables))
     else:
-        trainOperation = optimizer.minimize(loss)
-    return trainOperation
+        gradients, variables = zip(*optimizer.compute_gradients(loss))
+        trainOperation = optimizer.apply_gradients(zip(gradients, variables))
+    return trainOperation, gradients
 
 def ScheduledGradOptimizer(loss, baseLearningRate, momentum=0.9, decaySteps=1000, decayRate=0.5):
     """

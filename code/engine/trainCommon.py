@@ -11,7 +11,15 @@ from datetime import datetime
 from utils.args import *
 
 class PrintOps(object):
-    def __init__(self, ops, updateOps, names):
+    def flatten(self, tensor):
+        name = tensor.name.split('/')
+        name = '{}_{}_{}'.format(name[3], name[4], name[5])
+        shape = tensor.get_shape().as_list()
+        dim = np.prod(shape)
+        flattened = tf.reshape(tensor, (dim,), name=name)
+        return flattened
+    
+    def __init__(self, ops, updateOps, names, gradients):
         self.ops = ops
         self.updateOps = updateOps
         self.names = names
@@ -27,7 +35,17 @@ class PrintOps(object):
                 self.trainSummaries[i] = tf.summary.scalar('{}Train'.format(self.names[i]), self.trainPlaceholders[i])
             self.mergedValdSummary = tf.summary.merge(self.valdSummaries)
             self.mergedTrainSummary = tf.summary.merge(self.trainSummaries)
-
+        
+        with tf.variable_scope('IndividualGradients'):
+            self.gradients = [self.flatten(grad) for grad in gradients]
+            concatGradients = tf.concat(self.gradients, axis=0, name='ConcatenatedGradients')
+            gradientHistograms = [tf.summary.histogram(grad.name + '_hist', grad) for grad in self.gradients]
+            gradientMeans = [tf.summary.scalar(grad.name + '_mean', tf.reduce_mean(grad)) for grad in self.gradients]
+        with tf.variable_scope('ConcatenatedGradient'):
+            concatHist = tf.summary.histogram('ConcatenatedGradients_hist', concatGradients)
+            concatMean = tf.summary.scalar('ConcatenatedGradients_mean', tf.reduce_mean(concatGradients))
+        self.gradientSummary = tf.summary.merge(gradientHistograms + gradientMeans + [concatHist] + [concatMean])
+        
 class ModelTrainer(object):
     def __init__(self):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
@@ -91,7 +109,7 @@ class ModelTrainer(object):
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
-
+            
         accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
         opValueDict = {}
@@ -131,9 +149,13 @@ class ModelTrainer(object):
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)
-            _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
             
-            if batchIndex % self.batchStepsBetweenSummary == 0:
+            if batchIndex % self.batchStepsBetweenSummary != 0:
+                _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
+            else:
+                _, _, gradSummary = sess.run([updateOp, extraUpdateOps, printOps.gradientSummary], feed_dict=batchTrainFeedDict)
+                writer.add_summary(gradSummary, batchIndex)
+                
                 opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps,
                                     setType='train', batchTrainFeedDict=batchTrainFeedDict)
                 writer.add_summary(

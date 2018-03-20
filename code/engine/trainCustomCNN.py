@@ -11,8 +11,8 @@ from placeholders.shared_placeholders import *
 
 def GetTrainingOperation(lossOp, learningRate):
     with tf.variable_scope('optimizer'):
-        updateOp = AdamOptimizer(lossOp, learningRate)
-    return updateOp
+        updateOp, gradients = AdamOptimizer(lossOp, learningRate)
+    return updateOp, gradients
 
 def GetDataSetInputs():
     with tf.variable_scope('Inputs'):
@@ -46,7 +46,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NORM_PATH')
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
         GlobalOpts.labelBaseString = get('DATA.LABELS')
         GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.trainBatchSize = 4
@@ -84,26 +84,32 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
                                                      GlobalOpts.name)
     GlobalOpts.augment = 'none'
 
-def GetOps(labelsPL, outputLayer):
+def GetOps(labelsPL, outputLayer, learningRate=0.0001):
     if GlobalOpts.data == 'PNC':
-        lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-        MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-        MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
+        with tf.variable_scope('LossOperations'):
+            lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+            MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
+            MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
+            updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
         printOps = PrintOps(ops=[MSEOp, MAEOp],
             updateOps=[MSEUpdateOp, MAEUpdateOp],
-            names=['loss', 'MAE'])
+            names=['loss', 'MAE'],
+            gradients=gradients)
     else:
-        oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
-        lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
-        labelClasses = tf.argmax(input=oneHotLabels, axis=1)
-        predictionClasses = tf.argmax(input=outputLayer, axis=1)
-        accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
-        aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
-        errorOp = 1.0 - accuracyOp
+        with tf.variable_scope('LossOperations'):
+            oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
+            lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
+            labelClasses = tf.argmax(input=oneHotLabels, axis=1)
+            predictionClasses = tf.argmax(input=outputLayer, axis=1)
+            accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
+            aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
+            errorOp = 1.0 - accuracyOp
+            updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
         printOps = PrintOps(ops=[errorOp, aucOp],
             updateOps=[accuracyUpdateOp, aucUpdateOp],
-            names=['loss', 'AUC'])
-    return lossOp, printOps
+            names=['loss', 'AUC'],
+            gradients=gradients)
+    return lossOp, printOps, updateOp
 
 def compareCustomCNN():
     additionalArgs = [
@@ -156,11 +162,21 @@ def compareCustomCNN():
         'dest': 'align',
         'required': False,
         'const': None
-        }
+        },
+        {
+        'flag': '--numberTrials',
+        'help': 'Number of repeated models to run.',
+        'action': 'store',
+        'type': int,
+        'dest': 'numberTrials',
+        'required': False,
+        'const': None
+        },
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
+    if GlobalOpts.numberTrials is None:
+        GlobalOpts.numberTrials = 5
     DefineDataOpts(data=GlobalOpts.data, summaryName=GlobalOpts.summaryName)
-
     modelTrainer = ModelTrainer()
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
@@ -183,9 +199,7 @@ def compareCustomCNN():
                             poolType=GlobalOpts.poolType,
                             sliceIndex=GlobalOpts.sliceIndex,
                             align=GlobalOpts.align)
-    lossOp, printOps = GetOps(labelsPL, outputLayer)
-    learningRate = 0.0001
-    updateOp = GetTrainingOperation(lossOp, learningRate)
+    lossOp, printOps, updateOp = GetOps(labelsPL, outputLayer)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
                                 imagesPL,
@@ -202,4 +216,4 @@ def compareCustomCNN():
                                   updateOp,
                                   printOps,
                                   name=GlobalOpts.name,
-                                  numIters=5)
+                                  numIters=GlobalOpts.numberTrials)
