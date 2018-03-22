@@ -15,10 +15,14 @@ def customCNN(imagesPL,
               poolStrides=None,
               poolType='MAX',
               sliceIndex=None,
-              align=False):
+              align=False,
+              padding=None,
+              phenotypicsPL=None):
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
+        if padding is not None:
+            imagesPL = padImageTensor(imagesPL, padding)
         if scale is not None:
             with tf.variable_scope('PatchExtraction'):
                 imagesPL = ExtractImagePatches3D(imagesPL, scale=scale, sliceIndex=sliceIndex, align=align)
@@ -35,6 +39,9 @@ def customCNN(imagesPL,
             index += 1
         with tf.variable_scope('FullyConnectedLayers'):
             hiddenLayer = tf.layers.flatten(imagesPL)
+            if phenotypicsPL is not None:
+                with tf.variable_scope('AddPhenotypes'):
+                    hiddenLayer = tf.concat([hiddenLayer, phenotypicsPL], axis=1, name='ConcatPhenotypes')
             for numUnits in fullyConnectedLayers[:-1]:
                 hiddenLayer = standardDense(hiddenLayer, units=numUnits, name='hiddenLayer{}'.format(numUnits))
                 hiddenLayer = tf.contrib.layers.dropout(inputs=hiddenLayer, keep_prob=keepProbability, is_training=trainingPL)

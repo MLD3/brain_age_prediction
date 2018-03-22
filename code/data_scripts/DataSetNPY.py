@@ -21,8 +21,10 @@ class DataSetNPY(object):
         self.imageBaseString = imageBaseString
         self.labelBaseString = labelBaseString
         self.maxItemsInQueue = maxItemsInQueue
+        self.phenotypeBatchOperation = None
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
         dequeueOp = stringQueue.dequeue_many(batchSize)
+        self.dequeueOp = dequeueOp
         self.imageBatchOperation = tf.reshape(
             tf.py_func(self._loadImages, [dequeueOp], tf.float32),
             imageBatchDims)
@@ -35,7 +37,10 @@ class DataSetNPY(object):
 
     def NextBatch(self, sess):
         if self.augment == 'none':
-            return sess.run([self.imageBatchOperation, self.labelBatchOperation])
+            if self.phenotypeBatchOperation is not None:
+                return sess.run([self.imageBatchOperation, self.labelBatchOperation, self.phenotypeBatchOperation])
+            else:
+                return sess.run([self.imageBatchOperation, self.labelBatchOperation])
         else:
             return sess.run([self.augmentedImageOperation, self.labelBatchOperation])
 
@@ -89,7 +94,35 @@ class DataSetNPY(object):
                 name='ChooseAugmentation'
             )
             self.augmentedImageOperation = tf.reshape(chooseOperation, self.imageBatchDims)
-
+    
+    def CreatePhenotypicOperations(self, phenotypicBaseStrings):
+        self.phenotypicBaseStrings = phenotypicBaseStrings
+        self.phenotypeBatchOperation = tf.reshape(
+            tf.py_func(self._loadPhenotypes, [self.dequeueOp], tf.float32),
+            (self.batchSize, len(self.phenotypicBaseStrings) + 1))
+        
+    def _loadPhenotypes(self, x):
+        #NOTE: ASSUMES THE FIRST PHENOTYPE IS GENDER,
+        #WHERE MALE IS 1 AND FEMALE IS 2
+        phenotypes = np.zeros((self.batchSize, len(self.phenotypicBaseStrings) + 1), dtype=np.float32)
+        batchIndex = 0
+        for name in x:
+            phenotypeIndex = 0
+            for baseString in self.phenotypicBaseStrings:
+                if phenotypeIndex == 0:
+                    gender = np.load('{}{}.npy'.format(baseString, name.decode('utf-8'))).astype(np.float32)
+                    if gender == 1:
+                        phenotypes[batchIndex, phenotypeIndex] = 1
+                    elif gender == 2:
+                        phenotypes[batchIndex, phenotypeIndex + 1] = 1
+                    phenotypeIndex += 1
+                else:
+                    phenotypes[batchIndex, phenotypeIndex] = np.load('{}{}.npy'.format(baseString, name.decode('utf-8'))).astype(np.float32)
+                
+                phenotypeIndex += 1
+            batchIndex += 1
+        return phenotypes
+            
     def _loadImages(self, x):
         images = []
         for name in x:
@@ -105,14 +138,31 @@ class DataSetNPY(object):
         return labels
 
 if __name__ == '__main__':
-    dataset = DataSetNPY(filenames=['{}'.format(i) for i in range(10)], imageBaseString='../train', labelBaseString='../label', batchSize=5)
+    dataset = DataSetNPY(filenames=np.load('/data/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
+                         imageBatchDims=(-1, 41, 49, 41, 1),
+                         imageBaseString='/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/', 
+                         labelBaseString='/data/psturm/ABIDE/ABIDE2/binary_labels/', 
+                         batchSize=5)
     imageOp, labelOp = dataset.GetBatchOperations()
-    with tf.Session() as sess:
+    dequeueOp = dataset.dequeueOp
+    dataset.CreatePhenotypicOperations(phenotypicBaseStrings=[
+        '/data/psturm/ABIDE/ABIDE2/gender/',
+        '/data/psturm/ABIDE/ABIDE2/IQData/FIQ/',
+        '/data/psturm/ABIDE/ABIDE2/IQData/VIQ/',
+        '/data/psturm/ABIDE/ABIDE2/IQData/PIQ/',
+        '/data/psturm/ABIDE/ABIDE2/ages/'
+    ])
+    phenotypeOp = dataset.phenotypeBatchOperation
+    config  = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = 0.1
+    with tf.Session(config=config) as sess:
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-        for i in range(10):
-            images, labels = sess.run([imageOp, labelOp])
-            print(images)
+        for i in range(1):
+            subjects, images, labels, phenotypes = sess.run([dequeueOp, imageOp, labelOp, phenotypeOp])
+            print(subjects)
+            #print(images)
             print(labels)
+            print(phenotypes)
         coord.request_stop()
         coord.join(threads)

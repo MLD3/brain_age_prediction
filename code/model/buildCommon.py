@@ -72,6 +72,24 @@ def standardBlock(inputs,
             outputLayer = outputLayer + filteredInput
         return outputLayer
 
+def padImageTensor(image, padding, cropDims=[[3, 37], [3, 45], [0, 36]]):
+    with tf.variable_scope('Padding'):
+        croppedImage = image[:,
+                             cropDims[0][0]:cropDims[0][1],
+                             cropDims[1][0]:cropDims[1][1],
+                             cropDims[2][0]:cropDims[2][1],
+                             :]
+        paddedImage = tf.pad(croppedImage,
+                            paddings=[
+                                [0, 0],
+                                [padding, padding],
+                                [padding, padding],
+                                [padding, padding],
+                                [0, 0]
+                            ],
+                            name='ZeroPaddingOp')
+    return paddedImage
+    
 def attentionMap(inputs, randomInit=False):
     with tf.variable_scope('attentionMap'):
         weightShape = inputs.shape.as_list()

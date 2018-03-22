@@ -60,9 +60,10 @@ class ModelTrainer(object):
                         valdSet,
                         testSet,
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
-                        batchStepsBetweenSummary=500
+                        batchStepsBetweenSummary=500,
+                        phenotypicsPL=None
                         ):
-        if not os.path.exists(checkpointDir):
+        if not os.path.exists(checkpointDir) and GlobalOpts.validationDir is None:
             os.makedirs(checkpointDir)
         self.checkpointDir            = checkpointDir
         self.summaryDir               = summaryDir
@@ -74,22 +75,40 @@ class ModelTrainer(object):
         self.trainSet      = trainSet
         self.valdSet       = valdSet
         self.testSet       = testSet
+        self.phenotypicsPL = phenotypicsPL
 
     def GetFeedDict(self, sess, setType='train'):
-        if setType == 'train':
-            images, labels = self.trainSet.NextBatch(sess)
-            training = True
-        elif setType == 'vald':
-            images, labels = self.valdSet.NextBatch(sess)
-            training = False
-        elif setType == 'test':
-            images, labels = self.testSet.NextBatch(sess)
-            training = False
-        return {
-            self.imagesPL: images,
-            self.labelsPL: labels,
-            self.trainingPL: training
-        }
+        if self.phenotypicsPL is not None:
+            if setType == 'train':
+                images, labels, phenotypes = self.trainSet.NextBatch(sess)
+                training = True
+            elif setType == 'vald':
+                images, labels, phenotypes = self.valdSet.NextBatch(sess)
+                training = False
+            elif setType == 'test':
+                images, labels, phenotypes = self.testSet.NextBatch(sess)
+                training = False
+            return {
+                self.imagesPL: images,
+                self.labelsPL: labels,
+                self.trainingPL: training,
+                self.phenotypicsPL: phenotypes
+            }
+        else:
+            if setType == 'train':
+                images, labels = self.trainSet.NextBatch(sess)
+                training = True
+            elif setType == 'vald':
+                images, labels = self.valdSet.NextBatch(sess)
+                training = False
+            elif setType == 'test':
+                images, labels = self.testSet.NextBatch(sess)
+                training = False
+            return {
+                self.imagesPL: images,
+                self.labelsPL: labels,
+                self.trainingPL: training
+            }
 
     def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None):
         sess.run(tf.local_variables_initializer())
@@ -190,7 +209,7 @@ class ModelTrainer(object):
 
         return bestValdOpDict, testOpValueDict
 
-    def RepeatTrials(self, sess, updateOp, printOps, name, numIters=10):
+    def RepeatTrials(self, sess, updateOp, printOps, name, numIters=5):
         print('TRAINING MODEL {}'.format(name))
         graphWriter = tf.summary.FileWriter(self.summaryDir, graph=tf.get_default_graph())
         graphWriter.close()
@@ -229,5 +248,39 @@ class ModelTrainer(object):
             print(outputString)
             outputFile.write(outputString + '\n')
         outputFile.close()
+        coord.request_stop()
+        coord.join(threads)
+        
+    def ValidateModel(self, sess, updateOp, printOps, name, numIters=5):
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        print('Model: {}'.format(name))
+        bestValdOpDict = {}
+        bestTestOpDict = {}
+        for opName in printOps.names:
+            bestValdOpDict[opName] = []
+            bestTestOpDict[opName] = []
+        
+        for i in range(numIters):
+            sess.run(tf.global_variables_initializer())
+            extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
+            saver = tf.train.Saver()
+            savePath = '{}run_{}/'.format(GlobalOpts.validationDir, i)
+            saveModel.restore(sess, saver, savePath)
+            
+            valdOpDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='vald')
+            testOpDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='test')
+            for opName in printOps.names:
+                bestValdOpDict[opName].append(valdOpDict[opName])
+                bestTestOpDict[opName].append(testOpDict[opName])
+        print("==============Validation Set Operations, Best==============")
+        for opName in bestValdOpDict:
+            outputString = '{}: {} +- {}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]))
+            print(outputString)
+        print("==============Test Set Operations, Best==============")
+        for opName in bestTestOpDict:
+            outputString = '{}: {} +- {}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]))
+            print(outputString)
         coord.request_stop()
         coord.join(threads)

@@ -10,7 +10,8 @@
         "VALD_LIST": "/data/psturm/vald.npy",
         "TRAIN_LIST": "/data/psturm/train.npy",
         "PHENOTYPICS": {
-            "PATH": "/data/psturm/PNC_724_phenotypics.csv"
+            "PATH": "/data/psturm/PNC_724_phenotypics.csv",
+            "GENDER": "/data/psturm/gender/"
         },
         "STRUCTURAL": {
             "NUMPY_PATH": "/data/psturm/structural/numpyArrays/",
@@ -48,7 +49,12 @@
           "VALD_LIST": "/data/psturm/ABIDE/ABIDE2/vald_list.npy",
           "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE2/train_list.npy",
           "AVG_POOL2": "/data/psturm/ABIDE/ABIDE2/avgpool2x2x2/",
-          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/"
+          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/",
+          "IQ_LISTS": {
+              "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/test_IQ.npy",
+              "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/vald_IQ.npy",
+              "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy"
+          }
       }
     },
     "TRAIN": {
