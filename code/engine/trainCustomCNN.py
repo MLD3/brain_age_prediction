@@ -11,6 +11,9 @@ from placeholders.shared_placeholders import *
 
 def GetTrainingOperation(lossOp, learningRate):
     with tf.variable_scope('optimizer'):
+        if GlobalOpts.regStrength is not None: 
+            regularizerLosses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+            lossOp = tf.add_n([lossOp] + regularizerLosses, name="RegularizedLoss")
         updateOp, gradients = AdamOptimizer(lossOp, learningRate)
     return updateOp, gradients
 
@@ -42,45 +45,55 @@ def GetDataSetInputs():
     return trainDataSet, valdDataSet, testDataSet
 
 def DefineDataOpts(data='PNC', summaryName='test_comp'):
+    if GlobalOpts.dataScale == 1:
+        GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
+    elif GlobalOpts.dataScale == 2:
+        GlobalOpts.imageBatchDims = (-1, 61, 73, 61, 1)
+    elif GlobalOpts.dataScale == 3:
+        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
     if data == 'PNC':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
+        if GlobalOpts.pncDataType == 'AVG':
+            GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_POOL{}'.format(GlobalOpts.dataScale))
+        elif GlobalOpts.pncDataType == 'MAX':
+            GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
+        elif GlobalOpts.pncDataType == 'NAIVE':
+            GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
         GlobalOpts.labelBaseString = get('DATA.LABELS')
-        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.numberTestItems = 100
         GlobalOpts.numberValdItems = 100
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_PATH')
+        GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('DATA.PHENOTYPICS.GENDER')
-        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.numberTestItems = 100
         GlobalOpts.numberValdItems = 100
     elif data == 'ABIDE1':
         GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE1.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE1.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE1.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('ABIDE.ABIDE1.AVG_POOL3')
+        GlobalOpts.imageBaseString = get('ABIDE.ABIDE1.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE1.LABELS')
-        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.numberTestItems = get('ABIDE.ABIDE1.NUM_TEST')
         GlobalOpts.numberValdItems = get('ABIDE.ABIDE1.NUM_VALD')
     elif data == 'ABIDE2':
+        baseString = 'ABIDE.ABIDE2.IQ_LISTS.'
+        if GlobalOpts.abideSplit is not None:
+            baseString = '{}RANDOM_{}.'.format(baseString, GlobalOpts.abideSplit)
         if GlobalOpts.pheno:
-            GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.TRAIN')).tolist()
-            GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.VALD')).tolist()
-            GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.TEST')).tolist()
+            GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
+            GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
+            GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
         else:
             GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.TRAIN_LIST')).tolist()
             GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.VALD_LIST')).tolist()
             GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL3')
+        GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.LABELS')
-        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.numberTestItems = get('ABIDE.ABIDE2.NUM_TEST')
         GlobalOpts.numberValdItems = get('ABIDE.ABIDE2.NUM_VALD')
     elif data == 'ABIDE2_AGE':
@@ -92,19 +105,24 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.TRAIN_LIST')).tolist()
             GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.VALD_LIST')).tolist()
             GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL3')
+        GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.AGES')
-        GlobalOpts.imageBatchDims = (-1, 41, 49, 41, 1)
         GlobalOpts.numberTestItems = get('ABIDE.ABIDE2.NUM_TEST')
         GlobalOpts.numberValdItems = get('ABIDE.ABIDE2.NUM_VALD')
     GlobalOpts.poolType = 'MAX'
-    GlobalOpts.name = '{}Scale{}Data{}Batch{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize)
+    GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
     if GlobalOpts.sliceIndex is not None:
         GlobalOpts.name = '{}Slice{}'.format(GlobalOpts.name, GlobalOpts.sliceIndex)
     if GlobalOpts.align:
         GlobalOpts.name = '{}Aligned'.format(GlobalOpts.name)
     if GlobalOpts.padding is not None:
         GlobalOpts.name = '{}Padding{}'.format(GlobalOpts.name, GlobalOpts.padding)
+    if GlobalOpts.regStrength is not None:
+        GlobalOpts.name = '{}L2Reg{}'.format(GlobalOpts.name, GlobalOpts.regStrength)
+    if GlobalOpts.maxNorm is not None:
+        GlobalOpts.name = '{}MaxNorm{}'.format(GlobalOpts.name, GlobalOpts.maxNorm)
+    if GlobalOpts.dropout is not None:
+        GlobalOpts.name = '{}Dropout{}'.format(GlobalOpts.name, GlobalOpts.dropout)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
@@ -112,17 +130,18 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
     GlobalOpts.augment = 'none'
 
 def GetOps(labelsPL, outputLayer, learningRate=0.0001):
-    if GlobalOpts.validationDir is not None:
-        if GlobalOpts.data == 'PNC' or GlobalOpts.data == 'ABIDE2_AGE':
+    if GlobalOpts.data == 'PNC' or GlobalOpts.data == 'ABIDE2_AGE':
+        with tf.variable_scope('LossOperations'):
             lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
             MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
             MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
             updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
-            printOps = PrintOps(ops=[MSEOp, MAEOp],
-                updateOps=[MSEUpdateOp, MAEUpdateOp],
-                names=['loss', 'MAE'],
-                gradients=gradients)
-        else:
+        printOps = PrintOps(ops=[MSEOp, MAEOp],
+            updateOps=[MSEUpdateOp, MAEUpdateOp],
+            names=['loss', 'MAE'],
+            gradients=gradients)
+    else:
+        with tf.variable_scope('LossOperations'):
             oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
             lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
             entropyOp, entropyUpdateOp = tf.metrics.mean(values=lossOp)
@@ -130,38 +149,12 @@ def GetOps(labelsPL, outputLayer, learningRate=0.0001):
             predictionClasses = tf.argmax(input=outputLayer, axis=1)
             accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
             aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
-            errorOp = 1.0 - accuracyOp
+            errorOp = 1.0 - aucOp
             updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
-            printOps = PrintOps(ops=[errorOp, aucOp, entropyOp],
-                updateOps=[accuracyUpdateOp, aucUpdateOp, entropyUpdateOp],
-                names=['loss', 'AUC', 'CrossEntropy'],
-                gradients=gradients)
-    else:
-        if GlobalOpts.data == 'PNC' or GlobalOpts.data == 'ABIDE2_AGE':
-            with tf.variable_scope('LossOperations'):
-                lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-                MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
-                MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
-                updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
-            printOps = PrintOps(ops=[MSEOp, MAEOp],
-                updateOps=[MSEUpdateOp, MAEUpdateOp],
-                names=['loss', 'MAE'],
-                gradients=gradients)
-        else:
-            with tf.variable_scope('LossOperations'):
-                oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
-                lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
-                entropyOp, entropyUpdateOp = tf.metrics.mean(values=lossOp)
-                labelClasses = tf.argmax(input=oneHotLabels, axis=1)
-                predictionClasses = tf.argmax(input=outputLayer, axis=1)
-                accuracyOp, accuracyUpdateOp, = tf.metrics.accuracy(labels=labelClasses, predictions=predictionClasses)
-                aucOp, aucUpdateOp = tf.metrics.auc(labels=labelClasses, predictions=predictionClasses)
-                errorOp = 1.0 - accuracyOp
-                updateOp, gradients = GetTrainingOperation(lossOp, learningRate)
-            printOps = PrintOps(ops=[errorOp, aucOp, entropyOp],
-                updateOps=[accuracyUpdateOp, aucUpdateOp, entropyUpdateOp],
-                names=['loss', 'AUC', 'CrossEntropy'],
-                gradients=gradients)
+        printOps = PrintOps(ops=[errorOp, entropyOp, accuracyOp],
+            updateOps=[aucUpdateOp, entropyUpdateOp, accuracyUpdateOp],
+            names=['loss', 'entropy', 'Accuracy'],
+            gradients=gradients)
     return lossOp, printOps, updateOp
 
 def compareCustomCNN(validate=False):
@@ -260,6 +253,69 @@ def compareCustomCNN(validate=False):
         'dest': 'validationDir',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--regStrength',
+        'help': 'Lambda value for L2 regularization. If not specified, no regularization is applied.',
+        'action': 'store',
+        'type': float,
+        'dest': 'regStrength',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--learningRate',
+        'help': 'Global optimization learning rate. Default is 0.0001.',
+        'action': 'store',
+        'type': float,
+        'dest': 'learningRate',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--maxNorm',
+        'help': 'Specify an integer to constrain kernels with a maximum norm.',
+        'action': 'store',
+        'type': int,
+        'dest': 'maxNorm',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--dropout',
+        'help': 'The probability of keeping a neuron alive during training. Defaults to 0.6.',
+        'action': 'store',
+        'type': float,
+        'dest': 'dropout',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--abideSplit',
+        'help': 'An integer between 0 and 4, only valid if data is ABIDE2.',
+        'action': 'store',
+        'type': int,
+        'dest': 'abideSplit',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--dataScale',
+        'help': 'The downsampling rate of the data. Either 1, 2 or 3. Defaults to 3. ',
+        'action': 'store',
+        'type': int,
+        'dest': 'dataScale',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--pncDataType',
+        'help': 'One of AVG, MAX, NAIVE. Defaults to AVG. If set, dataScale cannot be specified.',
+        'action': 'store',
+        'type': str,
+        'dest': 'pncDataType',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -267,6 +323,14 @@ def compareCustomCNN(validate=False):
         GlobalOpts.numberTrials = 5
     if GlobalOpts.batchSize is None:
         GlobalOpts.batchSize = 4
+    if GlobalOpts.learningRate is None:
+        GlobalOpts.learningRate = 0.0001
+    if GlobalOpts.dropout is None:
+        GlobalOpts.dropout = 0.6
+    if GlobalOpts.dataScale is None:
+        GlobalOpts.dataScale = 3
+    if GlobalOpts.pncDataType is None:
+        GlobalOpts.pncDataType = 'AVG'
     DefineDataOpts(data=GlobalOpts.data, summaryName=GlobalOpts.summaryName)
     modelTrainer = ModelTrainer()
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
@@ -302,12 +366,13 @@ def compareCustomCNN(validate=False):
                             GlobalOpts.scale,
                             convLayers,
                             fullyConnectedLayers,
+                            keepProbability=GlobalOpts.dropout,
                             poolType=GlobalOpts.poolType,
                             sliceIndex=GlobalOpts.sliceIndex,
                             align=GlobalOpts.align,
                             padding=GlobalOpts.padding,
                             phenotypicsPL=phenotypicsPL)
-    lossOp, printOps, updateOp = GetOps(labelsPL, outputLayer)
+    lossOp, printOps, updateOp = GetOps(labelsPL, outputLayer, learningRate=GlobalOpts.learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,
                                 imagesPL,

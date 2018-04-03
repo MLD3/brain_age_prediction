@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import math
 import os
+import re
 from sklearn.model_selection import train_test_split, KFold
 from utils import saveModel
 from utils.config import get
@@ -10,10 +11,14 @@ from placeholders.shared_placeholders import *
 from datetime import datetime
 from utils.args import *
 
+
 class PrintOps(object):
     def flatten(self, tensor):
         name = tensor.name.split('/')
-        name = '{}_{}_{}'.format(name[3], name[4], name[5])
+        if len(name) > 5:
+            name = '{}_{}_{}'.format(name[3], name[4], name[5])
+        else:
+            name = re.sub('[^0-9a-zA-Z]+', '_', tensor.name)
         shape = tensor.get_shape().as_list()
         dim = np.prod(shape)
         flattened = tf.reshape(tensor, (dim,), name=name)
@@ -60,7 +65,7 @@ class ModelTrainer(object):
                         valdSet,
                         testSet,
                         numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
-                        batchStepsBetweenSummary=500,
+                        batchStepsBetweenSummary=250,
                         phenotypicsPL=None
                         ):
         if not os.path.exists(checkpointDir) and GlobalOpts.validationDir is None:
@@ -238,13 +243,13 @@ class ModelTrainer(object):
         print("==============Validation Set Operations, Best==============")
         outputFile.write("==============Validation Set Operations, Best==============\n")
         for opName in bestValdOpDict:
-            outputString = '{}: {} +- {}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]))
+            outputString = '{}: {} +- {}\t{}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]), bestValdOpDict[opName])
             print(outputString)
             outputFile.write(outputString + '\n')
         print("==============Test Set Operations, Best==============")
         outputFile.write("==============Test Set Operations, Best==============\n")
         for opName in bestTestOpDict:
-            outputString = '{}: {} +- {}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]))
+            outputString = '{}: {} +- {}\t{}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]), bestTestOpDict[opName])
             print(outputString)
             outputFile.write(outputString + '\n')
         outputFile.close()
@@ -274,13 +279,14 @@ class ModelTrainer(object):
             for opName in printOps.names:
                 bestValdOpDict[opName].append(valdOpDict[opName])
                 bestTestOpDict[opName].append(testOpDict[opName])
+        
         print("==============Validation Set Operations, Best==============")
         for opName in bestValdOpDict:
-            outputString = '{}: {} +- {}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]))
+            outputString = '{}: {} +- {}\t{}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]), bestValdOpDict[opName])
             print(outputString)
         print("==============Test Set Operations, Best==============")
         for opName in bestTestOpDict:
-            outputString = '{}: {} +- {}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]))
+            outputString = '{}: {} +- {}\t{}'.format(opName, np.mean(bestTestOpDict[opName]), np.std(bestTestOpDict[opName]), bestTestOpDict[opName])
             print(outputString)
         coord.request_stop()
         coord.join(threads)
