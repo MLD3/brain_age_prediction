@@ -23,7 +23,7 @@ class PrintOps(object):
         dim = np.prod(shape)
         flattened = tf.reshape(tensor, (dim,), name=name)
         return flattened
-    
+
     def __init__(self, ops, updateOps, names, gradients):
         self.ops = ops
         self.updateOps = updateOps
@@ -40,7 +40,7 @@ class PrintOps(object):
                 self.trainSummaries[i] = tf.summary.scalar('{}Train'.format(self.names[i]), self.trainPlaceholders[i])
             self.mergedValdSummary = tf.summary.merge(self.valdSummaries)
             self.mergedTrainSummary = tf.summary.merge(self.trainSummaries)
-        
+
         with tf.variable_scope('IndividualGradients'):
             self.gradients = [self.flatten(grad) for grad in gradients]
             concatGradients = tf.concat(self.gradients, axis=0, name='ConcatenatedGradients')
@@ -50,7 +50,7 @@ class PrintOps(object):
             concatHist = tf.summary.histogram('ConcatenatedGradients_hist', concatGradients)
             concatMean = tf.summary.scalar('ConcatenatedGradients_mean', tf.reduce_mean(concatGradients))
         self.gradientSummary = tf.summary.merge(gradientHistograms + gradientMeans + [concatHist] + [concatMean])
-        
+
 class ModelTrainer(object):
     def __init__(self):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
@@ -64,7 +64,7 @@ class ModelTrainer(object):
                         trainSet,
                         valdSet,
                         testSet,
-                        numberOfSteps=get('TRAIN.DEFAULTS.TEST_NB_STEPS'),
+                        numberOfSteps=251,
                         batchStepsBetweenSummary=250,
                         phenotypicsPL=None
                         ):
@@ -124,7 +124,7 @@ class ModelTrainer(object):
             numberIters = self.testSet.maxItemsInQueue
         elif setType == 'train':
             numberIters = 1
-        
+
         for i in range(numberIters):
             if setType == 'vald':
                 feed_dict = self.GetFeedDict(sess, setType=setType)
@@ -133,7 +133,7 @@ class ModelTrainer(object):
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
-            
+
         accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
         opValueDict = {}
@@ -173,13 +173,13 @@ class ModelTrainer(object):
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)
-            
+
             if batchIndex % self.batchStepsBetweenSummary != 0:
                 _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
             else:
                 _, _, gradSummary = sess.run([updateOp, extraUpdateOps, printOps.gradientSummary], feed_dict=batchTrainFeedDict)
                 writer.add_summary(gradSummary, batchIndex)
-                
+
                 opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps,
                                     setType='train', batchTrainFeedDict=batchTrainFeedDict)
                 writer.add_summary(
@@ -255,7 +255,7 @@ class ModelTrainer(object):
         outputFile.close()
         coord.request_stop()
         coord.join(threads)
-        
+
     def ValidateModel(self, sess, updateOp, printOps, name, numIters=5):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
@@ -265,7 +265,7 @@ class ModelTrainer(object):
         for opName in printOps.names:
             bestValdOpDict[opName] = []
             bestTestOpDict[opName] = []
-        
+
         for i in range(numIters):
             sess.run(tf.global_variables_initializer())
             extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -273,13 +273,13 @@ class ModelTrainer(object):
             saver = tf.train.Saver()
             savePath = '{}run_{}/'.format(GlobalOpts.validationDir, i)
             saveModel.restore(sess, saver, savePath)
-            
+
             valdOpDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='vald')
             testOpDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='test')
             for opName in printOps.names:
                 bestValdOpDict[opName].append(valdOpDict[opName])
                 bestTestOpDict[opName].append(testOpDict[opName])
-        
+
         print("==============Validation Set Operations, Best==============")
         for opName in bestValdOpDict:
             outputString = '{}: {} +- {}\t{}'.format(opName, np.mean(bestValdOpDict[opName]), np.std(bestValdOpDict[opName]), bestValdOpDict[opName])

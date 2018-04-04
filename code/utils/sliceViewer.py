@@ -52,7 +52,7 @@ class Viewer(object):
     def cycle_channel(self, ax, inc):
         if len(self.currentObject.shape) == 3:
             return
-        self.currentChannel = (self.currentChannel + inc) % self.currentObject.shape[3]
+        self.currentChannel = min(max((self.currentChannel + inc), 0), self.currentObject.shape[3] - 1)
         self.currentVolume = self.currentObject[:,:,:,self.currentChannel]
         self.setImage(ax, reshow=True)
 
@@ -81,7 +81,8 @@ class Viewer(object):
         ax.imshow(self.currentVolume[ax.index, :, :])
         cid = fig.canvas.mpl_connect('key_press_event', self.process_key)
 
-imFile = '../../dataVisualizations/maps/Reverse0/attention/AttentionMap0.npy'
+imFile = '../aligned.npy'
+# imFile = '../../dataVisualizations/maps/Reverse0/attention/AttentionMap0.npy'
 image = np.load(imFile)
 image  = np.squeeze(image)
 v = Viewer()

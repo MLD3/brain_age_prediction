@@ -27,85 +27,66 @@
         }
     },
     "ABIDE": {
-      "ABIDE1": {
-          "NUM_TRAIN": 697,
-          "NUM_TEST":  200,
-          "NUM_VALD":  200,
-          "LABELS": "/data/psturm/ABIDE/ABIDE1/binary_labels/",
-          "AGES": "/data/psturm/ABIDE/ABIDE1/ages/",
-          "TEST_LIST": "/data/psturm/ABIDE/ABIDE1/test_list.npy",
-          "VALD_LIST": "/data/psturm/ABIDE/ABIDE1/vald_list.npy",
-          "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE1/train_list.npy",
-          "AVG_POOL2": "/data/psturm/ABIDE/ABIDE1/avgpool2x2x2/",
-          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE1/avgpool3x3x3/"
-      },
-      "ABIDE2": {
-          "NUM_TRAIN": 554,
-          "NUM_TEST":  180,
-          "NUM_VALD":  180,
-          "AVG_POOL1": "/data/psturm/ABIDE/ABIDE2/numpyArrays/",
-          "AVG_POOL2": "/data/psturm/ABIDE/ABIDE2/avgpool2x2x2/",
-          "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/",
-          "LABELS": "/data/psturm/ABIDE/ABIDE2/binary_labels/",
-          "AGES": "/data/psturm/ABIDE/ABIDE2/ages/",
-          "TEST_LIST": "/data/psturm/ABIDE/ABIDE2/test_list.npy",
-          "VALD_LIST": "/data/psturm/ABIDE/ABIDE2/vald_list.npy",
-          "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE2/train_list.npy",
-          "IQ_LISTS": {
-              "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/test_IQ.npy",
-              "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/vald_IQ.npy",
-              "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/train_IQ.npy",
-              "RANDOM_0": {
-                  "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/random_0/test_IQ.npy",
-                  "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/random_0/vald_IQ.npy",
-                  "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/random_0/train_IQ.npy"
-              },
-              "RANDOM_1": {
-                  "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/random_1/test_IQ.npy",
-                  "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/random_1/vald_IQ.npy",
-                  "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/random_1/train_IQ.npy"
-              },
-              "RANDOM_2": {
-                  "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/random_2/test_IQ.npy",
-                  "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/random_2/vald_IQ.npy",
-                  "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/random_2/train_IQ.npy"
-              },
-              "RANDOM_3": {
-                  "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/random_3/test_IQ.npy",
-                  "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/random_3/vald_IQ.npy",
-                  "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/random_3/train_IQ.npy"
-              },
-              "RANDOM_4": {
-                  "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/random_4/test_IQ.npy",
-                  "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/random_4/vald_IQ.npy",
-                  "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/random_4/train_IQ.npy"
-              }
-          }
-      }
-    },
-    "TRAIN": {
-        "DEFAULTS": {
-            "LARGE_NB_STEPS": 100000,
-            "NB_STEPS": 10000,
-            "TEST_NB_STEPS": 500,
-            "LEARNING_RATE": 0.0001
+        "ABIDE1": {
+            "NUM_TRAIN": 697,
+            "NUM_TEST":  200,
+            "NUM_VALD":  200,
+            "LABELS": "/data/psturm/ABIDE/ABIDE1/binary_labels/",
+            "AGES": "/data/psturm/ABIDE/ABIDE1/ages/",
+            "TEST_LIST": "/data/psturm/ABIDE/ABIDE1/test_list.npy",
+            "VALD_LIST": "/data/psturm/ABIDE/ABIDE1/vald_list.npy",
+            "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE1/train_list.npy",
+            "AVG_POOL2": "/data/psturm/ABIDE/ABIDE1/avgpool2x2x2/",
+            "AVG_POOL3": "/data/psturm/ABIDE/ABIDE1/avgpool3x3x3/"
         },
-        "CNN_BASELINE": {
-            "SUMMARIES_DIR": "../summaries/cnn_baseline/",
-            "CHECKPOINT_DIR": "../checkpoints/cnn_baseline/",
-            "LARGE_LEARNING_RATE": 0.0005,
-            "LEARNING_RATE": 0.0001,
-            "SMALL_LEARNING_RATE": 0.00005,
-            "MOMENTUM": 0.9,
-            "NB_STEPS": 5000,
-            "SMALL_NB_STEPS": 10,
-            "SLICE_BATCH_SIZE": 64,
-            "LARGE_BATCH_SIZE": 4,
-            "BATCH_SIZE": 2,
-            "SMALL_BATCH_SIZE": 1,
-            "KEEP_PROB": 0.6,
-            "SMALL_KEEP_PROB": 0.3,
-            "TINY_KEEP_PROB": 0.1
+        "ABIDE2": {
+            "NUM_TRAIN": 554,
+            "NUM_TEST":  180,
+            "NUM_VALD":  180,
+            "AVG_POOL1": "/data/psturm/ABIDE/ABIDE2/numpyArrays/",
+            "AVG_POOL2": "/data/psturm/ABIDE/ABIDE2/avgpool2x2x2/",
+            "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/",
+            "LABELS": "/data/psturm/ABIDE/ABIDE2/binary_labels/",
+            "AGES": "/data/psturm/ABIDE/ABIDE2/ages/",
+            "TEST": "/data/psturm/ABIDE/ABIDE2/test_list.npy",
+            "VALD": "/data/psturm/ABIDE/ABIDE2/vald_list.npy",
+            "TRAIN": "/data/psturm/ABIDE/ABIDE2/train_list.npy",
+            "IQ_LISTS": {
+                "SITE_LISTS": {
+                    "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/test_IQ.npy",
+                    "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/vald_IQ.npy",
+                    "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/train_IQ.npy"
+                },
+                "STRAT_LISTS": {
+                    "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/test_IQ.npy",
+                    "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/vald_IQ.npy",
+                    "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/train_IQ.npy"
+                }
+            }
         }
+    },
+    "ADHD": {
+        "AVG_POOL1": "/data/psturm/ADHD/numpyArrays/",
+        "AVG_POOL2": "/data/psturm/ADHD/avgpool2x2x2/",
+        "AVG_POOL3": "/data/psturm/ADHD/avgpool3x3x3/",
+        "LABELS": "/data/psturm/ADHD/adhd_labels/",
+        "AGES": "/data/psturm/ADHD/ages/",
+        "GENDER": "/data/psturm/ADHD/gender/",
+        "SITE_LISTS": {
+            "NUM_TRAIN": 614,
+            "NUM_TEST": 79,
+            "NUM_VALD": 83,
+            "TEST": "/data/psturm/ADHD/siteSeperatedLists/test_list.npy",
+            "VALD": "/data/psturm/ADHD/siteSeperatedLists/vald_list.npy",
+            "TRAIN": "/data/psturm/ADHD/siteSeperatedLists/train_list.npy"
+        },
+        "STRAT_LISTS": {
+            "NUM_TRAIN": 618,
+            "NUM_TEST": 79,
+            "NUM_VALD": 79,
+            "TEST": "/data/psturm/ADHD/stratifiedLists/test_list.npy",
+            "VALD": "/data/psturm/ADHD/stratifiedLists/vald_list.npy",
+            "TRAIN": "/data/psturm/ADHD/stratifiedLists/train_list.npy"
+        },
     }
 }

@@ -11,7 +11,7 @@ from placeholders.shared_placeholders import *
 
 def GetTrainingOperation(lossOp, learningRate):
     with tf.variable_scope('optimizer'):
-        if GlobalOpts.regStrength is not None: 
+        if GlobalOpts.regStrength is not None:
             regularizerLosses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
             lossOp = tf.add_n([lossOp] + regularizerLosses, name="RegularizedLoss")
         updateOp, gradients = AdamOptimizer(lossOp, learningRate)
@@ -62,40 +62,30 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         elif GlobalOpts.pncDataType == 'NAIVE':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
         GlobalOpts.labelBaseString = get('DATA.LABELS')
-        GlobalOpts.numberTestItems = 100
-        GlobalOpts.numberValdItems = 100
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
         GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('DATA.PHENOTYPICS.GENDER')
-        GlobalOpts.numberTestItems = 100
-        GlobalOpts.numberValdItems = 100
     elif data == 'ABIDE1':
         GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE1.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE1.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE1.TEST_LIST')).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE1.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE1.LABELS')
-        GlobalOpts.numberTestItems = get('ABIDE.ABIDE1.NUM_TEST')
-        GlobalOpts.numberValdItems = get('ABIDE.ABIDE1.NUM_VALD')
     elif data == 'ABIDE2':
-        baseString = 'ABIDE.ABIDE2.IQ_LISTS.'
-        if GlobalOpts.abideSplit is not None:
-            baseString = '{}RANDOM_{}.'.format(baseString, GlobalOpts.abideSplit)
+        baseString = 'ABIDE.ABIDE2.'
         if GlobalOpts.pheno:
-            GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
-            GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
-            GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
-        else:
-            GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.TRAIN_LIST')).tolist()
-            GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.VALD_LIST')).tolist()
-            GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
+            if GlobalOpts.listType == 'strat':
+                baseString = '{}IQ_LISTS.STRAT_LISTS.'.format(baseString)
+            elif GlobalOpts.listType == 'site':
+                baseString = '{}IQ_LISTS.SITE_LISTS.'.format(baseString)
+        GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
+        GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
+        GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.LABELS')
-        GlobalOpts.numberTestItems = get('ABIDE.ABIDE2.NUM_TEST')
-        GlobalOpts.numberValdItems = get('ABIDE.ABIDE2.NUM_VALD')
     elif data == 'ABIDE2_AGE':
         if GlobalOpts.pheno:
             GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.TRAIN')).tolist()
@@ -107,8 +97,23 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.AGES')
-        GlobalOpts.numberTestItems = get('ABIDE.ABIDE2.NUM_TEST')
-        GlobalOpts.numberValdItems = get('ABIDE.ABIDE2.NUM_VALD')
+
+    elif 'ADHD' in data:
+        if GlobalOpts.listType == 'strat':
+            baseString = 'ADHD.STRAT_LISTS.'
+        elif GlobalOpts.listType == 'site':
+            baseString = 'ADHD.SITE_LISTS.'
+        GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
+        GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
+        GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
+        GlobalOpts.imageBaseString = get('ADHD.AVG_POOL{}'.format(GlobalOpts.dataScale))
+        if data == 'ADHD_AGE':
+            GlobalOpts.labelBaseString = get('ADHD.AGES')
+        else:
+            GlobalOpts.labelBaseString = get('ADHD.LABELS')
+
+    GlobalOpts.numberTestItems = len(GlobalOpts.testFiles)
+    GlobalOpts.numberValdItems = len(GlobalOpts.valdFiles)
     GlobalOpts.poolType = 'MAX'
     GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
     if GlobalOpts.sliceIndex is not None:
@@ -130,7 +135,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
     GlobalOpts.augment = 'none'
 
 def GetOps(labelsPL, outputLayer, learningRate=0.0001):
-    if GlobalOpts.data == 'PNC' or GlobalOpts.data == 'ABIDE2_AGE':
+    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
         with tf.variable_scope('LossOperations'):
             lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
             MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
@@ -142,6 +147,8 @@ def GetOps(labelsPL, outputLayer, learningRate=0.0001):
             gradients=gradients)
     else:
         with tf.variable_scope('LossOperations'):
+            if 'ADHD' in GlobalOpts.data:
+                labelsPL = labelsPL >= 1
             oneHotLabels = tf.squeeze(tf.one_hot(indices=tf.cast(labelsPL, tf.int32), depth=2), axis=1)
             lossOp = tf.losses.softmax_cross_entropy(onehot_labels=oneHotLabels, logits=outputLayer)
             entropyOp, entropyUpdateOp = tf.metrics.mean(values=lossOp)
@@ -157,7 +164,7 @@ def GetOps(labelsPL, outputLayer, learningRate=0.0001):
             gradients=gradients)
     return lossOp, printOps, updateOp
 
-def compareCustomCNN(validate=False):
+def GetArgs():
     additionalArgs = [
         {
         'flag': '--scale',
@@ -291,15 +298,6 @@ def compareCustomCNN(validate=False):
         'const': None
         },
         {
-        'flag': '--abideSplit',
-        'help': 'An integer between 0 and 4, only valid if data is ABIDE2.',
-        'action': 'store',
-        'type': int,
-        'dest': 'abideSplit',
-        'required': False,
-        'const': None
-        },
-        {
         'flag': '--dataScale',
         'help': 'The downsampling rate of the data. Either 1, 2 or 3. Defaults to 3. ',
         'action': 'store',
@@ -314,6 +312,15 @@ def compareCustomCNN(validate=False):
         'action': 'store',
         'type': str,
         'dest': 'pncDataType',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--listType',
+        'help': 'Only valid for ABIDE and ADHD. One of strat or site.',
+        'action': 'store',
+        'type': str,
+        'dest': 'listType',
         'required': False,
         'const': None
         }
@@ -331,6 +338,11 @@ def compareCustomCNN(validate=False):
         GlobalOpts.dataScale = 3
     if GlobalOpts.pncDataType is None:
         GlobalOpts.pncDataType = 'AVG'
+    if GlobalOpts.listType is None:
+        GlobalOpts.listType = 'strat'
+
+def compareCustomCNN(validate=False):
+    GetArgs()
     DefineDataOpts(data=GlobalOpts.data, summaryName=GlobalOpts.summaryName)
     modelTrainer = ModelTrainer()
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
@@ -341,7 +353,7 @@ def compareCustomCNN(validate=False):
         convLayers = [8, 16, 32, 64]
     elif GlobalOpts.type == 'reverse':
         convLayers = [64, 32, 16, 8]
-    if GlobalOpts.data == 'PNC' or GlobalOpts.data == 'ABIDE2_AGE':
+    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
         fullyConnectedLayers = [256, 1]
     else:
         fullyConnectedLayers = [256, 2]

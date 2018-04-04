@@ -17,7 +17,8 @@ def customCNN(imagesPL,
               sliceIndex=None,
               align=False,
               padding=None,
-              phenotypicsPL=None):
+              phenotypicsPL=None,
+              randomFlips=False):
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
@@ -25,7 +26,7 @@ def customCNN(imagesPL,
             imagesPL = padImageTensor(imagesPL, padding)
         if scale is not None:
             with tf.variable_scope('PatchExtraction'):
-                imagesPL = ExtractImagePatches3D(imagesPL, scale=scale, sliceIndex=sliceIndex, align=align)
+                imagesPL = ExtractImagePatches3D(imagesPL, scale=scale, sliceIndex=sliceIndex, align=align, randomFlips=randomFlips)
         index = 0
         for numFilters in convolutionalLayers:
             convStride = (1,1,1)
