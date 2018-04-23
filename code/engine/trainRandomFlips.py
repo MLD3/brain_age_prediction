@@ -13,12 +13,12 @@ from engine.trainCustomCNN import GetTrainingOperation, GetDataSetInputs, Define
 
 def runRandomFlips():
     ParseArgs('Run 3D CNN over structural MRI volumes')
-    GlobalOpts.scale = 3
+    GlobalOpts.scale = 2
     GlobalOpts.type = 'reverse'
     GlobalOpts.summaryName = 'alignmentComp'
     GlobalOpts.data = 'PNC'
     GlobalOpts.sliceIndex = None
-    GlobalOpts.align = None
+    GlobalOpts.align = True
     GlobalOpts.numberTrials = 50
     GlobalOpts.padding = None
     GlobalOpts.batchSize = 4
@@ -56,7 +56,7 @@ def runRandomFlips():
         MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)
         MAEOp, MAEUpdateOp = tf.metrics.mean_absolute_error(labels=labelsPL, predictions=outputLayer)
         updateOp, gradients = GetTrainingOperation(lossOp, GlobalOpts.learningRate)
-    diceOp, diceUpdateOp = pairwiseDiceTF(imagesPL)
+    diceOp, diceUpdateOp = pairwiseDiceTF(GlobalOpts.slicedPL)
     printOps = PrintOps(ops=[MSEOp, MAEOp, diceOp],
         updateOps=[MSEUpdateOp, MAEUpdateOp, diceUpdateOp],
         names=['loss', 'MAE', 'PairwiseDice'],

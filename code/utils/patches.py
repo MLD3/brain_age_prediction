@@ -20,18 +20,18 @@ def pairwiseDiceTF(imagesPL):
     with tf.variable_scope('diceCoeff'):
         imagesPL = tf.cast((imagesPL > 0), tf.float32)
         batchSize, numRows, numCols, depth, numberChannels = imagesPL.get_shape().as_list()
-        diceVar = tf.Variable(dtype=tf.float32, initial_value=0, name='diceNumerator')
-        diceCounter = tf.Variable(dtype=tf.float32, initial_value=0, name='diceDenominator')
+        diceVar = tf.Variable(dtype=tf.float32, initial_value=0, name='diceNumerator', trainable=False)
+        diceCounter = tf.Variable(dtype=tf.float32, initial_value=0, name='diceDenominator', trainable=False)
         numAccum = tf.constant(shape=(), dtype=tf.float32, value=0)
         denAccum = tf.constant(shape=(), dtype=tf.float32, value=0)
-        for batch in range(batchSize):
-            for i in range(numberChannels - 1):
-                for j in range(i + 1, numberChannels):
-                    numerator = 2 * tf.reduce_sum(tf.minimum(imagesPL[batch,:,:,:,i], imagesPL[batch,:,:,:,j]))
-                    denom = tf.reduce_sum(imagesPL[batch, :, :, :, i]) + tf.reduce_sum(imagesPL[batch, :, :, :, j])
-                    diceCoeff = numerator / denom
-                    numAccum = numAccum + diceCoeff
-                    denAccum = denAccum + 1
+        for i in range(numberChannels - 1):
+            for j in range(i + 1, numberChannels):
+                numerators = 2 * tf.reduce_sum(tf.reduce_min(tf.stack([imagesPL[:,:,:,:,i], imagesPL[:,:,:,:,j]], axis=4), axis=4), axis=[1,2,3])
+                denoms = tf.reduce_sum(imagesPL[:, :, :, :, i], axis=[1,2,3]) + tf.reduce_sum(imagesPL[:, :, :, :, j], axis=[1,2,3])
+                diceCoeff = tf.reduce_sum(numerators / denoms)
+                numberElements = tf.cast(tf.shape(denoms)[0], tf.float32)
+                numAccum = numAccum + diceCoeff
+                denAccum = denAccum + numberElements
         updateOp = tf.group(tf.assign_add(diceVar, numAccum), tf.assign_add(diceCounter, denAccum))
         valueOp = diceVar / diceCounter
     return valueOp, updateOp
@@ -83,6 +83,15 @@ def ExtractImagePatches3D(images, scale=2, kernelSize=3, sliceIndex=None, align=
     Z = 3
     alignAxes=[None, [Z], [Y], [Y, Z], [X], [X, Z], [X, Y], [X, Y, Z]]
 
+    if randomFlips:
+        randomAxes = []
+        for i in range(8):
+            randomAxes.append(tf.Variable(
+            initial_value=tf.unique(tf.random_uniform(shape=tf.random_uniform(
+                                                shape=(1,), minval=0, maxval=3, dtype=tf.int32, name='uniformShape_{}'.format(i)), 
+                                            minval=1, maxval=4, dtype=tf.int32, name='uniformValue_{}'.format(i)))[0], 
+                                 validate_shape=False, name='randomFlipAxis_{}'.format(i), trainable=False))
+        
     rowIndex = rowStride + kernelSize
     while rowIndex <= numRows:
         colIndex = colStride + kernelSize
@@ -100,11 +109,8 @@ def ExtractImagePatches3D(images, scale=2, kernelSize=3, sliceIndex=None, align=
                     return imageSlice
                 if align and alignAxes[runningIndex] is not None:
                     imageSlice = tf.reverse(imageSlice, axis=alignAxes[runningIndex])
-                elif randomFlips:
-                    reverseIndices = tf.slice(tf.random_shuffle(tf.constant([1,2,3], dtype=tf.int32)),
-                                              begin=[0],
-                                              size=tf.random_uniform(shape=(1,), dtype=int32, minval=0, maxval=3))
-                    imageSlice = tf.reverse(imageSlice, axis=reverseIndices)
+                if randomFlips:
+                    imageSlice = tf.reverse(imageSlice, axis=randomAxes[runningIndex])
                 patches.append(imageSlice)
                 runningIndex += 1
                 depthIndex += depthStride

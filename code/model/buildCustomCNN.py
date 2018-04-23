@@ -1,7 +1,8 @@
 import tensorflow as tf
 import numpy as np
+from utils.args import *
 from utils.config import get
-from utils.patches import ExtractImagePatches3D
+from utils.patches import ExtractImagePatches3D, ExtractImagePatchesDEPRECATED
 from placeholders.shared_placeholders import *
 from model.buildCommon import *
 
@@ -27,6 +28,7 @@ def customCNN(imagesPL,
         if scale is not None:
             with tf.variable_scope('PatchExtraction'):
                 imagesPL = ExtractImagePatches3D(imagesPL, scale=scale, sliceIndex=sliceIndex, align=align, randomFlips=randomFlips)
+                GlobalOpts.slicedPL = imagesPL
         index = 0
         for numFilters in convolutionalLayers:
             convStride = (1,1,1)

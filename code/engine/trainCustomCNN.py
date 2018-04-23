@@ -399,11 +399,15 @@ def compareCustomCNN(validate=False):
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:
         if validate:
-            modelTrainer.ValidateModel(sess,
-                                  updateOp,
-                                  printOps,
-                                  name=GlobalOpts.name,
-                                  numIters=GlobalOpts.numberTrials)
+            modelTrainer.getPatientPerformances(sess,
+                                                outputLayer,
+                                                name=GlobalOpts.name,
+                                                numIters=GlobalOpts.numberTrials)
+            #modelTrainer.ValidateModel(sess,
+            #                      updateOp,
+            #                      printOps,
+            #                      name=GlobalOpts.name,
+            #                      numIters=GlobalOpts.numberTrials)
         else:
             modelTrainer.RepeatTrials(sess,
                                   updateOp,

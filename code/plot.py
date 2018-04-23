@@ -1,6 +1,8 @@
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
+
 def plotValdPerformances():
     x_vals      = np.array([6, 9, 13, 18, 27, 60])
     constant    = np.array([2.976, 3.334, 3.408, 3.150, 3.159, 3.397])
@@ -148,5 +150,25 @@ def scatterParamPerformance():
     plt.ylabel('Mean Square Error')
     plt.show()
 
+def alignmentScatter():
+    inFile = '/home/psturm/brain_age_prediction/summaries/alignmentComp/reverseScale2DataPNCBatch4Rate0.0001AlignedDropout0.6/performance.txt'
+    with open(inFile) as fin:
+        content = fin.readlines()
+    content = [x.strip() for x in content]
+    content = [content[i] for i in [1,2,3,5,6,7]]
+    content = [(x.split('['))[1].split(']')[0] for x in content]
+    content = [[float(y) for y in x.split(', ')] for x in content]
+    vald_loss = content[0]
+    vald_dice = content[2]
+    test_loss = content[3]
+    test_dice = content[5]
+    
+    plt.scatter(test_dice, test_loss)
+    plt.plot(np.unique(test_dice), np.poly1d(np.polyfit(test_dice, test_loss, 1))(np.unique(test_dice)))
+    plt.title('Scatter Plot of Test Loss vs. Dice Coefficient')
+    plt.xlabel('Dice Coefficient')
+    plt.ylabel('Test Loss')
+    plt.savefig('TestDice.png', bbox_inches='tight')
+    
 if __name__ == '__main__':
-    plotTrainingTime()
+    alignmentScatter()

@@ -290,3 +290,58 @@ class ModelTrainer(object):
             print(outputString)
         coord.request_stop()
         coord.join(threads)
+
+    def getPatientPerformances(self, sess, predictionOp, name, numIters=1):
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+        nameOp = self.testSet.dequeueOp
+        labelOp = self.testSet.labelBatchOperation
+        imageOp = self.testSet.imageBatchOperation
+        numberIters = self.testSet.maxItemsInQueue
+        predictedAges = np.zeros((numIters, numberIters))
+        trueAges = np.zeros((numberIters, ))
+        name_arr = []
+        print('Model: {}'.format(name))
+        
+        print('SUBJECT ID\tTRUE AGE\tPREDICTED AGE')
+        for i in range(numIters):
+            sess.run(tf.global_variables_initializer())
+            extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            saver = tf.train.Saver()
+            savePath = '{}run_{}/'.format(GlobalOpts.validationDir, i)
+            saveModel.restore(sess, saver, savePath)
+            
+            for j in range(numberIters):
+                images, labels, names = sess.run([imageOp, labelOp, nameOp])
+                feed_dict = {
+                    self.imagesPL: images,
+                    self.labelsPL: labels,
+                    self.trainingPL: False
+                }
+                names = names[0].decode('UTF-8')
+                if i == 0:
+                    name_arr.append(names)
+                labels = labels[0, 0]
+                predictions = sess.run([predictionOp], feed_dict=feed_dict)
+                predictions = np.squeeze(predictions[0])
+                trueAges[j] = labels
+                predictedAges[i, j] = predictions
+#                print('{}\t{:.4f}\t{:.4f}'.format(names, labels, predictions))
+        df = pd.DataFrame(data = {
+            'Subject': np.array(name_arr),
+            'TrueAge': trueAges,
+            'Run_1': predictedAges[0, :],
+            'Run_2': predictedAges[1, :],
+            'Run_3': predictedAges[2, :],
+            'Run_4': predictedAges[3, :],
+            'Run_5': predictedAges[4, :],
+            'MinPredicted': np.min(predictedAges, axis=0),
+            'MaxPredicted': np.max(predictedAges, axis=0),
+            'sdPredicted': np.std(predictedAges, axis=0)
+        })
+        print(df)
+        #for j in range(numberIters):
+        #    print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
+        df.to_csv('{}.csv'.format(name), index=False)
+        coord.request_stop()
+        coord.join(threads)
