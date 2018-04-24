@@ -3,6 +3,14 @@ import numpy as np
 from utils.config import get
 
 class DataSetNPY(object):
+    """
+    This class supports reading in batches of .npy data.
+    It is less efficient than converting your data into TFRecords (but
+    it is difficult to convert 3D data into such a format), and it is also
+    less efficient than converting your data into byte format
+    (which is possible for 3D data, but runs into computational issues
+    regarding model building). 
+    """
     def __init__(self,
             filenames,
             imageBaseString,
@@ -94,13 +102,13 @@ class DataSetNPY(object):
                 name='ChooseAugmentation'
             )
             self.augmentedImageOperation = tf.reshape(chooseOperation, self.imageBatchDims)
-    
+
     def CreatePhenotypicOperations(self, phenotypicBaseStrings):
         self.phenotypicBaseStrings = phenotypicBaseStrings
         self.phenotypeBatchOperation = tf.reshape(
             tf.py_func(self._loadPhenotypes, [self.dequeueOp], tf.float32),
             (self.batchSize, len(self.phenotypicBaseStrings) + 1))
-        
+
     def _loadPhenotypes(self, x):
         #NOTE: ASSUMES THE FIRST PHENOTYPE IS GENDER,
         #WHERE MALE IS 1 AND FEMALE IS 2
@@ -118,11 +126,11 @@ class DataSetNPY(object):
                     phenotypeIndex += 1
                 else:
                     phenotypes[batchIndex, phenotypeIndex] = np.load('{}{}.npy'.format(baseString, name.decode('utf-8'))).astype(np.float32)
-                
+
                 phenotypeIndex += 1
             batchIndex += 1
         return phenotypes
-            
+
     def _loadImages(self, x):
         images = []
         for name in x:
@@ -140,8 +148,8 @@ class DataSetNPY(object):
 if __name__ == '__main__':
     dataset = DataSetNPY(filenames=np.load('/data/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
                          imageBatchDims=(-1, 41, 49, 41, 1),
-                         imageBaseString='/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/', 
-                         labelBaseString='/data/psturm/ABIDE/ABIDE2/binary_labels/', 
+                         imageBaseString='/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/',
+                         labelBaseString='/data/psturm/ABIDE/ABIDE2/binary_labels/',
                          batchSize=5)
     imageOp, labelOp = dataset.GetBatchOperations()
     dequeueOp = dataset.dequeueOp

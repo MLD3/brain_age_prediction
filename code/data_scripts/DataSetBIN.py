@@ -3,6 +3,10 @@ import numpy as np
 from utils.config import get
 
 class DataSetBIN(object):
+    """
+    This class creates a tensorflow queue that reads in raw byte files
+    that contain 3D images with a specified dimension. 
+    """
     def __init__(self,
             binFileNames,
             imageDims=[145, 145, 1],

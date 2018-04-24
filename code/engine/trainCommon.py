@@ -13,6 +13,10 @@ from utils.args import *
 
 
 class PrintOps(object):
+    """
+    This class wraps an arbitrary set of operations and supports
+    printing those operations to tensorboard summary files.
+    """
     def flatten(self, tensor):
         name = tensor.name.split('/')
         if len(name) > 5:
@@ -52,6 +56,10 @@ class PrintOps(object):
         self.gradientSummary = tf.summary.merge(gradientHistograms + gradientMeans + [concatHist] + [concatMean])
 
 class ModelTrainer(object):
+    """
+    This class supports training an arbitrary model with a gradient-based
+    minimization algorithm.
+    """
     def __init__(self):
         self.dateString = datetime.now().strftime('%I:%M%p_%B_%d_%Y')
 
@@ -302,7 +310,7 @@ class ModelTrainer(object):
         trueAges = np.zeros((numberIters, ))
         name_arr = []
         print('Model: {}'.format(name))
-        
+
         print('SUBJECT ID\tTRUE AGE\tPREDICTED AGE')
         for i in range(numIters):
             sess.run(tf.global_variables_initializer())
@@ -310,7 +318,7 @@ class ModelTrainer(object):
             saver = tf.train.Saver()
             savePath = '{}run_{}/'.format(GlobalOpts.validationDir, i)
             saveModel.restore(sess, saver, savePath)
-            
+
             for j in range(numberIters):
                 images, labels, names = sess.run([imageOp, labelOp, nameOp])
                 feed_dict = {

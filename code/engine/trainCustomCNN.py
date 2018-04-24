@@ -11,6 +11,11 @@ from engine.trainCommon import *
 from placeholders.shared_placeholders import *
 
 def GetTrainingOperation(lossOp, learningRate):
+    """
+    Given a loss operation and a learning rate,
+    returns an operation to minimize that loss and
+    the corresponding gradients.
+    """
     with tf.variable_scope('optimizer'):
         if GlobalOpts.regStrength is not None:
             regularizerLosses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
@@ -19,6 +24,9 @@ def GetTrainingOperation(lossOp, learningRate):
     return updateOp, gradients
 
 def GetDataSetInputs():
+    """
+    Returns dataset objects based on the specified input parameters.
+    """
     with tf.variable_scope('Inputs'):
         with tf.variable_scope('TrainingInputs'):
             trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
@@ -46,6 +54,9 @@ def GetDataSetInputs():
     return trainDataSet, valdDataSet, testDataSet
 
 def DefineDataOpts(data='PNC', summaryName='test_comp'):
+    """
+    Defines global parameters based on input parameters.
+    """
     if GlobalOpts.dataScale == 1:
         GlobalOpts.imageBatchDims = (-1, 121, 145, 121, 1)
     elif GlobalOpts.dataScale == 2:
@@ -145,6 +156,10 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
     GlobalOpts.augment = 'none'
 
 def GetOps(labelsPL, outputLayer, learningRate=0.0001):
+    """
+    Given the Global Opts defined, returns a loss operation, an update operation,
+    and summary operations.
+    """
     if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
         with tf.variable_scope('LossOperations'):
             lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
