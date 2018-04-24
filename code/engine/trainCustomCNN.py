@@ -72,7 +72,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         elif GlobalOpts.pncDataType == 'MAX':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
         elif GlobalOpts.pncDataType == 'NAIVE':
-            GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.EXTRA_SMALL_PATH')
+            GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NAIVE{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('DATA.LABELS')
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
@@ -86,7 +86,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE1.TEST_LIST')).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE1.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE1.LABELS')
-    elif data == 'ABIDE2':
+    elif data == 'ABIDE2' or data == 'ABIDE2_AGE':
         baseString = 'ABIDE.ABIDE2.'
         if GlobalOpts.pheno:
             if GlobalOpts.listType == 'strat':
@@ -97,18 +97,10 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
         GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
-        GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.LABELS')
-    elif data == 'ABIDE2_AGE':
-        if GlobalOpts.pheno:
-            GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.TRAIN')).tolist()
-            GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.VALD')).tolist()
-            GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.IQ_LISTS.TEST')).tolist()
+        if 'AGE' in data:
+            GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.AGES')
         else:
-            GlobalOpts.trainFiles = np.load(get('ABIDE.ABIDE2.TRAIN_LIST')).tolist()
-            GlobalOpts.valdFiles = np.load(get('ABIDE.ABIDE2.VALD_LIST')).tolist()
-            GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
-        GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
-        GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.AGES')
+            GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.LABELS')
     elif 'ADHD' in data:
         if GlobalOpts.listType == 'strat':
             baseString = 'ADHD.STRAT_LISTS.'
@@ -357,6 +349,24 @@ def GetArgs():
         'dest': 'depthwise',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--hiddenUnits',
+        'help': 'The number of hidden units. Defaults to 256.',
+        'action': 'store',
+        'type': int,
+        'dest': 'hiddenUnits',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--trainingSize',
+        'help': 'Number of training examples. Default is 524, which is max.',
+        'action': 'store',
+        'type': int,
+        'dest': 'trainingSize',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -374,10 +384,14 @@ def GetArgs():
         GlobalOpts.pncDataType = 'AVG'
     if GlobalOpts.listType is None:
         GlobalOpts.listType = 'strat'
+    if GlobalOpts.hiddenUnits is None:
+        GlobalOpts.hiddenUnits = 256
 
 def compareCustomCNN(validate=False):
     GetArgs()
     DefineDataOpts(data=GlobalOpts.data, summaryName=GlobalOpts.summaryName)
+    if GlobalOpts.trainingSize is not None:
+        GlobalOpts.trainFiles = GlobalOpts.trainFiles[:GlobalOpts.trainingSize]
     modelTrainer = ModelTrainer()
     trainDataSet, valdDataSet, testDataSet = GetDataSetInputs()
     imagesPL, labelsPL = StructuralPlaceholders(GlobalOpts.imageBatchDims)
@@ -388,25 +402,26 @@ def compareCustomCNN(validate=False):
     elif GlobalOpts.type == 'reverse':
         convLayers = [64, 32, 16, 8]
     if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
-        fullyConnectedLayers = [256, 1]
+        fullyConnectedLayers = [GlobalOpts.hiddenUnits, 1]
     else:
-        fullyConnectedLayers = [256, 2]
+        fullyConnectedLayers = [GlobalOpts.hiddenUnits, 2]
     if GlobalOpts.pheno:
         phenotypicBaseStrings=[
-            '/data/psturm/ABIDE/ABIDE2/gender/',
-            '/data/psturm/ABIDE/ABIDE2/IQData/FIQ/',
-            '/data/psturm/ABIDE/ABIDE2/IQData/VIQ/',
-            '/data/psturm/ABIDE/ABIDE2/IQData/PIQ/'
+            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/gender/',
+            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/FIQ/',
+            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/VIQ/',
+            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/PIQ/'
         ]
         if GlobalOpts.data != 'ABIDE2_AGE':
-            phenotypicBaseStrings.append('/data/psturm/ABIDE/ABIDE2/ages/')
+            phenotypicBaseStrings.append('/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/ages/')
         phenotypicsPL = tf.placeholder(dtype=tf.float32, shape=(None, len(phenotypicBaseStrings) + 1), name='phenotypicsPL')
         trainDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
         valdDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
         testDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
     else:
         phenotypicsPL = None
-    
+
+    valdDataSet.PreloadData()
     if GlobalOpts.depthwise:
         if GlobalOpts.type == 'traditional':
             convLayers = [1, 2, 4, 8]
@@ -420,16 +435,17 @@ def compareCustomCNN(validate=False):
                                   keepProbability=GlobalOpts.dropout)
     else:
         outputLayer = customCNN(imagesPL,
-                            trainingPL,
-                            GlobalOpts.scale,
-                            convLayers,
-                            fullyConnectedLayers,
-                            keepProbability=GlobalOpts.dropout,
-                            poolType=GlobalOpts.poolType,
-                            sliceIndex=GlobalOpts.sliceIndex,
-                            align=GlobalOpts.align,
-                            padding=GlobalOpts.padding,
-                            phenotypicsPL=phenotypicsPL)
+                                trainingPL,
+                                GlobalOpts.scale,
+                                convLayers,
+                                fullyConnectedLayers,
+                                keepProbability=GlobalOpts.dropout,
+                                poolType=GlobalOpts.poolType,
+                                sliceIndex=GlobalOpts.sliceIndex,
+                                align=GlobalOpts.align,
+                                padding=GlobalOpts.padding,
+                                phenotypicsPL=phenotypicsPL)
+
     lossOp, printOps, updateOp = GetOps(labelsPL, outputLayer, learningRate=GlobalOpts.learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
                                 GlobalOpts.checkpointDir,

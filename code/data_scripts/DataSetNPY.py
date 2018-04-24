@@ -30,6 +30,9 @@ class DataSetNPY(object):
         self.labelBaseString = labelBaseString
         self.maxItemsInQueue = maxItemsInQueue
         self.phenotypeBatchOperation = None
+        self.preloaded=False
+        self.loadedImages=None
+        self.loadedLabels=None
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
         dequeueOp = stringQueue.dequeue_many(batchSize)
         self.dequeueOp = dequeueOp
@@ -43,7 +46,17 @@ class DataSetNPY(object):
         if self.augment != 'none':
             self.CreateAugmentOperations(augmentation=augment)
 
+    def PreloadData(self):
+        files = [x.encode() for x in self.filenames]
+        self.loadedImages = np.reshape(self._loadImages(files), self.imageBatchDims).astype(np.float32)
+        self.loadedLabels = np.reshape(self._loadLabels(files), self.labelBatchDims).astype(np.float32)
+        self.maxItemsInQueue = 1
+        self.preloaded = True
+        
     def NextBatch(self, sess):
+        if self.preloaded:
+            return self.loadedImages, self.loadedLabels
+
         if self.augment == 'none':
             if self.phenotypeBatchOperation is not None:
                 return sess.run([self.imageBatchOperation, self.labelBatchOperation, self.phenotypeBatchOperation])

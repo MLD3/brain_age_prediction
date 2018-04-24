@@ -72,7 +72,7 @@ class ModelTrainer(object):
                         trainSet,
                         valdSet,
                         testSet,
-                        numberOfSteps=251,
+                        numberOfSteps=501,
                         batchStepsBetweenSummary=250,
                         phenotypicsPL=None
                         ):
