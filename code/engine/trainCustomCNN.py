@@ -4,6 +4,7 @@ import pandas as pd
 from utils.args import *
 from data_scripts.DataSetNPY import DataSetNPY
 from model.buildCustomCNN import customCNN
+from model.buildSeparableCNN import separableCNN
 from utils.saveModel import *
 from utils.config import get
 from engine.trainCommon import *
@@ -97,7 +98,6 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.testFiles = np.load(get('ABIDE.ABIDE2.TEST_LIST')).tolist()
         GlobalOpts.imageBaseString = get('ABIDE.ABIDE2.AVG_POOL{}'.format(GlobalOpts.dataScale))
         GlobalOpts.labelBaseString = get('ABIDE.ABIDE2.AGES')
-
     elif 'ADHD' in data:
         if GlobalOpts.listType == 'strat':
             baseString = 'ADHD.STRAT_LISTS.'
@@ -111,6 +111,16 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.labelBaseString = get('ADHD.AGES')
         else:
             GlobalOpts.labelBaseString = get('ADHD.LABELS')
+    elif 'PAC' in data:
+        baseString = 'PAC.'
+        GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
+        GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
+        GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
+        GlobalOpts.imageBaseString = get('PAC.AVG_POOL{}'.format(GlobalOpts.dataScale))
+        if 'AGE' in data:
+            GlobalOpts.labelBaseString = get('PAC.AGES')
+        else:
+            GlobalOpts.labelBaseString = get('PAC.LABELS')
 
     GlobalOpts.numberTestItems = len(GlobalOpts.testFiles)
     GlobalOpts.numberValdItems = len(GlobalOpts.valdFiles)
@@ -192,7 +202,7 @@ def GetArgs():
         },
         {
         'flag': '--data',
-        'help': 'One of: PNC, PNC_GENDER, ABIDE1, ABIDE2, ABIDE2_AGE',
+        'help': 'One of: PNC, PNC_GENDER, ABIDE1, ABIDE2, ABIDE2_AGE, PAC, PAC_AGE',
         'action': 'store',
         'type': str,
         'dest': 'data',
@@ -323,6 +333,15 @@ def GetArgs():
         'dest': 'listType',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--depthwise',
+        'help': 'If 1, use depthwise convolutions for the entire network.',
+        'action': 'store',
+        'type': int,
+        'dest': 'depthwise',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -372,8 +391,20 @@ def compareCustomCNN(validate=False):
         testDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
     else:
         phenotypicsPL = None
-
-    outputLayer = customCNN(imagesPL,
+    
+    if GlobalOpts.depthwise:
+        if GlobalOpts.type == 'traditional':
+            convLayers = [1, 2, 4, 8]
+        elif GlobalOpts.type == 'reverse':
+            convLayers = [8, 4, 2, 1]
+        outputLayer = separableCNN(imagesPL,
+                                  trainingPL,
+                                  GlobalOpts.scale,
+                                  convLayers,
+                                  fullyConnectedLayers,
+                                  keepProbability=GlobalOpts.dropout)
+    else:
+        outputLayer = customCNN(imagesPL,
                             trainingPL,
                             GlobalOpts.scale,
                             convLayers,

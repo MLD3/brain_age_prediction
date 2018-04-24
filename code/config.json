@@ -88,5 +88,17 @@
             "VALD": "/data/psturm/ADHD/stratifiedLists/vald_list.npy",
             "TRAIN": "/data/psturm/ADHD/stratifiedLists/train_list.npy"
         },
+    },
+    "PAC": {
+        "AVG_POOL1": "/data/psturm/PAC/numpyArrays/",
+        "AVG_POOL2": "/data/psturm/PAC/avgpool2x2x2/",
+        "AVG_POOL3": "/data/psturm/PAC/avgpool3x3x3/",
+        "LABELS": "/data/psturm/PAC/binary_labels/",
+        "AGES": "/data/psturm/PAC/ages/",
+        "GENDER": "/data/psturm/PAC/gender/",
+        "TIV": "/data/psturm/PAC/tivs/",
+        "TEST": "/data/psturm/PAC/test.npy",
+        "VALD": "/data/psturm/PAC/vald.npy",
+        "TRAIN": "/data/psturm/PAC/train.npy"
     }
 }
