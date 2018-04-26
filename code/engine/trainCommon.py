@@ -178,6 +178,8 @@ class ModelTrainer(object):
         bestValidationLoss = math.inf
         bestValdOpDict = {}
         bestLossStepIndex = 0
+        stepsSinceLastBest = 0
+        maxStepsBeforeStop = 20000
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)
@@ -215,6 +217,11 @@ class ModelTrainer(object):
                     bestValidationLoss = validationLoss
                     bestValdOpDict = opValueDict
                     self.SaveModel(sess, batchIndex, saver, savePath)
+                    stepsSinceLastBest = 0
+                else:
+                    stepsSinceLastBest += self.batchStepsBetweenSummary
+                    if stepsSinceLastBest >= maxStepsBeforeStop:
+                        break
 
         saveModel.restore(sess, saver, savePath)
         testOpValueDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='test')
