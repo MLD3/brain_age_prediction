@@ -5,22 +5,22 @@
         "DESCR": "Analysis of MRI images"
     },
     "DATA": {
-        "LABELS": "/data/psturm/labels/",
-        "TEST_LIST": "/data/psturm/test.npy",
-        "VALD_LIST": "/data/psturm/vald.npy",
-        "TRAIN_LIST": "/data/psturm/train.npy",
+        "LABELS": "/data1/brain/labels/",
+        "TEST_LIST": "/data1/brain/test.npy",
+        "VALD_LIST": "/data1/brain/vald.npy",
+        "TRAIN_LIST": "/data1/brain/train.npy",
         "PHENOTYPICS": {
-            "PATH": "/data/psturm/PNC_724_phenotypics.csv",
-            "GENDER": "/data/psturm/gender/"
+            "PATH": "/data1/brain/PNC_724_phenotypics.csv",
+            "GENDER": "/data1/brain/gender/"
         },
         "STRUCTURAL": {
-            "AVG_POOL1": "/data/psturm/structural/numpyArrays/",
-            "AVG_POOL2": "/data/psturm/structural/avgpool2x2x2/",
-            "AVG_POOL3": "/data/psturm/structural/avgpool3x3x3/",
-            "EXTRA_SMALL_PATH": "/data/psturm/structural/extraSmallArrays/",
-            "MAX_PATH": "/data/psturm/structural/maxpoolArrays/",
-            "NIFTY_PATH": "/data/psturm/structural/niftiImages/",
-            "NORM_PATH": "/data/psturm/structural/meanNorm3x3Arrays/",
+            "AVG_POOL1": "/data1/brain/structural/numpyArrays/",
+            "AVG_POOL2": "/data1/brain/structural/avgpool2x2x2/",
+            "AVG_POOL3": "/data1/brain/structural/avgpool3x3x3/",
+            "EXTRA_SMALL_PATH": "/data1/brain/structural/extraSmallArrays/",
+            "MAX_PATH": "/data1/brain/structural/maxpoolArrays/",
+            "NIFTY_PATH": "/data1/brain/structural/niftiImages/",
+            "NORM_PATH": "/data1/brain/structural/meanNorm3x3Arrays/",
             "HEIGHT": 121,
             "WIDTH": 145,
             "DEPTH": 121
@@ -31,74 +31,74 @@
             "NUM_TRAIN": 697,
             "NUM_TEST":  200,
             "NUM_VALD":  200,
-            "LABELS": "/data/psturm/ABIDE/ABIDE1/binary_labels/",
-            "AGES": "/data/psturm/ABIDE/ABIDE1/ages/",
-            "TEST_LIST": "/data/psturm/ABIDE/ABIDE1/test_list.npy",
-            "VALD_LIST": "/data/psturm/ABIDE/ABIDE1/vald_list.npy",
-            "TRAIN_LIST": "/data/psturm/ABIDE/ABIDE1/train_list.npy",
-            "AVG_POOL2": "/data/psturm/ABIDE/ABIDE1/avgpool2x2x2/",
-            "AVG_POOL3": "/data/psturm/ABIDE/ABIDE1/avgpool3x3x3/"
+            "LABELS": "/data1/brain/ABIDE/ABIDE1/binary_labels/",
+            "AGES": "/data1/brain/ABIDE/ABIDE1/ages/",
+            "TEST_LIST": "/data1/brain/ABIDE/ABIDE1/test_list.npy",
+            "VALD_LIST": "/data1/brain/ABIDE/ABIDE1/vald_list.npy",
+            "TRAIN_LIST": "/data1/brain/ABIDE/ABIDE1/train_list.npy",
+            "AVG_POOL2": "/data1/brain/ABIDE/ABIDE1/avgpool2x2x2/",
+            "AVG_POOL3": "/data1/brain/ABIDE/ABIDE1/avgpool3x3x3/"
         },
         "ABIDE2": {
             "NUM_TRAIN": 554,
             "NUM_TEST":  180,
             "NUM_VALD":  180,
-            "AVG_POOL1": "/data/psturm/ABIDE/ABIDE2/numpyArrays/",
-            "AVG_POOL2": "/data/psturm/ABIDE/ABIDE2/avgpool2x2x2/",
-            "AVG_POOL3": "/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/",
-            "LABELS": "/data/psturm/ABIDE/ABIDE2/binary_labels/",
-            "AGES": "/data/psturm/ABIDE/ABIDE2/ages/",
-            "TEST": "/data/psturm/ABIDE/ABIDE2/test_list.npy",
-            "VALD": "/data/psturm/ABIDE/ABIDE2/vald_list.npy",
-            "TRAIN": "/data/psturm/ABIDE/ABIDE2/train_list.npy",
+            "AVG_POOL1": "/data1/brain/ABIDE/ABIDE2/numpyArrays/",
+            "AVG_POOL2": "/data1/brain/ABIDE/ABIDE2/avgpool2x2x2/",
+            "AVG_POOL3": "/data1/brain/ABIDE/ABIDE2/avgpool3x3x3/",
+            "LABELS": "/data1/brain/ABIDE/ABIDE2/binary_labels/",
+            "AGES": "/data1/brain/ABIDE/ABIDE2/ages/",
+            "TEST": "/data1/brain/ABIDE/ABIDE2/test_list.npy",
+            "VALD": "/data1/brain/ABIDE/ABIDE2/vald_list.npy",
+            "TRAIN": "/data1/brain/ABIDE/ABIDE2/train_list.npy",
             "IQ_LISTS": {
                 "SITE_LISTS": {
-                    "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/test_IQ.npy",
-                    "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/vald_IQ.npy",
-                    "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/siteSeperatedLists/train_IQ.npy"
+                    "TEST": "/data1/brain/ABIDE/ABIDE2/IQData/siteSeperatedLists/test_IQ.npy",
+                    "VALD": "/data1/brain/ABIDE/ABIDE2/IQData/siteSeperatedLists/vald_IQ.npy",
+                    "TRAIN": "/data1/brain/ABIDE/ABIDE2/IQData/siteSeperatedLists/train_IQ.npy"
                 },
                 "STRAT_LISTS": {
-                    "TEST": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/test_IQ.npy",
-                    "VALD": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/vald_IQ.npy",
-                    "TRAIN": "/data/psturm/ABIDE/ABIDE2/IQData/stratifiedLists/train_IQ.npy"
+                    "TEST": "/data1/brain/ABIDE/ABIDE2/IQData/stratifiedLists/test_IQ.npy",
+                    "VALD": "/data1/brain/ABIDE/ABIDE2/IQData/stratifiedLists/vald_IQ.npy",
+                    "TRAIN": "/data1/brain/ABIDE/ABIDE2/IQData/stratifiedLists/train_IQ.npy"
                 }
             }
         }
     },
     "ADHD": {
-        "AVG_POOL1": "/data/psturm/ADHD/numpyArrays/",
-        "AVG_POOL2": "/data/psturm/ADHD/avgpool2x2x2/",
-        "AVG_POOL3": "/data/psturm/ADHD/avgpool3x3x3/",
-        "LABELS": "/data/psturm/ADHD/adhd_labels/",
-        "AGES": "/data/psturm/ADHD/ages/",
-        "GENDER": "/data/psturm/ADHD/gender/",
+        "AVG_POOL1": "/data1/brain/ADHD/numpyArrays/",
+        "AVG_POOL2": "/data1/brain/ADHD/avgpool2x2x2/",
+        "AVG_POOL3": "/data1/brain/ADHD/avgpool3x3x3/",
+        "LABELS": "/data1/brain/ADHD/adhd_labels/",
+        "AGES": "/data1/brain/ADHD/ages/",
+        "GENDER": "/data1/brain/ADHD/gender/",
         "SITE_LISTS": {
             "NUM_TRAIN": 614,
             "NUM_TEST": 79,
             "NUM_VALD": 83,
-            "TEST": "/data/psturm/ADHD/siteSeperatedLists/test_list.npy",
-            "VALD": "/data/psturm/ADHD/siteSeperatedLists/vald_list.npy",
-            "TRAIN": "/data/psturm/ADHD/siteSeperatedLists/train_list.npy"
+            "TEST": "/data1/brain/ADHD/siteSeperatedLists/test_list.npy",
+            "VALD": "/data1/brain/ADHD/siteSeperatedLists/vald_list.npy",
+            "TRAIN": "/data1/brain/ADHD/siteSeperatedLists/train_list.npy"
         },
         "STRAT_LISTS": {
             "NUM_TRAIN": 618,
             "NUM_TEST": 79,
             "NUM_VALD": 79,
-            "TEST": "/data/psturm/ADHD/stratifiedLists/test_list.npy",
-            "VALD": "/data/psturm/ADHD/stratifiedLists/vald_list.npy",
-            "TRAIN": "/data/psturm/ADHD/stratifiedLists/train_list.npy"
+            "TEST": "/data1/brain/ADHD/stratifiedLists/test_list.npy",
+            "VALD": "/data1/brain/ADHD/stratifiedLists/vald_list.npy",
+            "TRAIN": "/data1/brain/ADHD/stratifiedLists/train_list.npy"
         },
     },
     "PAC": {
-        "AVG_POOL1": "/data/psturm/PAC/numpyArrays/",
-        "AVG_POOL2": "/data/psturm/PAC/avgpool2x2x2/",
-        "AVG_POOL3": "/data/psturm/PAC/avgpool3x3x3/",
-        "LABELS": "/data/psturm/PAC/binary_labels/",
-        "AGES": "/data/psturm/PAC/ages/",
-        "GENDER": "/data/psturm/PAC/gender/",
-        "TIV": "/data/psturm/PAC/tivs/",
-        "TEST": "/data/psturm/PAC/test.npy",
-        "VALD": "/data/psturm/PAC/vald.npy",
-        "TRAIN": "/data/psturm/PAC/train.npy"
+        "AVG_POOL1": "/data1/brain/PAC/numpyArrays/",
+        "AVG_POOL2": "/data1/brain/PAC/avgpool2x2x2/",
+        "AVG_POOL3": "/data1/brain/PAC/avgpool3x3x3/",
+        "LABELS": "/data1/brain/PAC/binary_labels/",
+        "AGES": "/data1/brain/PAC/ages/",
+        "GENDER": "/data1/brain/PAC/gender/",
+        "TIV": "/data1/brain/PAC/tivs/",
+        "TEST": "/data1/brain/PAC/test.npy",
+        "VALD": "/data1/brain/PAC/vald.npy",
+        "TRAIN": "/data1/brain/PAC/train.npy"
     }
 }
