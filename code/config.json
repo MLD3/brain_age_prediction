@@ -5,22 +5,22 @@
         "DESCR": "Analysis of MRI images"
     },
     "DATA": {
-        "LABELS": "/data1/brain/labels/",
-        "TEST_LIST": "/data1/brain/test.npy",
-        "VALD_LIST": "/data1/brain/vald.npy",
-        "TRAIN_LIST": "/data1/brain/train.npy",
+        "LABELS": "/data1/brain/PNC/labels/",
+        "TEST_LIST": "/data1/brain/PNC/test.npy",
+        "VALD_LIST": "/data1/brain/PNC/vald.npy",
+        "TRAIN_LIST": "/data1/brain/PNC/train.npy",
         "PHENOTYPICS": {
-            "PATH": "/data1/brain/PNC_724_phenotypics.csv",
-            "GENDER": "/data1/brain/gender/"
+            "PATH": "/data1/brain/PNC/PNC_724_phenotypics.csv",
+            "GENDER": "/data1/brain/PNC/gender/"
         },
         "STRUCTURAL": {
-            "AVG_POOL1": "/data1/brain/structural/numpyArrays/",
-            "AVG_POOL2": "/data1/brain/structural/avgpool2x2x2/",
-            "AVG_POOL3": "/data1/brain/structural/avgpool3x3x3/",
-            "EXTRA_SMALL_PATH": "/data1/brain/structural/extraSmallArrays/",
-            "MAX_PATH": "/data1/brain/structural/maxpoolArrays/",
-            "NIFTY_PATH": "/data1/brain/structural/niftiImages/",
-            "NORM_PATH": "/data1/brain/structural/meanNorm3x3Arrays/",
+            "AVG_POOL1": "/data1/brain/PNC/structural/numpyArrays/",
+            "AVG_POOL2": "/data1/brain/PNC/structural/avgpool2x2x2/",
+            "AVG_POOL3": "/data1/brain/PNC/structural/avgpool3x3x3/",
+            "EXTRA_SMALL_PATH": "/data1/PNC/brain/structural/extraSmallArrays/",
+            "MAX_PATH": "/data1/brain/PNC/structural/maxpoolArrays/",
+            "NIFTY_PATH": "/data1/brain/PNC/structural/niftiImages/",
+            "NORM_PATH": "/data1/brain/PNC/structural/meanNorm3x3Arrays/",
             "HEIGHT": 121,
             "WIDTH": 145,
             "DEPTH": 121
