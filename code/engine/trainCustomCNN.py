@@ -127,7 +127,6 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
 
     GlobalOpts.numberTestItems = len(GlobalOpts.testFiles)
     GlobalOpts.numberValdItems = len(GlobalOpts.valdFiles)
-    GlobalOpts.poolType = 'MAX'
     GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
     if GlobalOpts.sliceIndex is not None:
         GlobalOpts.name = '{}Slice{}'.format(GlobalOpts.name, GlobalOpts.sliceIndex)
@@ -214,6 +213,15 @@ def GetArgs():
         'type': str,
         'dest': 'data',
         'required': True
+        },
+        {
+        'flag': '--poolType',
+        'help': 'One of MAX, AVG, NONE. Type of pooling layer used inside the network. Default is max pooling.',
+        'action': 'store',
+        'type': str,
+        'dest': 'poolType',
+        'required': False,
+        'const': None
         },
         {
         'flag': '--sliceIndex',
@@ -386,6 +394,8 @@ def GetArgs():
         GlobalOpts.listType = 'strat'
     if GlobalOpts.hiddenUnits is None:
         GlobalOpts.hiddenUnits = 256
+    if GlobalOpts.poolType is None:
+        GlobalOpts.poolType = 'MAX'
 
 def compareCustomCNN(validate=False):
     GetArgs()
@@ -407,13 +417,13 @@ def compareCustomCNN(validate=False):
         fullyConnectedLayers = [GlobalOpts.hiddenUnits, 2]
     if GlobalOpts.pheno:
         phenotypicBaseStrings=[
-            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/gender/',
-            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/FIQ/',
-            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/VIQ/',
-            '/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/IQData/PIQ/'
+            '/data1/brain/ABIDE/ABIDE2/gender/',
+            '/data1/brain/ABIDE/ABIDE2/IQData/FIQ/',
+            '/data1/brain/ABIDE/ABIDE2/IQData/VIQ/',
+            '/data1/brain/ABIDE/ABIDE2/IQData/PIQ/'
         ]
         if GlobalOpts.data != 'ABIDE2_AGE':
-            phenotypicBaseStrings.append('/scratch/wiensj_fluxg/psturm/ABIDE/ABIDE2/ages/')
+            phenotypicBaseStrings.append('/data1/brain//ABIDE/ABIDE2/ages/')
         phenotypicsPL = tf.placeholder(dtype=tf.float32, shape=(None, len(phenotypicBaseStrings) + 1), name='phenotypicsPL')
         trainDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
         valdDataSet.CreatePhenotypicOperations(phenotypicBaseStrings)
@@ -422,6 +432,11 @@ def compareCustomCNN(validate=False):
         phenotypicsPL = None
 
     valdDataSet.PreloadData()
+
+    """
+    These definitions are used for depthwise convolution network.
+    Implemented by Pascal Sturmfels
+    """
     if GlobalOpts.depthwise:
         if GlobalOpts.type == 'traditional':
             convLayers = [1, 2, 4, 8]

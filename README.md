@@ -17,6 +17,9 @@ required arguments:
                         The file name to put the results of this run into.
   --data DATA           One of: PNC, PNC_GENDER, ABIDE1, ABIDE2, ABIDE2_AGE
 optional arguments: 
+  --poolType POOLTYPE
+						The type of the pooling layer used inside the network.
+						One of: MAX, AVG, NONE
   --sliceIndex SLICEINDEX
                         Set this to an integer to select a single brain region
                         as opposed to concatenating all regions along the

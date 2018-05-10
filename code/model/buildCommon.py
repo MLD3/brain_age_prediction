@@ -79,6 +79,8 @@ def standardBlock(inputs,
                 pooledInput = standardPool(inputs, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
             elif poolType == 'AVERAGE':
                 pooledInput = avgPool(inputs, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
+            else:
+                pooledInput = inputs
             filteredInput = standardConvolution(pooledInput,
                                                 filters=filters,
                                                 name='Block{}InputConvolution'.format(blockNumber),

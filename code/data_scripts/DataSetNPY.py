@@ -84,6 +84,9 @@ class DataSetNPY(object):
         return randomImageBatch, randomLabelBatch
 
     def CreateAugmentOperations(self, augmentation='flip'):
+        """
+        These are untested features.
+        """
         with tf.variable_scope('DataAugmentation'):
             if augmentation == 'flip':
                 augmentedImageOperation = tf.reverse(self.imageBatchOperation,
@@ -159,19 +162,19 @@ class DataSetNPY(object):
         return labels
 
 if __name__ == '__main__':
-    dataset = DataSetNPY(filenames=np.load('/data/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
+    dataset = DataSetNPY(filenames=np.load('/data1/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
                          imageBatchDims=(-1, 41, 49, 41, 1),
-                         imageBaseString='/data/psturm/ABIDE/ABIDE2/avgpool3x3x3/',
-                         labelBaseString='/data/psturm/ABIDE/ABIDE2/binary_labels/',
+                         imageBaseString='/data1/brain/ABIDE/ABIDE2/avgpool3x3x3/',
+                         labelBaseString='/data1/brain/ABIDE/ABIDE2/binary_labels/',
                          batchSize=5)
     imageOp, labelOp = dataset.GetBatchOperations()
     dequeueOp = dataset.dequeueOp
     dataset.CreatePhenotypicOperations(phenotypicBaseStrings=[
-        '/data/psturm/ABIDE/ABIDE2/gender/',
-        '/data/psturm/ABIDE/ABIDE2/IQData/FIQ/',
-        '/data/psturm/ABIDE/ABIDE2/IQData/VIQ/',
-        '/data/psturm/ABIDE/ABIDE2/IQData/PIQ/',
-        '/data/psturm/ABIDE/ABIDE2/ages/'
+        '/data1/brain/ABIDE/ABIDE2/gender/',
+        '/data1/brain/ABIDE/ABIDE2/IQData/FIQ/',
+        '/data1/brain/ABIDE/ABIDE2/IQData/VIQ/',
+        '/data1/brain/ABIDE/ABIDE2/IQData/PIQ/',
+        '/data1/brain/ABIDE/ABIDE2/ages/'
     ])
     phenotypeOp = dataset.phenotypeBatchOperation
     config  = tf.ConfigProto()
