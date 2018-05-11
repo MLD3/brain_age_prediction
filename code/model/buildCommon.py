@@ -71,14 +71,26 @@ def standardBlock(inputs,
         if normalize:
             outputLayer = standardBatchNorm(outputLayer, trainingPL, name='Block{}BatchNorm'.format(blockNumber))
         if poolType=='MAX':
-            outputLayer = standardPool(outputLayer, strides=poolStrides, name='Block{}MaxPool'.format(blockNumber))
+            outputLayer = standardPool(outputLayer, kernal_size=poolStrides, strides=poolStrides, name='Block{}MaxPool'.format(blockNumber))
         elif poolType=='AVERAGE':
-            outputLayer = avgPool(outputLayer, strides=poolStrides, name='Block{}AvgPool'.format(blockNumber))
+            outputLayer = avgPool(outputLayer, kernal_size=poolStrides, strides=poolStrides, name='Block{}AvgPool'.format(blockNumber))
+        elif poolType=='STRIDED':
+            outputLayer = standardConvolution(outputLayer,
+                                              filters=poolStrides,
+                                              name='Block{}StridePool'.format(blockNumber),
+                                              kernal_size=poolStrides[1:4],
+                                              strides=poolStrides[1:4])
         if skipConnection:
             if poolType == 'MAX':
-                pooledInput = standardPool(inputs, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
+                pooledInput = standardPool(inputs, kernal_size=poolStrides, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
             elif poolType == 'AVERAGE':
-                pooledInput = avgPool(inputs, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
+                pooledInput = avgPool(inputs, kernal_size=poolStrides, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
+            elif poolType == 'STRIDED':
+                pooledInput = standardConvolution(inputs,
+                                              filters=poolStrides,
+                                              name='Block{}StridePool'.format(blockNumber),
+                                              kernal_size=poolStrides[1:4],
+                                              strides=poolStrides[1:4])
             else:
                 pooledInput = inputs
             filteredInput = standardConvolution(pooledInput,
