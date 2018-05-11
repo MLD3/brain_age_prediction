@@ -86,9 +86,10 @@ def standardBlock(inputs,
             elif poolType == 'AVERAGE':
                 pooledInput = avgPool(inputs, kernal_size=poolStrides, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
             elif poolType == 'STRIDED':
+                #questionable
                 pooledInput = standardConvolution(inputs,
                                               filters=poolStrides,
-                                              name='Block{}StridePool'.format(blockNumber),
+                                              name='Block{}InputStridePool'.format(blockNumber),
                                               kernal_size=poolStrides[1:4],
                                               strides=poolStrides[1:4])
             else:
