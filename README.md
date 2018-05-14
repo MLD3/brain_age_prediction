@@ -34,6 +34,7 @@ optional arguments:
   --pheno PHENO         Specify 1 to add phenotypics to the model.
   --validationDir VALIDATIONDIR
                         Checkpoint directory to restore the model from.
+						If not specified, program will check the default directory for stored parameters.
   --regStrength REGSTRENGTH
                         Lambda value for L2 regularization. If not specified,
                         no regularization is applied.

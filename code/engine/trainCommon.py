@@ -78,6 +78,8 @@ class ModelTrainer(object):
                         ):
         if not os.path.exists(checkpointDir) and GlobalOpts.validationDir is None:
             os.makedirs(checkpointDir)
+        elif GlobalOpts.validationDir is None:
+            GlobalOpts.validationDir = checkpointDir
         self.checkpointDir            = checkpointDir
         self.summaryDir               = summaryDir
         self.numberOfSteps            = numberOfSteps
