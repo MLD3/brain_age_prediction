@@ -75,12 +75,11 @@ def standardBlock(inputs,
         elif poolType=='AVERAGE':
             outputLayer = avgPool(outputLayer, kernel_size=poolStrides, strides=poolStrides, name='Block{}AvgPool'.format(blockNumber))
         elif poolType=='STRIDED':
-            poolTuple = tuple(poolStrides[1:4])
             outputLayer = standardConvolution(outputLayer,
                                               filters=poolStrides,
                                               name='Block{}StridePool'.format(blockNumber),
-                                              kernel_size=poolTuple,
-                                              strides=poolTuple)
+                                              kernel_size=(2,2,2),
+                                              strides=(2,2,2))
         if skipConnection:
             if poolType == 'MAX':
                 pooledInput = standardPool(inputs, kernel_size=poolStrides, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
