@@ -216,7 +216,7 @@ def GetArgs():
         },
         {
         'flag': '--poolType',
-        'help': 'One of MAX, AVG, NONE. Type of pooling layer used inside the network. Default is max pooling.',
+        'help': 'One of MAX, AVG, STRIDED, NONE. Type of pooling layer used inside the network. Default is max pooling.',
         'action': 'store',
         'type': str,
         'dest': 'poolType',
