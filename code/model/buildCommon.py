@@ -78,8 +78,8 @@ def standardBlock(inputs,
             outputLayer = standardConvolution(outputLayer,
                                               filters=poolStrides,
                                               name='Block{}StridePool'.format(blockNumber),
-                                              kernel_size=poolStrides[1:4],
-                                              strides=poolStrides[1:4])
+                                              kernel_size=tuple(poolStrides[1:4]),
+                                              strides=tuple(poolStrides[1:4]))
         if skipConnection:
             if poolType == 'MAX':
                 pooledInput = standardPool(inputs, kernel_size=poolStrides, strides=poolStrides, name='Block{}InputMaxPool'.format(blockNumber))
@@ -89,8 +89,8 @@ def standardBlock(inputs,
                 pooledInput = standardConvolution(inputs,
                                               filters=poolStrides,
                                               name='Block{}InputStridePool'.format(blockNumber),
-                                              kernel_size=poolStrides[1:4],
-                                              strides=poolStrides[1:4])
+                                              kernel_size=tuple(poolStrides[1:4]),
+                                              strides=tuple(poolStrides[1:4]))
             else:
                 pooledInput = inputs
             filteredInput = standardConvolution(pooledInput,
