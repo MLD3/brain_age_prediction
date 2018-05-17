@@ -19,7 +19,7 @@ required arguments:
 optional arguments: 
   --poolType POOLTYPE
 						The type of the pooling layer used inside the network.
-						One of: MAX, AVG, NONE
+						One of: MAX, AVG, STRIDED, NONE
   --sliceIndex SLICEINDEX
                         Set this to an integer to select a single brain region
                         as opposed to concatenating all regions along the
