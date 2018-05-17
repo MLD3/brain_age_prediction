@@ -19,7 +19,8 @@ def customCNN(imagesPL,
               align=False,
               padding=None,
               phenotypicsPL=None,
-              randomFlips=False):
+              randomFlips=False,
+              skipConnection=False):
     with tf.variable_scope('customCNN'):
         if imagesPL.dtype != tf.float32:
             imagesPL = tf.cast(imagesPL, tf.float32, name='CastInputToFloat32')
@@ -38,7 +39,7 @@ def customCNN(imagesPL,
             if poolStrides is not None:
                 poolStride = [1, poolStrides[index], poolStrides[index], poolStrides[index], 1]
 
-            imagesPL = standardBlock(imagesPL, trainingPL, blockNumber=index, filters=numFilters, poolType=poolType, kernelStrides=convStride, poolStrides=poolStride)
+            imagesPL = standardBlock(imagesPL, trainingPL, blockNumber=index, filters=numFilters, poolType=poolType, kernelStrides=convStride, poolStrides=poolStride, skipConnection=skipConnection)
             index += 1
         with tf.variable_scope('FullyConnectedLayers'):
             hiddenLayer = tf.layers.flatten(imagesPL)

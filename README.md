@@ -24,7 +24,7 @@ optional arguments:
                         Set this to an integer to select a single brain region
                         as opposed to concatenating all regions along the
                         depth channel.
-  --align ALIGN         Set to true to align channels.
+  --align ALIGN         Set to 1 to align channels.
   --numberTrials NUMBERTRIALS
                         Number of repeated models to run.
   --padding PADDING     Set this to an integer to crop the image to the brain
@@ -34,7 +34,8 @@ optional arguments:
   --pheno PHENO         Specify 1 to add phenotypics to the model.
   --validationDir VALIDATIONDIR
                         Checkpoint directory to restore the model from.
-						If not specified, program will check the default directory for stored parameters.
+						If not specified, program will check the default
+						directory for stored parameters.
   --regStrength REGSTRENGTH
                         Lambda value for L2 regularization. If not specified,
                         no regularization is applied.
@@ -51,6 +52,11 @@ optional arguments:
                         One of AVG, MAX, NAIVE. Defaults to AVG. If set,
                         dataScale cannot be specified.
   --listType LISTTYPE   Only valid for ABIDE and ADHD. One of strat or site.
+  --depthwise DEPTHWISE
+						Set to 1 use depthwise model instead of standard model
+  --skipConnection SKIPCONNECTION
+						Set to 1 to allow skip connection layer, add residuals
+						to the network (like ResNet).
 ```
   
   The scripts assume that you have the following directories, which you will have to create yourself:   

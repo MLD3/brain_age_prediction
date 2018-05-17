@@ -375,6 +375,15 @@ def GetArgs():
         'dest': 'trainingSize',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--skipConnection',
+        'help': 'If 1, use skipConnection in standard block (like ResNet).',
+        'action': 'store',
+        'type': int,
+        'dest': 'skipConnection',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -396,6 +405,8 @@ def GetArgs():
         GlobalOpts.hiddenUnits = 256
     if GlobalOpts.poolType is None:
         GlobalOpts.poolType = 'MAX'
+    if GlobalOpts.skipConnection is None:
+        GlobalOpts.skipConnection = 0
 
 def compareCustomCNN(validate=False):
     GetArgs()
@@ -459,7 +470,8 @@ def compareCustomCNN(validate=False):
                                 sliceIndex=GlobalOpts.sliceIndex,
                                 align=GlobalOpts.align,
                                 padding=GlobalOpts.padding,
-                                phenotypicsPL=phenotypicsPL)
+                                phenotypicsPL=phenotypicsPL,
+                                skipConnection=GlobalOpts.skipConnection)
 
     lossOp, printOps, updateOp = GetOps(labelsPL, outputLayer, learningRate=GlobalOpts.learningRate)
     modelTrainer.DefineNewParams(GlobalOpts.summaryDir,
