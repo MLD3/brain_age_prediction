@@ -162,7 +162,7 @@ class DataSetNPY(object):
         return labels
 
 if __name__ == '__main__':
-    dataset = DataSetNPY(filenames=np.load('/data1/psturm/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
+    dataset = DataSetNPY(filenames=np.load('/data1/brain/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
                          imageBatchDims=(-1, 41, 49, 41, 1),
                          imageBaseString='/data1/brain/ABIDE/ABIDE2/avgpool3x3x3/',
                          labelBaseString='/data1/brain/ABIDE/ABIDE2/binary_labels/',
