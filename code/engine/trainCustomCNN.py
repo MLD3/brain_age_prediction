@@ -140,6 +140,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.name = '{}MaxNorm{}'.format(GlobalOpts.name, GlobalOpts.maxNorm)
     if GlobalOpts.dropout is not None:
         GlobalOpts.name = '{}Dropout{}'.format(GlobalOpts.name, GlobalOpts.dropout)
+    if GlobalOpts.skipConnection is not None:
+        GlobalOpts.name = '{}SkipConnection{}'.format(GlobalOpts.name, GlobalOpts.skipConnection)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
@@ -459,6 +461,10 @@ def compareCustomCNN(validate=False):
                                   convLayers,
                                   fullyConnectedLayers,
                                   keepProbability=GlobalOpts.dropout)
+    """
+    These are the parameter used for standard convolution network.
+    Implemented by Pascal Sturmfels
+    """
     else:
         outputLayer = customCNN(imagesPL,
                                 trainingPL,

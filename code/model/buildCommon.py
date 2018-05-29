@@ -92,6 +92,7 @@ def standardBlock(inputs,
                                               kernel_size=poolStrides[1:4],
                                               strides=poolStrides[1:4])
             else:
+                #useless
                 pooledInput = inputs
             filteredInput = standardConvolution(pooledInput,
                                                 filters=filters,
