@@ -181,7 +181,7 @@ class ModelTrainer(object):
         bestValdOpDict = {}
         bestLossStepIndex = 0
         stepsSinceLastBest = 0
-        maxStepsBeforeStop = 20000
+        maxStepsBeforeStop = 40000
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)

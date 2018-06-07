@@ -24,7 +24,7 @@ optional arguments:
                         Set this to an integer to select a single brain region
                         as opposed to concatenating all regions along the
                         depth channel.
-  --align ALIGN         Set to 1 to align channels.
+  --align ALIGN         Set to 1 to align channels, maximizes the intersection.
   --numberTrials NUMBERTRIALS
                         Number of repeated models to run.
   --padding PADDING     Set this to an integer to crop the image to the brain
