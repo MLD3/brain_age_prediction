@@ -86,6 +86,16 @@ class DataSetNPY(object):
     def CreateAugmentOperations(self, augmentation='flip'):
         """
         These are untested features.
+        Will choose to do augmenting operation specified by arguments with a probability of 1/3.
+        Flip: flip the batch by its first axis.
+        Translate: pad the images with random size of zeros, and 
+                   then cut the image to remain the size.
+        ---Below features are moved to elsewhere---
+        Max_avg_mixture: randomly use max pooling instead of average pooling
+                         in the sampling phase.
+        Combination: choose two different person with the same age,
+                     then combine the left and right half from each image
+                     to create a new one.
         """
         with tf.variable_scope('DataAugmentation'):
             if augmentation == 'flip':
@@ -107,7 +117,6 @@ class DataSetNPY(object):
                 augmentedImageOperation = tf.slice(paddedImageOperation,
                                                 sliceBegin,
                                                 sliceEnd)
-
             chooseOperation = tf.cond(
                 tf.equal(
                     tf.ones(shape=(), dtype=tf.int32),
@@ -160,7 +169,10 @@ class DataSetNPY(object):
             labels.append(np.load('{}{}.npy'.format(self.labelBaseString, name.decode('utf-8'))).astype(np.float32))
         labels = np.array(labels)
         return labels
-
+'''
+The main function may be used for testing.
+Unknown feature.
+'''
 if __name__ == '__main__':
     dataset = DataSetNPY(filenames=np.load('/data1/brain/ABIDE/ABIDE2/IQData/train_IQ.npy').tolist(),
                          imageBatchDims=(-1, 41, 49, 41, 1),
