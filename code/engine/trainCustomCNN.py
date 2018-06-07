@@ -461,10 +461,6 @@ def compareCustomCNN(validate=False):
                                   convLayers,
                                   fullyConnectedLayers,
                                   keepProbability=GlobalOpts.dropout)
-    """
-    These are the parameter used for standard convolution network.
-    Implemented by Pascal Sturmfels
-    """
     else:
         outputLayer = customCNN(imagesPL,
                                 trainingPL,
