@@ -407,8 +407,6 @@ def GetArgs():
         GlobalOpts.hiddenUnits = 256
     if GlobalOpts.poolType is None:
         GlobalOpts.poolType = 'MAX'
-    if GlobalOpts.skipConnection is None:
-        GlobalOpts.skipConnection = 0
 
 def compareCustomCNN(validate=False):
     GetArgs()
@@ -447,7 +445,7 @@ def compareCustomCNN(validate=False):
     valdDataSet.PreloadData()
 
     """
-    These definitions are used for depthwise convolution network.
+    Depthwise is used for depthwise convolution network.
     Implemented by Pascal Sturmfels
     """
     if GlobalOpts.depthwise:
