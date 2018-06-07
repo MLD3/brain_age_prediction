@@ -182,10 +182,6 @@ class ModelTrainer(object):
         bestLossStepIndex = 0
         stepsSinceLastBest = 0
         maxStepsBeforeStop = 40000
-<<<<<<< HEAD
-=======
-
->>>>>>> fb589d2ee23b5797b7d7324b11920ae2aa93b0bd
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess)
