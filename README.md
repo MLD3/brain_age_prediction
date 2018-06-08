@@ -49,11 +49,11 @@ optional arguments:
                         The downsampling rate of the data. Either 1, 2 or 3.
                         Defaults to 3.
   --pncDataType PNCDATATYPE
-                        One of AVG, MAX, NAIVE. Defaults to AVG. If set,
-                        dataScale cannot be specified.
+                        One of AVG, MAX, NAIVE, POOL_MIX, COMBINE. Defaults to AVG. 
+						If set, dataScale cannot be specified.
   --listType LISTTYPE   Only valid for ABIDE and ADHD. One of strat or site.
   --depthwise DEPTHWISE
-						Set to 1 use depthwise model instead of standard model
+						Set to 1 to use depthwise convolutions for the entire network.
   --skipConnection SKIPCONNECTION
 						Set to 1 to allow skip connection layer, add residuals
 						to the network (like ResNet).

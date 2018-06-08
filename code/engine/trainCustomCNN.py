@@ -67,13 +67,19 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
         GlobalOpts.testFiles = np.load(get('DATA.TEST_LIST')).tolist()
+        GlobalOpts.labelBaseString = get('DATA.LABELS')
         if GlobalOpts.pncDataType == 'AVG':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.AVG_POOL{}'.format(GlobalOpts.dataScale))
         elif GlobalOpts.pncDataType == 'MAX':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.MAX_PATH')
         elif GlobalOpts.pncDataType == 'NAIVE':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NAIVE{}'.format(GlobalOpts.dataScale))
-        GlobalOpts.labelBaseString = get('DATA.LABELS')
+        elif GlobalOpts.pncDataType == 'POOL_MIX':
+            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.POOL_MIX_TRAIN_LIST')).tolist()
+            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH')
+        elif GlobalOpts.pncDataType == 'COMBINE':
+            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
+            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
@@ -335,7 +341,7 @@ def GetArgs():
         },
         {
         'flag': '--pncDataType',
-        'help': 'One of AVG, MAX, NAIVE. Defaults to AVG. If set, dataScale cannot be specified.',
+        'help': 'One of AVG, MAX, NAIVE, POOL_MIX, COMBINE. Defaults to AVG. If set, dataScale cannot be specified.',
         'action': 'store',
         'type': str,
         'dest': 'pncDataType',
@@ -353,7 +359,7 @@ def GetArgs():
         },
         {
         'flag': '--depthwise',
-        'help': 'If 1, use depthwise convolutions for the entire network.',
+        'help': 'Set to 1 to use depthwise convolutions for the entire network.',
         'action': 'store',
         'type': int,
         'dest': 'depthwise',
@@ -380,7 +386,7 @@ def GetArgs():
         },
         {
         'flag': '--skipConnection',
-        'help': 'If 1, use skipConnection in standard block (like ResNet).',
+        'help': 'Set to 1 to allow skip connection layer, add residuals to the network (like ResNet).',
         'action': 'store',
         'type': int,
         'dest': 'skipConnection',

@@ -24,6 +24,12 @@
             "HEIGHT": 121,
             "WIDTH": 145,
             "DEPTH": 121
+        },
+        "AUGMENTED":{
+            "POOL_MIX_PATH": "/data1/brain/PNC_AUGMENTED/pool_mix/",
+            "COMBINE_PATH": "/data1/brain/PNC_AUGMENTED/combine/",
+            "POOL_MIX_TRAIN_LIST": "/data1/brain/PNC_AUGMENTED/pool_mix_train.npy",
+            "COMBINE_TRAIN_LIST": "/data1/brain/PNC_AUGMENTED/combine_train.npy"
         }
     },
     "ABIDE": {
