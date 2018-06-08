@@ -77,9 +77,11 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         elif GlobalOpts.pncDataType == 'POOL_MIX':
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.POOL_MIX_TRAIN_LIST')).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH')
+            GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
+            GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
