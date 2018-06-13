@@ -410,7 +410,7 @@ def GetArgs():
         'flag': '--augRatio',
         'help': 'Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2.',
         'action': 'store',
-        'type': float,
+        'type': int,
         'dest': 'augRatio',
         'required': False,
         'const': None
