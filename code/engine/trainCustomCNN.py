@@ -150,6 +150,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.name = '{}Dropout{}'.format(GlobalOpts.name, GlobalOpts.dropout)
     if GlobalOpts.skipConnection is not None:
         GlobalOpts.name = '{}SkipConnection{}'.format(GlobalOpts.name, GlobalOpts.skipConnection)
+    if GlobalOpts.pncDataType == "POOL_MIX":
+        GlobalOpts.name = '{}MAX_RATIO{}AUG_RATIO{}'.format(GlobalOpts.name, GlobalOpts.maxRatio, GlobalOpts.augRatio)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
