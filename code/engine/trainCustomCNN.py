@@ -76,7 +76,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NAIVE{}'.format(GlobalOpts.dataScale))
         elif GlobalOpts.pncDataType == 'POOL_MIX':
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.POOL_MIX_TRAIN_LIST_{}'.format(GlobalOpts.augRatio))).tolist()
-            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + GlobalOpts.maxRatio + "/"
+            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + str(GlobalOpts.maxRatio) + "/"
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
