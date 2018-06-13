@@ -75,8 +75,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         elif GlobalOpts.pncDataType == 'NAIVE':
             GlobalOpts.imageBaseString = get('DATA.STRUCTURAL.NAIVE{}'.format(GlobalOpts.dataScale))
         elif GlobalOpts.pncDataType == 'POOL_MIX':
-            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.POOL_MIX_TRAIN_LIST')).tolist()
-            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH')
+            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.POOL_MIX_TRAIN_LIST_{}'.format(GlobalOpts.augRatio))).tolist()
+            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + GlobalOpts.maxRatio + "/"
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
@@ -394,6 +394,24 @@ def GetArgs():
         'dest': 'skipConnection',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--maxRatio',
+        'help': 'Ratio of max pooling in the pool_mix augmentation. Default to 0.25.',
+        'action': 'store',
+        'type': float,
+        'dest': 'maxRatio',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--augRatio',
+        'help': 'Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2.',
+        'action': 'store',
+        'type': float,
+        'dest': 'augRatio',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -415,6 +433,10 @@ def GetArgs():
         GlobalOpts.hiddenUnits = 256
     if GlobalOpts.poolType is None:
         GlobalOpts.poolType = 'MAX'
+    if GlobalOpts.pncDataType == 'POOL_MIX' and GlobalOpts.maxRatio is None:
+        GlobalOpts.maxRatio = 0.25
+    if GlobalOpts.pncDataType == 'POOL_MIX' and GlobalOpts.augRatio is None:
+        GlobalOpts.maxRatio = 2
 
 def compareCustomCNN(validate=False):
     GetArgs()

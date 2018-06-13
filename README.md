@@ -57,6 +57,12 @@ optional arguments:
   --skipConnection SKIPCONNECTION
 						Set to 1 to allow skip connection layer, add residuals
 						to the network (like ResNet).
+  --maxRatio MAXRATIO
+						Ratio of max pooling in the pool_mix augmentation. Default to 0.25.
+						The ratio should fall within the range [0.05, 0.75] and also be a multiple of 0.05.
+						Useful only when pool_mix type is selected.
+  --augRatio AUGRATIO
+						Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2. Useful only when pool_mix type is selected.
 ```
   
   The scripts assume that you have the following directories, which you will have to create yourself:   
