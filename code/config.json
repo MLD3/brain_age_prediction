@@ -36,7 +36,9 @@
             "CONCAT_TRAIN_LIST":"/data1/brain/PNC_AUGMENTED/comcat_train_list.npy",
             "POOL_MIX_LABELS": "/data1/brain/PNC_AUGMENTED/pool_mix_labels/",
             "COMBINE_LABELS": "/data1/brain/PNC_AUGMENTED/combine_labels/",
-            "CONCAT_LABELS":"/data1/brain/PNC_AUGMENTED/pool_mix_labels/"
+            "CONCAT_LABELS":"/data1/brain/PNC_AUGMENTED/pool_mix_labels/",
+            "CONCAT_VALD_MAX": "/data1/brain/PNC_AUGMENTED/vald_max_list.npy",
+            "CONCAT_TEST_MAX": "/data1/brain/PNC_AUGMENTED/test_max_list.npy"
         }
     },
     "ABIDE": {

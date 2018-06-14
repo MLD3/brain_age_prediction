@@ -83,7 +83,12 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
         elif GlobalOpts.pncDataType == 'CONCAT':
-            #FIXME
+            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.CONCAT_TRAIN_LIST')).tolist()
+            GlobalOpts.imageBaseString = get('DATA.AUGMENTED.CONCAT_PATH')
+            GlobalOpts.labelBaseString = get('DATA.AUGMENTED.CONCAT_LABELS')
+            if GlobalOpts.testType == 'MAX':
+                GlobalOpts.valdFiles = np.load(get('DATA.AUGMENTED.CONCAT_VALD_MAX')).tolist()
+                GlobalOpts.testFiles = np.load(get('DATA.AUGMENTED.CONCAT_TEST_MAX')).tolist()
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()
@@ -154,6 +159,10 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.name = '{}SkipConnection{}'.format(GlobalOpts.name, GlobalOpts.skipConnection)
     if GlobalOpts.pncDataType == "POOL_MIX":
         GlobalOpts.name = '{}MAX_RATIO{}AUG_RATIO{}'.format(GlobalOpts.name, GlobalOpts.maxRatio, GlobalOpts.augRatio)
+    if GlobalOpts.pncDataType == "CONCAT":
+        if GlobalOpts.testType is None:
+            GlobalOpts.testType = 'AVG'
+        GlobalOpts.name = '{}CONCAT_TEST_WITH_{}'.format(GlobalOpts.name, GlobalOpts.testType)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
@@ -414,6 +423,15 @@ def GetArgs():
         'action': 'store',
         'type': int,
         'dest': 'augRatio',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--testType',
+        'help': 'One of AVG, MAX. Type of validation and test file preprocessing setting. Default to AVG.',
+        'action': 'store',
+        'type': str,
+        'dest': 'testType',
         'required': False,
         'const': None
         }

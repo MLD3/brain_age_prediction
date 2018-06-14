@@ -49,7 +49,7 @@ optional arguments:
                         The downsampling rate of the data. Either 1, 2 or 3.
                         Defaults to 3.
   --pncDataType PNCDATATYPE
-                        One of AVG, MAX, NAIVE, POOL_MIX, COMBINE. Defaults to AVG. 
+                        One of AVG, MAX, NAIVE, POOL_MIX, COMBINE, CONCAT. Defaults to AVG. 
 						If set, dataScale cannot be specified.
   --listType LISTTYPE   Only valid for ABIDE and ADHD. One of strat or site.
   --depthwise DEPTHWISE
@@ -63,6 +63,8 @@ optional arguments:
 						Useful only when pool_mix type is selected.
   --augRatio AUGRATIO
 						Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2. Useful only when pool_mix type is selected.
+  --testType TESTTYPE
+						One of AVG, MAX. Type of validation and test file preprocessing setting used in concat augmentation. Default to AVG.
 ```
   
   The scripts assume that you have the following directories, which you will have to create yourself:   
