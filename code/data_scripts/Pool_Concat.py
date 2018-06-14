@@ -4,7 +4,7 @@ from skimage.measure import block_reduce
 
 avg_file = 'PNC/structural/avgpool3x3x3/'
 max_file = 'PNC/structural/maxpoolArrays/'
-outputFile = 'PNC_AUGMENTED/pool_concat/'
+outputFile = 'PNC_AUGMENTED/concat/'
 
 df = pd.read_csv('PNC/PNC_724_phenotypics.csv')
 
