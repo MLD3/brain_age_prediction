@@ -82,6 +82,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
+        elif GlobalOpts.pncDataType == 'CONCAT':
+            #FIXME
     elif data == 'PNC_GENDER':
         GlobalOpts.trainFiles = np.load(get('DATA.TRAIN_LIST')).tolist()
         GlobalOpts.valdFiles = np.load(get('DATA.VALD_LIST')).tolist()

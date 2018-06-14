@@ -28,12 +28,15 @@
         "AUGMENTED":{
             "POOL_MIX_PATH": "/data1/brain/PNC_AUGMENTED/pool_mix_",
             "COMBINE_PATH": "/data1/brain/PNC_AUGMENTED/combine/",
+            "CONCAT_PATH": "/data1/brain/PNC_AUGMENTED/concat/",
             "POOL_MIX_TRAIN_LIST_2": "/data1/brain/PNC_AUGMENTED/pool_mix_train_list_2.npy",
             "POOL_MIX_TRAIN_LIST_3": "/data1/brain/PNC_AUGMENTED/pool_mix_train_list_3.npy",
             "POOL_MIX_TRAIN_LIST_4": "/data1/brain/PNC_AUGMENTED/pool_mix_train_list_4.npy",
             "COMBINE_TRAIN_LIST": "/data1/brain/PNC_AUGMENTED/combine_train_list.npy",
+            "CONCAT_TRAIN_LIST":"/data1/brain/PNC_AUGMENTED/comcat_train_list.npy",
             "POOL_MIX_LABELS": "/data1/brain/PNC_AUGMENTED/pool_mix_labels/",
-            "COMBINE_LABELS": "/data1/brain/PNC_AUGMENTED/combine_labels/"
+            "COMBINE_LABELS": "/data1/brain/PNC_AUGMENTED/combine_labels/",
+            "CONCAT_LABELS":"/data1/brain/PNC_AUGMENTED/pool_mix_labels/"
         }
     },
     "ABIDE": {
