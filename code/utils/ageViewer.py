@@ -11,7 +11,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/"):
     ageDistDict = {}
     ageList = []
     ageDist = []
-    df = pd.read_csv('PNC/PNC_724_phenotypics.csv')
+    df = pd.read_csv('/data1/brain/PNC/PNC_724_phenotypics.csv')
     for _, row in df.iterrows():
         subject = row['Subject']
         print('Reading subject {}'.format(subject), end='\r')
