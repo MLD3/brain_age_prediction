@@ -1,10 +1,10 @@
 import matplotlib
 matplotlib.use('tkagg')
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import argparse
+import pandas as pd
 
 
 def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/"):
