@@ -16,6 +16,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/"):
         subject = row['Subject']
         print('Reading subject {}'.format(subject), end='\r')
         age = np.load('{}{}{}'.format(labelsloc, subject, '.npy'))
+        age = age[0]
         if age not in ageDistDict:
             ageDistDict[age] = []
         ageDistDict[age].append(subject)
