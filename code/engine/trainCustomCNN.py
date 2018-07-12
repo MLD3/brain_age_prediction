@@ -29,29 +29,38 @@ def GetDataSetInputs():
     """
     with tf.variable_scope('Inputs'):
         with tf.variable_scope('TrainingInputs'):
-            trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles,
-                                      imageBaseString=GlobalOpts.imageBaseString,
-                                      imageBatchDims=GlobalOpts.imageBatchDims,
-                                      labelBaseString=GlobalOpts.labelBaseString,
-                                      batchSize=GlobalOpts.batchSize,
-                                      augment=GlobalOpts.augment)
+            trainDataSets = []
+            for i in range(5):
+                trainDataSet = DataSetNPY(filenames=GlobalOpts.trainFiles[i],
+                                          imageBaseString=GlobalOpts.imageBaseString,
+                                          imageBatchDims=GlobalOpts.imageBatchDims,
+                                          labelBaseString=GlobalOpts.labelBaseString,
+                                          batchSize=GlobalOpts.batchSize,
+                                          augment=GlobalOpts.augment)
+                trainDataSets.append(trainDataSet)
         with tf.variable_scope('ValidationInputs'):
-            valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles,
-                                    imageBaseString=GlobalOpts.imageBaseString,
-                                    imageBatchDims=GlobalOpts.imageBatchDims,
-                                    labelBaseString=GlobalOpts.labelBaseString,
-                                    batchSize=1,
-                                    maxItemsInQueue=GlobalOpts.numberValdItems,
-                                    shuffle=False)
+            valdDataSets = []
+            for i in range(5):
+                valdDataSet  = DataSetNPY(filenames=GlobalOpts.valdFiles[i],
+                                         imageBaseString=GlobalOpts.imageBaseString,
+                                         imageBatchDims=GlobalOpts.imageBatchDims,
+                                         labelBaseString=GlobalOpts.labelBaseString,
+                                         batchSize=1,
+                                         maxItemsInQueue=GlobalOpts.numberValdItems,
+                                         shuffle=False)
+                valdDataSets.append(valdDataSet)
         with tf.variable_scope('TestInputs'):
-            testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
-                                    imageBaseString=GlobalOpts.imageBaseString,
-                                    imageBatchDims=GlobalOpts.imageBatchDims,
-                                    labelBaseString=GlobalOpts.labelBaseString,
-                                    batchSize=1,
-                                    maxItemsInQueue=GlobalOpts.numberTestItems,
-                                    shuffle=False)
-    return trainDataSet, valdDataSet, testDataSet
+            testDataSets = []
+            for i in range(5):
+                testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
+                                         imageBaseString=GlobalOpts.imageBaseString,
+                                         imageBatchDims=GlobalOpts.imageBatchDims,
+                                         labelBaseString=GlobalOpts.labelBaseString,
+                                         batchSize=1,
+                                         maxItemsInQueue=GlobalOpts.numberTestItems,
+                                         shuffle=False)
+                testDataSets.append(testDataSet)
+    return trainDataSets, valdDataSets, testDataSets
 
 def DefineDataOpts(data='PNC', summaryName='test_comp'):
     """
@@ -79,7 +88,7 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + str(GlobalOpts.maxRatio) + "/"
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
-            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST')).tolist()
+            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}'.format(GlobalOpts.augRatio))).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
         elif GlobalOpts.pncDataType == 'CONCAT':
@@ -159,15 +168,21 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.name = '{}SkipConnection{}'.format(GlobalOpts.name, GlobalOpts.skipConnection)
     if GlobalOpts.pncDataType == "POOL_MIX":
         GlobalOpts.name = '{}MAX_RATIO{}AUG_RATIO{}'.format(GlobalOpts.name, GlobalOpts.maxRatio, GlobalOpts.augRatio)
+    if GlobalOpts.pncDataType == "COMBINE":
+        GlobalOpts.name = '{}COMBINE_AUG_RATIO{}'.format(GlobalOpts.name, GlobalOpts.augRatio)
     if GlobalOpts.pncDataType == "CONCAT":
         if GlobalOpts.testType is None:
             GlobalOpts.testType = 'AVG'
         GlobalOpts.name = '{}CONCAT_TEST_WITH_{}'.format(GlobalOpts.name, GlobalOpts.testType)
+    if GlobalOpts.augment is None:
+        GlobalOpts.augment = 'none'
+    else:
+        GlobalOpts.name = '{}AUGMENTED_BY_{}'.format(GlobalOpts.name, GlobalOpts.augment)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
-    GlobalOpts.augment = 'none'
+
 
 def GetOps(labelsPL, outputLayer, learningRate=0.0001):
     """
@@ -419,9 +434,9 @@ def GetArgs():
         },
         {
         'flag': '--augRatio',
-        'help': 'Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2.',
+        'help': 'Ratio of augmented images versus pure average images in the pool_mix and combine augmentation. Default to 2.',
         'action': 'store',
-        'type': int,
+        'type': float,
         'dest': 'augRatio',
         'required': False,
         'const': None
@@ -429,6 +444,15 @@ def GetArgs():
         {
         'flag': '--testType',
         'help': 'One of AVG, MAX. Type of validation and test file preprocessing setting. Default to AVG.',
+        'action': 'store',
+        'type': str,
+        'dest': 'testType',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--augment',
+        'help': 'One of FLIP, TRANSLATE. Type of standard augmentation. Default to None.',
         'action': 'store',
         'type': str,
         'dest': 'testType',
@@ -458,7 +482,7 @@ def GetArgs():
     if GlobalOpts.pncDataType == 'POOL_MIX' and GlobalOpts.maxRatio is None:
         GlobalOpts.maxRatio = 0.25
     if GlobalOpts.pncDataType == 'POOL_MIX' and GlobalOpts.augRatio is None:
-        GlobalOpts.maxRatio = 2
+        GlobalOpts.augRatio = 2
 
 def compareCustomCNN(validate=False):
     GetArgs()
@@ -479,6 +503,7 @@ def compareCustomCNN(validate=False):
     else:
         fullyConnectedLayers = [GlobalOpts.hiddenUnits, 2]
     if GlobalOpts.pheno:
+        # FIXME: new dataset cannot accomodate phenotypic
         phenotypicBaseStrings=[
             '/data1/brain/ABIDE/ABIDE2/gender/',
             '/data1/brain/ABIDE/ABIDE2/IQData/FIQ/',
@@ -494,7 +519,8 @@ def compareCustomCNN(validate=False):
     else:
         phenotypicsPL = None
 
-    valdDataSet.PreloadData()
+    for vald in valdDataSet:
+        vald.PreloadData()
 
     """
     Depthwise is used for depthwise convolution network.

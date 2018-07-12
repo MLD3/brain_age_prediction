@@ -3,7 +3,7 @@ import numpy as np
 from skimage.measure import block_reduce
 import os
 
-inputFile = 'PNC/structural/maxpoolArrays/'
+inputFile = 'PNC/structural/avgpool3x3x3/'
 df = pd.read_csv('PNC/PNC_724_phenotypics.csv')
 max_pool_rate = 0.25
 def mix(a, axis=None, out=None):

@@ -90,16 +90,16 @@ class ModelTrainer(object):
         self.testSet       = testSet
         self.phenotypicsPL = phenotypicsPL
 
-    def GetFeedDict(self, sess, setType='train'):
+    def GetFeedDict(self, sess, setType='train', setIndex=0):
         if self.phenotypicsPL is not None:
             if setType == 'train':
-                images, labels, phenotypes = self.trainSet.NextBatch(sess)
+                images, labels, phenotypes = self.trainSet[setIndex].NextBatch(sess)
                 training = True
             elif setType == 'vald':
-                images, labels, phenotypes = self.valdSet.NextBatch(sess)
+                images, labels, phenotypes = self.valdSet[setIndex].NextBatch(sess)
                 training = False
             elif setType == 'test':
-                images, labels, phenotypes = self.testSet.NextBatch(sess)
+                images, labels, phenotypes = self.testSet[setIndex].NextBatch(sess)
                 training = False
             return {
                 self.imagesPL: images,
@@ -109,13 +109,13 @@ class ModelTrainer(object):
             }
         else:
             if setType == 'train':
-                images, labels = self.trainSet.NextBatch(sess)
+                images, labels = self.trainSet[setIndex].NextBatch(sess)
                 training = True
             elif setType == 'vald':
-                images, labels = self.valdSet.NextBatch(sess)
+                images, labels = self.valdSet[setIndex].NextBatch(sess)
                 training = False
             elif setType == 'test':
-                images, labels = self.testSet.NextBatch(sess)
+                images, labels = self.testSet[setIndex].NextBatch(sess)
                 training = False
             return {
                 self.imagesPL: images,
@@ -123,7 +123,7 @@ class ModelTrainer(object):
                 self.trainingPL: training
             }
 
-    def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None):
+    def GetPerformanceThroughSet(self, sess, printOps, setType='vald', batchTrainFeedDict=None, setIndex=0):
         sess.run(tf.local_variables_initializer())
         accumulatedOps = sess.run(printOps.ops)
         if setType == 'vald':
@@ -135,9 +135,9 @@ class ModelTrainer(object):
 
         for i in range(numberIters):
             if setType == 'vald':
-                feed_dict = self.GetFeedDict(sess, setType=setType)
+                feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'test':
-                feed_dict = self.GetFeedDict(sess, setType=setType)
+                feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
@@ -161,7 +161,7 @@ class ModelTrainer(object):
         saver.save(sess, path)
         print('STEP {}: saved model to path {}'.format(step, path), end='\r')
 
-    def TrainModel(self, sess, updateOp, printOps, name):
+    def TrainModel(self, sess, updateOp, printOps, name, setIndex=0):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
 
         # Initialize relevant variables
@@ -182,7 +182,7 @@ class ModelTrainer(object):
         maxStepsBeforeStop = 40000
 
         for batchIndex in range(self.numberOfSteps):
-            batchTrainFeedDict = self.GetFeedDict(sess)
+            batchTrainFeedDict = self.GetFeedDict(sess, setIndex=setIndex)
 
             if batchIndex % self.batchStepsBetweenSummary != 0:
                 _, _ = sess.run([updateOp, extraUpdateOps], feed_dict=batchTrainFeedDict)
@@ -191,7 +191,7 @@ class ModelTrainer(object):
                 writer.add_summary(gradSummary, batchIndex)
 
                 opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps,
-                                    setType='train', batchTrainFeedDict=batchTrainFeedDict)
+                                    setType='train', batchTrainFeedDict=batchTrainFeedDict, setIndex=setIndex)
                 writer.add_summary(
                     sess.run(
                         printOps.mergedTrainSummary,
@@ -201,7 +201,7 @@ class ModelTrainer(object):
                 for opName in opValueDict:
                     print('{}: {}'.format(opName, opValueDict[opName]))
 
-                opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps)
+                opValueDict, summaryFeedDict = self.GetPerformanceThroughSet(sess, printOps, setIndex=setIndex)
                 writer.add_summary(
                     sess.run(
                         printOps.mergedValdSummary,
@@ -224,7 +224,7 @@ class ModelTrainer(object):
                         break
 
         saveModel.restore(sess, saver, savePath)
-        testOpValueDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='test')
+        testOpValueDict, _ = self.GetPerformanceThroughSet(sess, printOps, setType='test', setIndex=setIndex)
         writer.close()
 
         return bestValdOpDict, testOpValueDict
@@ -248,7 +248,8 @@ class ModelTrainer(object):
             valdOpDict, testOpDict = self.TrainModel(sess,
                                                        updateOp,
                                                        printOps,
-                                                       '{}/run_{}'.format(name, i))
+                                                       '{}/run_{}'.format(name, i),
+                                                       i % 5)
             for opName in printOps.names:
                 bestValdOpDict[opName].append(valdOpDict[opName])
                 bestTestOpDict[opName].append(testOpDict[opName])
