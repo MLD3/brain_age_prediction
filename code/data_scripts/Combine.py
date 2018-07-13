@@ -14,6 +14,7 @@ with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'r') as fp:
         images = []
         for file in files:
             image = np.load('{}{}.npy'.format(inputFile, file))
+            np.save('{}{}.npy'.format(outputFile, file))
             images.append(image)
         for i in range(len(files)):
             for j in range(1, min(len(files)-1, 6)):
