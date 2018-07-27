@@ -589,3 +589,4 @@ def compareCustomCNN(validate=False):
                                   printOps,
                                   name=GlobalOpts.name,
                                   numIters=GlobalOpts.numberTrials)
+
