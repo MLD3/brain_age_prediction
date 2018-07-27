@@ -46,18 +46,18 @@ def GetDataSetInputs():
                                          imageBatchDims=GlobalOpts.imageBatchDims,
                                          labelBaseString=GlobalOpts.labelBaseString,
                                          batchSize=1,
-                                         maxItemsInQueue=GlobalOpts.numberValdItems,
+                                         maxItemsInQueue=GlobalOpts.numberValdItems[i],
                                          shuffle=False)
                 valdDataSets.append(valdDataSet)
         with tf.variable_scope('TestInputs'):
             testDataSets = []
             for i in range(5):
-                testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles,
+                testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles[i],
                                          imageBaseString=GlobalOpts.imageBaseString,
                                          imageBatchDims=GlobalOpts.imageBatchDims,
                                          labelBaseString=GlobalOpts.labelBaseString,
                                          batchSize=1,
-                                         maxItemsInQueue=GlobalOpts.numberTestItems,
+                                         maxItemsInQueue=GlobalOpts.numberTestItems[i],
                                          shuffle=False)
                 testDataSets.append(testDataSet)
     return trainDataSets, valdDataSets, testDataSets
@@ -88,7 +88,10 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + str(GlobalOpts.maxRatio) + "/"
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
-            GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}'.format(GlobalOpts.augRatio))).tolist()
+            if GlobalOpts.augRatio >= 1:
+                GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}'.format(int(GlobalOpts.augRatio)))).tolist()
+            else:
+                GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}'.format(int(100*GlobalOpts.augRatio)))).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
         elif GlobalOpts.pncDataType == 'CONCAT':
@@ -148,9 +151,14 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.labelBaseString = get('PAC.AGES')
         else:
             GlobalOpts.labelBaseString = get('PAC.LABELS')
-
-    GlobalOpts.numberTestItems = len(GlobalOpts.testFiles)
-    GlobalOpts.numberValdItems = len(GlobalOpts.valdFiles)
+    GlobalOpts.numberTestItems = []
+    GlobalOpts.numberValdItems = []
+    for i in range(5):
+        GlobalOpts.trainFiles[i] = GlobalOpts.trainFiles[i].tolist()
+        GlobalOpts.testFiles[i] = GlobalOpts.testFiles[i].tolist()
+        GlobalOpts.valdFiles[i] = GlobalOpts.valdFiles[i].tolist()
+        GlobalOpts.numberTestItems.append(len(GlobalOpts.testFiles))
+        GlobalOpts.numberValdItems.append(len(GlobalOpts.valdFiles))
     GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
     if GlobalOpts.sliceIndex is not None:
         GlobalOpts.name = '{}Slice{}'.format(GlobalOpts.name, GlobalOpts.sliceIndex)
@@ -455,7 +463,7 @@ def GetArgs():
         'help': 'One of FLIP, TRANSLATE. Type of standard augmentation. Default to None.',
         'action': 'store',
         'type': str,
-        'dest': 'testType',
+        'dest': 'augment',
         'required': False,
         'const': None
         }

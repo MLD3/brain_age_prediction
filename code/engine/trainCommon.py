@@ -127,9 +127,9 @@ class ModelTrainer(object):
         sess.run(tf.local_variables_initializer())
         accumulatedOps = sess.run(printOps.ops)
         if setType == 'vald':
-            numberIters = self.valdSet.maxItemsInQueue
+            numberIters = self.valdSet[setIndex].maxItemsInQueue
         elif setType == 'test':
-            numberIters = self.testSet.maxItemsInQueue
+            numberIters = self.testSet[setIndex].maxItemsInQueue
         elif setType == 'train':
             numberIters = 1
 
