@@ -124,7 +124,7 @@ class DataSetNPY(object):
             # elif augmentation == 'rotate':
                 # TODO:
             chooseOperation = tf.cond(
-                tf.less(
+                tf.math.less(
                     tf.ones(shape=(), dtype=tf.float32),
                     tf.random_uniform(shape=(), dtype=tf.float32, minval=0, maxval=1+augRatio)
                 ),
