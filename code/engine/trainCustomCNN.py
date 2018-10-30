@@ -202,7 +202,9 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
     if GlobalOpts.augment is None:
         GlobalOpts.augment = 'none'
     else:
-        GlobalOpts.name = '{}AUGMENTED_BY_{}'.format(GlobalOpts.name, GlobalOpts.augment)
+        if GlobalOpts.augRatio is None:
+            GlobalOpts.augRatio == 1
+        GlobalOpts.name = '{}AUGMENTED_BY_{}_AUG_RATIO{}'.format(GlobalOpts.name, GlobalOpts.augment, GlobalOpts.augRatio)
     GlobalOpts.summaryDir = '../summaries/{}/{}/'.format(summaryName,
                                                      GlobalOpts.name)
     GlobalOpts.checkpointDir = '../checkpoints/{}/{}/'.format(summaryName,
