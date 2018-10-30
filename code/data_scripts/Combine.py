@@ -5,7 +5,7 @@ import json
 inputFile = '/data1/brain/PNC/structural/avgpool3x3x3/'
 outputFile = '/data1/brain/PNC_AUGMENTED/combine/'
 if not os.path.exists(outputFile):
-        os.makedirs(outputFile)
+    os.makedirs(outputFile)
 with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'r') as fp:
     ageDistribution = json.load(fp)
     for age, files in ageDistribution.items():

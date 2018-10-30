@@ -20,7 +20,8 @@ class DataSetNPY(object):
             batchSize=64,
             maxItemsInQueue=100,
             shuffle=True,
-            augment='none'
+            augment='none',
+            augRatio=None
         ):
         self.filenames = filenames
         self.batchSize = batchSize
@@ -44,7 +45,7 @@ class DataSetNPY(object):
             labelBatchDims)
         self.augment = augment
         if self.augment != 'none':
-            self.CreateAugmentOperations(augmentation=augment)
+            self.CreateAugmentOperations(augmentation=augment, augRatio=augRatio)
 
     def PreloadData(self):
         files = [x.encode() for x in self.filenames]
@@ -83,10 +84,10 @@ class DataSetNPY(object):
             self.labelBatchDims)
         return randomImageBatch, randomLabelBatch
 
-    def CreateAugmentOperations(self, augmentation='flip'):
+    def CreateAugmentOperations(self, augmentation='flip', augRatio=1):
         """
-        These are untested features.
-        Will choose to do augmenting operation specified by arguments with a probability of 1/3.
+        These are untested features. Augmentation on the fly.
+        Will choose to do augmenting operation specified by arguments with a probability of 1/2.
         Flip: flip the batch by its first axis.
         Translate: pad the images with random size of zeros, and 
                    then cut the image to remain the size.
@@ -116,11 +117,16 @@ class DataSetNPY(object):
                 sliceEnd = self.imageBatchDims
                 augmentedImageOperation = tf.slice(paddedImageOperation,
                                                 sliceBegin,
-                                                sliceEnd)
+                                                sliceEnd,
+                                                name='translate')
+            # elif augmentation == 'crop':
+                # TODO: what is the crop size?
+            # elif augmentation == 'rotate':
+                # TODO:
             chooseOperation = tf.cond(
                 tf.equal(
-                    tf.ones(shape=(), dtype=tf.int32),
-                    tf.random_uniform(shape=(), dtype=tf.int32, minval=0, maxval=2)
+                    tf.ones(shape=(), dtype=tf.float32),
+                    tf.random_uniform(shape=(), dtype=tf.float32, minval=0, maxval=1+augRatio)
                 ),
                 lambda: augmentedImageOperation,
                 lambda: self.imageBatchOperation,

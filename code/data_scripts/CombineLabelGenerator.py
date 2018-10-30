@@ -64,9 +64,12 @@ with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'r') as fp:
         test_set[i] = np.array(test_set[i]).astype('<U12')
     train_set, vald_set, test_set = np.array(train_set), np.array(vald_set), np.array(test_set)
     #np.save('{}train_list.npy'.format(outputFile), train_set)
+    '''
     set_size = 100
     for i in range(5):
         train_set[i] = train_set[i][:set_size]
+    np.save('{}combine_train_orig_{}'.format(outputFile, set_size), train_set)
+    '''
     for i in range(5):
         train_set_dummy_dense = []
         for j in range(5):
@@ -85,10 +88,11 @@ with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'r') as fp:
                         combined_image = ageDistribution[age][(index + k) % len(ageDistribution[age])]
                         if str(combined_image) in train_set[j]:
                             train_set_dummy.append(str(image) + str(k))
-            train_set_dummy = np.array(train_set_dummy).astype('<U12')
+            train_set_dummy = np.array(train_set_dummy)
+            shuffle(train_set_dummy)
             train_set_dummy_dense.append(train_set_dummy)
         train_set_dummy_dense = np.array(train_set_dummy_dense)
-        np.save('{}combine_train_{}_{}'.format(outputFile, density[i], set_size), train_set_dummy_dense)
+        np.save('{}combine_train_{}'.format(outputFile, density[i]), train_set_dummy_dense)
     #np.save('{}vald_list.npy'.format(outputFile), vald_set)
     #np.save('{}test_list.npy'.format(outputFile), test_set)
     print("Successfully generated all the labels")

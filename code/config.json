@@ -37,6 +37,30 @@
             "COMBINE_TRAIN_LIST_1": "/data1/brain/PNC_AUGMENTED/combine_train_1.npy",
             "COMBINE_TRAIN_LIST_2": "/data1/brain/PNC_AUGMENTED/combine_train_2.npy",
             "COMBINE_TRAIN_LIST_3": "/data1/brain/PNC_AUGMENTED/combine_train_3.npy",
+            "100": 
+            {
+                "COMBINE_TRAIN_LIST_0_25": "/data1/brain/PNC_AUGMENTED/combine_train_0_25_100.npy",
+                "COMBINE_TRAIN_LIST_0_50": "/data1/brain/PNC_AUGMENTED/combine_train_0_5_100.npy",
+                "COMBINE_TRAIN_LIST_1": "/data1/brain/PNC_AUGMENTED/combine_train_1_100.npy",
+                "COMBINE_TRAIN_LIST_2": "/data1/brain/PNC_AUGMENTED/combine_train_2_100.npy",
+                "COMBINE_TRAIN_LIST_3": "/data1/brain/PNC_AUGMENTED/combine_train_3_100.npy",
+            },
+            "200": 
+            {
+                "COMBINE_TRAIN_LIST_0_25": "/data1/brain/PNC_AUGMENTED/combine_train_0_25_200.npy",
+                "COMBINE_TRAIN_LIST_0_50": "/data1/brain/PNC_AUGMENTED/combine_train_0_5_200.npy",
+                "COMBINE_TRAIN_LIST_1": "/data1/brain/PNC_AUGMENTED/combine_train_1_200.npy",
+                "COMBINE_TRAIN_LIST_2": "/data1/brain/PNC_AUGMENTED/combine_train_2_200.npy",
+                "COMBINE_TRAIN_LIST_3": "/data1/brain/PNC_AUGMENTED/combine_train_3_200.npy",
+            },
+            "300": 
+            {
+                "COMBINE_TRAIN_LIST_0_25": "/data1/brain/PNC_AUGMENTED/combine_train_0_25_300.npy",
+                "COMBINE_TRAIN_LIST_0_50": "/data1/brain/PNC_AUGMENTED/combine_train_0_5_300.npy",
+                "COMBINE_TRAIN_LIST_1": "/data1/brain/PNC_AUGMENTED/combine_train_1_300.npy",
+                "COMBINE_TRAIN_LIST_2": "/data1/brain/PNC_AUGMENTED/combine_train_2_300.npy",
+                "COMBINE_TRAIN_LIST_3": "/data1/brain/PNC_AUGMENTED/combine_train_3_300.npy",
+            },
             "CONCAT_TRAIN_LIST":"/data1/brain/PNC_AUGMENTED/concat_train_list.npy",
             "POOL_MIX_LABELS": "/data1/brain/PNC_AUGMENTED/general_labels/",
             "COMBINE_LABELS": "/data1/brain/PNC_AUGMENTED/general_labels/",

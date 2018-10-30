@@ -36,7 +36,8 @@ def GetDataSetInputs():
                                           imageBatchDims=GlobalOpts.imageBatchDims,
                                           labelBaseString=GlobalOpts.labelBaseString,
                                           batchSize=GlobalOpts.batchSize,
-                                          augment=GlobalOpts.augment)
+                                          augment=GlobalOpts.augment,
+                                          augRatio=GlobalOpts.augRatio)
                 trainDataSets.append(trainDataSet)
         with tf.variable_scope('ValidationInputs'):
             valdDataSets = []
@@ -88,10 +89,26 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.POOL_MIX_PATH') + str(GlobalOpts.maxRatio) + "/"
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.POOL_MIX_LABELS')
         elif GlobalOpts.pncDataType == 'COMBINE':
-            if GlobalOpts.augRatio >= 1:
-                GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}'.format(int(GlobalOpts.augRatio)))).tolist()
-            else:
-                GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}'.format(int(100*GlobalOpts.augRatio)))).tolist()
+            if GlobalOpts.origSize == 100:
+                if GlobalOpts.augRatio >= 1:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}_100'.format(int(GlobalOpts.augRatio)))).tolist()
+                else:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}_100'.format(int(100*GlobalOpts.augRatio)))).tolist()
+            elif GlobalOpts.origSize == 200:
+                if GlobalOpts.augRatio >= 1:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}_200'.format(int(GlobalOpts.augRatio)))).tolist()
+                else:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}_200'.format(int(100*GlobalOpts.augRatio)))).tolist()
+            elif GlobalOpts.origSize == 300:
+                if GlobalOpts.augRatio >= 1:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}_300'.format(int(GlobalOpts.augRatio)))).tolist()
+                else:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}_300'.format(int(100*GlobalOpts.augRatio)))).tolist()
+            else:               
+                if GlobalOpts.augRatio >= 1:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_{}'.format(int(GlobalOpts.augRatio)))).tolist()
+                else:
+                    GlobalOpts.trainFiles = np.load(get('DATA.AUGMENTED.COMBINE_TRAIN_LIST_0_{}'.format(int(100*GlobalOpts.augRatio)))).tolist()
             GlobalOpts.imageBaseString = get('DATA.AUGMENTED.COMBINE_PATH')
             GlobalOpts.labelBaseString = get('DATA.AUGMENTED.COMBINE_LABELS')
         elif GlobalOpts.pncDataType == 'CONCAT':
@@ -154,9 +171,9 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
     GlobalOpts.numberTestItems = []
     GlobalOpts.numberValdItems = []
     for i in range(5):
-        GlobalOpts.trainFiles[i] = GlobalOpts.trainFiles[i].tolist()
-        GlobalOpts.testFiles[i] = GlobalOpts.testFiles[i].tolist()
-        GlobalOpts.valdFiles[i] = GlobalOpts.valdFiles[i].tolist()
+        GlobalOpts.trainFiles[i] = np.array(GlobalOpts.trainFiles[i]).tolist()
+        GlobalOpts.testFiles[i] = np.array(GlobalOpts.testFiles[i]).tolist()
+        GlobalOpts.valdFiles[i] = np.array(GlobalOpts.valdFiles[i]).tolist()
         GlobalOpts.numberTestItems.append(len(GlobalOpts.testFiles))
         GlobalOpts.numberValdItems.append(len(GlobalOpts.valdFiles))
     GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
@@ -464,6 +481,15 @@ def GetArgs():
         'action': 'store',
         'type': str,
         'dest': 'augment',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--origSize',
+        'help': 'Size of the original sample before augmentation. One of 100, 200, 300. If None, then all samples are used.',
+        'action': 'store',
+        'type': int,
+        'dest': 'origSize',
         'required': False,
         'const': None
         }

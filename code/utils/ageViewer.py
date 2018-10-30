@@ -42,15 +42,15 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
         ageDist.append(len(ageDistDict[age]))
     ind = np.arange(len(ageList))
     width = 0.5 # arbitrarily chosen const
+    ageEnum = np.array(ageEnum)
+    print("The average age is " + str(np.mean(ageEnum)) + " with a std of " + str(np.std(ageEnum)) )
+    print("The length of the set is :" + str(ageEnum.shape[0]))
     fig, ax = plt.subplots()
     rect = ax.bar(ind, ageDist, color='r')
     ax.set_ylabel('Number of MRI in this age')
     ax.set_title('MRI distribution by the age')
     ax.set_xticks(ind)
     ax.set_xticklabels(ageList)
-    ageEnum = np.array(ageEnum)
-    print("The average age is " + str(np.mean(ageEnum)) + " with a std of " + str(np.std(ageEnum)) )
-    print("The length of the set is :" + str(ageEnum.shape[0]))
     plt.show()
     if save:
         with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'w') as fp:
