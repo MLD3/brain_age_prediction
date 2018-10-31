@@ -119,10 +119,18 @@ class DataSetNPY(object):
                                                 sliceBegin,
                                                 sliceEnd,
                                                 name='translate')
+            elif augmentation == 'rotate':
+                # for now it is rotate 180 degrees in x axis and y axis only
+                # if proven to be useful, then we can explore more on this
+                augmentedImageOperation = tf.reverse(self.imageBatchOperation,
+                                                     axis=[1],
+                                                     name='rotate_y')
+                augmentedImageOperation = tf.reverse(augmentedImageOperation,
+                                                     axis=[0],
+                                                     name='rotate_x')
             # elif augmentation == 'crop':
                 # TODO: what is the crop size?
-            # elif augmentation == 'rotate':
-                # TODO:
+
             chooseOperation = tf.cond(
                 tf.less(
                     tf.ones(shape=(), dtype=tf.float32),
