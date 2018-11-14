@@ -186,7 +186,7 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     print('Saving z axis training set')
     flattenedImages.tofile('{}zAxisSlices/train.bin'.format(outFile))
 
-def ConvertUKNIItoCSV(inFile, outFile, SubjectDataFrame):
+def ConvertUKNIItoNPY(inFile, outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
         subject = row['eid']
         print('Saving Subject {}'.format(subject))
@@ -196,6 +196,14 @@ def ConvertUKNIItoCSV(inFile, outFile, SubjectDataFrame):
         outFileName = outFile + str(subject)
         np.save(outFileName, imageArray)
 
+def convertCSVToAgeNPY(outFile, SubjectDataFrame):
+    for _, row in SubjectDataFrame.iterrows():
+        subject = row['eid']
+        print('Saving Subject {}'.format(subject))
+        age = row['age']
+        npArray = np.array(age)
+        outFileName = outFile + str(subject)
+        np.save(outFileName, npArray)
 # This pushing age inside of the np array?
 '''
 i = 0
@@ -219,4 +227,5 @@ if __name__ == '__main__':
     '''
     # for UKBIOBANK transfer
     SubjectDataFrame = pd.read_csv('/data1/brain/UKBIOBANK/UKBiobank_T1_age.csv')
-    ConvertUKNIItoCSV(inFile='/data1/brain/UKBIOBANK/structural/', outFile='/data1/brain/UKBIOBANK/numpyArrays/', SubjectDataFrame=SubjectDataFrame)
+    # ConvertUKNIItoNPY(inFile='/data1/brain/UKBIOBANK/structural/', outFile='/data1/brain/UKBIOBANK/numpyArrays/', SubjectDataFrame=SubjectDataFrame)
+    convertCSVToAgeNPY(outFile='/data1/brain/UKBIOBANK/labels/', SubjectDataFrame)
