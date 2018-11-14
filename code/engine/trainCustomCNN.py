@@ -168,6 +168,13 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
             GlobalOpts.labelBaseString = get('PAC.AGES')
         else:
             GlobalOpts.labelBaseString = get('PAC.LABELS')
+    elif 'BIOBANK' in data:
+        baseString = 'BIOBANK'
+        GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
+        GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
+        GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
+        GlobalOpts.imageBaseString = get('BIOBANK.AVG_POOL{}'.format(GlobalOpts.dataScale))
+        GlobalOpts.labelBaseString = get('BIOBANK.LABELS')
     GlobalOpts.numberTestItems = []
     GlobalOpts.numberValdItems = []
     for i in range(5):
