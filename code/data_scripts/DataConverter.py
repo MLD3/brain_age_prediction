@@ -186,6 +186,18 @@ def NPYToBinaryDataset(inFile, outFile, SubjectDataFrame):
     print('Saving z axis training set')
     flattenedImages.tofile('{}zAxisSlices/train.bin'.format(outFile))
 
+def ConvertUKNIItoCSV(inFile, outFile, SubjectDataFrame):
+    for _, row in SubjectDataFrame.iterrows():
+        subject = row['eid']
+        print('Saving Subject {}'.format(subject))
+        fileName = '{}r15_{}_T1_brain_to_MNI.nii'.format(inFile, str(subject))
+        NIIimage = nib.load(fileName)
+        imageArray = NIIimage.get_data()
+        outFileName = outFile + str(subject)
+        np.save(outFileName, imageArray)
+
+# This pushing age inside of the np array?
+'''
 i = 0
 for _, row in df.iterrows():
     subject = row['Subject']
@@ -197,9 +209,14 @@ for _, row in df.iterrows():
     nparray = np.insert(nparray, 0, age)
     accumulatedArrays[i, :] = nparray
     i = i + 1
-
+'''
 
 
 if __name__ == '__main__':
+    '''
     SubjectDataFrame = pd.read_csv('/data/psturm/PNC_724_phenotypics.csv')
     NPYToBinaryDataset(inFile='/data/psturm/structural/numpyArrays/', outFile='/data/psturm/structural/', SubjectDataFrame=SubjectDataFrame)
+    '''
+    # for UKBIOBANK transfer
+    SubjectDataFrame = pd.read_csv('/data1/brain/UKBIOBANK/UKBiobank_T1_age.csv')
+    ConvertUKNIItoCSV(inFile='/data1/brain/UKBIOBANK/structural/', outFile='/data1/brain/UKBIOBANK/numpyArrays/', SubjectDataFrame=SubjectDataFrame)
