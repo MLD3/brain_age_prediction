@@ -228,4 +228,4 @@ if __name__ == '__main__':
     # for UKBIOBANK transfer
     SubjectDataFrame = pd.read_csv('/data1/brain/UKBIOBANK/UKBiobank_T1_age.csv')
     # ConvertUKNIItoNPY(inFile='/data1/brain/UKBIOBANK/structural/', outFile='/data1/brain/UKBIOBANK/numpyArrays/', SubjectDataFrame=SubjectDataFrame)
-    convertCSVToAgeNPY(outFile='/data1/brain/UKBIOBANK/labels/', SubjectDataFrame)
+    convertCSVToAgeNPY(outFile='/data1/brain/UKBIOBANK/labels/', SubjectDataFrame=SubjectDataFrame)
