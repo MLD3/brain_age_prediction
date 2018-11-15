@@ -332,7 +332,7 @@ class ModelTrainer(object):
             saveModel.restore(sess, saver, savePath)
 
             for j in range(numberIters):
-                images, labels, names = sess.run([imageOp[j], labelOp[j], nameOp[j]])
+                images, labels, names = sess.run([imageOp[i], labelOp[i], nameOp[i]])
                 feed_dict = {
                     self.imagesPL: images,
                     self.labelsPL: labels,
