@@ -50,17 +50,30 @@ def GetDataSetInputs():
                                          maxItemsInQueue=GlobalOpts.numberValdItems[i],
                                          shuffle=False)
                 valdDataSets.append(valdDataSet)
-        with tf.variable_scope('TestInputs'):
-            testDataSets = []
-            for i in range(5):
-                testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles[i],
-                                         imageBaseString=GlobalOpts.imageBaseString,
-                                         imageBatchDims=GlobalOpts.imageBatchDims,
-                                         labelBaseString=GlobalOpts.labelBaseString,
-                                         batchSize=1,
-                                         maxItemsInQueue=GlobalOpts.numberTestItems[i],
-                                         shuffle=False)
-                testDataSets.append(testDataSet)
+        if GlobalOpts.pretrained:
+            with tf.variable_scope('TestInputs'):
+                testDataSets = []
+                for i in range(5):
+                    testDataSet  = DataSetNPY(filenames="/data1/brain/UKBIOBANK/train.npy",
+                                             imageBaseString="/data1/brain/UKBIOBANK/avgpool3x3x3/",
+                                             imageBatchDims=GlobalOpts.imageBatchDims,
+                                             labelBaseString="/data1/brain/UKBIOBANK/labels/",
+                                             batchSize=1,
+                                             maxItemsInQueue=9191,
+                                             shuffle=False)
+                    testDataSets.append(testDataSet)
+        else:
+            with tf.variable_scope('TestInputs'):
+                testDataSets = []
+                for i in range(5):
+                    testDataSet  = DataSetNPY(filenames=GlobalOpts.testFiles[i],
+                                             imageBaseString=GlobalOpts.imageBaseString,
+                                             imageBatchDims=GlobalOpts.imageBatchDims,
+                                             labelBaseString=GlobalOpts.labelBaseString,
+                                             batchSize=1,
+                                             maxItemsInQueue=GlobalOpts.numberTestItems[i],
+                                             shuffle=False)
+                    testDataSets.append(testDataSet)
     return trainDataSets, valdDataSets, testDataSets
 
 def DefineDataOpts(data='PNC', summaryName='test_comp'):
@@ -499,6 +512,15 @@ def GetArgs():
         'action': 'store',
         'type': int,
         'dest': 'origSize',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--pretrained',
+        'help': 'Set to 1 to use the pretrained model to test on the UKBiobank Dataset',
+        'action': 'store',
+        'type': int,
+        'dest': 'pretrained',
         'required': False,
         'const': None
         }
