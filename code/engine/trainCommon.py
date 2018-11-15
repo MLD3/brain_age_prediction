@@ -310,10 +310,12 @@ class ModelTrainer(object):
     def getPatientPerformances(self, sess, predictionOp, name, numIters=1):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-        nameOp = self.testSet.dequeueOp
-        labelOp = self.testSet.labelBatchOperation
-        imageOp = self.testSet.imageBatchOperation
-        numberIters = self.testSet.maxItemsInQueue
+        nameOp, labelOp, imageOp = [], [], []
+        for i in range(5):
+            nameOp.append(self.testSet[i].dequeueOp)
+            labelOp.append(self.testSet[i].labelBatchOperation)
+            imageOp.append(self.testSet[i].imageBatchOperation)
+        numberIters = self.testSet[0].maxItemsInQueue
         predictedAges = np.zeros((numIters, numberIters))
         absoluteErrors = np.zeros((numIters, numberIters))
         squaredErrors = np.zeros((numIters, numberIters))
@@ -330,7 +332,7 @@ class ModelTrainer(object):
             saveModel.restore(sess, saver, savePath)
 
             for j in range(numberIters):
-                images, labels, names = sess.run([imageOp, labelOp, nameOp])
+                images, labels, names = sess.run([imageOp[j], labelOp[j], nameOp[j]])
                 feed_dict = {
                     self.imagesPL: images,
                     self.labelsPL: labels,
