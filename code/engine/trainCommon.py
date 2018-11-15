@@ -379,6 +379,6 @@ class ModelTrainer(object):
         print("MSE: " + str(MSE))
         # for j in range(numberIters):
         #     print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
-        df.to_csv('{}.csv'.format(name), index=False)
+        df.to_csv('{}{}.csv'.format("/home/hyhuang/brain_age_prediction/reports/",name), index=False)
         coord.request_stop()
         coord.join(threads)
