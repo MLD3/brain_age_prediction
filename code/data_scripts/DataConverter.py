@@ -210,7 +210,7 @@ def convertCSVToList(outFile, SubjectDataFrame):
     for _, row in SubjectDataFrame.iterrows():
         subject = row['eid']
         print('Saving Subject {}'.format(subject))
-        array.append(subject)
+        array.append(str(subject))
     np.save(outFile, array)
 # This pushing age inside of the np array?
 '''
