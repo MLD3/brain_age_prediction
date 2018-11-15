@@ -204,6 +204,14 @@ def convertCSVToAgeNPY(outFile, SubjectDataFrame):
         npArray = np.array(age)
         outFileName = outFile + str(subject)
         np.save(outFileName, npArray)
+
+def convertCSVToList(outFile, SubjectDataFrame):
+    array = []
+    for _, row in SubjectDataFrame.iterrows():
+        subject = row['eid']
+        print('Saving Subject {}'.format(subject))
+        array.append(subject)
+    np.save(outFile, array)
 # This pushing age inside of the np array?
 '''
 i = 0
@@ -228,4 +236,5 @@ if __name__ == '__main__':
     # for UKBIOBANK transfer
     SubjectDataFrame = pd.read_csv('/data1/brain/UKBIOBANK/UKBiobank_T1_age.csv')
     # ConvertUKNIItoNPY(inFile='/data1/brain/UKBIOBANK/structural/', outFile='/data1/brain/UKBIOBANK/numpyArrays/', SubjectDataFrame=SubjectDataFrame)
-    convertCSVToAgeNPY(outFile='/data1/brain/UKBIOBANK/labels/', SubjectDataFrame=SubjectDataFrame)
+    # convertCSVToAgeNPY(outFile='/data1/brain/UKBIOBANK/labels/', SubjectDataFrame=SubjectDataFrame)
+    convertCSVToList(outFile='/data1/brain/UKBIOBANK/train.npy', SubjectDataFrame=SubjectDataFrame)
