@@ -315,6 +315,8 @@ class ModelTrainer(object):
         imageOp = self.testSet.imageBatchOperation
         numberIters = self.testSet.maxItemsInQueue
         predictedAges = np.zeros((numIters, numberIters))
+        absoluteErrors = np.zeros((numIters, numberIters))
+        squaredErrors = np.zeros((numIters, numberIters))
         trueAges = np.zeros((numberIters, ))
         name_arr = []
         print('Model: {}'.format(name))
@@ -342,6 +344,8 @@ class ModelTrainer(object):
                 predictions = np.squeeze(predictions[0])
                 trueAges[j] = labels
                 predictedAges[i, j] = predictions
+                absoluteErrors[i, j] = np.abs(predictions - labels)
+                squaredErrors[i, j] = np.square(predictions - labels)
 #                print('{}\t{:.4f}\t{:.4f}'.format(names, labels, predictions))
         df = pd.DataFrame(data = {
             'Subject': np.array(name_arr),
@@ -353,11 +357,26 @@ class ModelTrainer(object):
             'Run_5': predictedAges[4, :],
             'MinPredicted': np.min(predictedAges, axis=0),
             'MaxPredicted': np.max(predictedAges, axis=0),
-            'sdPredicted': np.std(predictedAges, axis=0)
+            'sdPredicted': np.std(predictedAges, axis=0),
+            'AE_1': predictedAges[0, :],
+            'AE_2': predictedAges[1, :],
+            'AE_3': predictedAges[2, :],
+            'AE_4': predictedAges[3, :],
+            'AE_5': predictedAges[4, :],
+            'SE_1': predictedAges[0, :],
+            'SE_2': predictedAges[1, :],
+            'SE_3': predictedAges[2, :],
+            'SE_4': predictedAges[3, :],
+            'SE_5': predictedAges[4, :],
+
         })
-        print(df)
-        #for j in range(numberIters):
-        #    print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
+        # print(df)
+        MAE = np.mean(absoluteErrors, axis=1)
+        MSE = np.mean(squaredErrors, axis=1)
+        print("MAE: " + str(MAE))
+        print("MSE: " + str(MSE))
+        # for j in range(numberIters):
+        #     print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
         df.to_csv('{}.csv'.format(name), index=False)
         coord.request_stop()
         coord.join(threads)
