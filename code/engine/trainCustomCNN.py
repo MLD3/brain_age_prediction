@@ -54,7 +54,7 @@ def GetDataSetInputs():
             with tf.variable_scope('TestInputs'):
                 testDataSets = []
                 for i in range(5):
-                    testDataSet  = DataSetNPY(filenames="/data1/brain/UKBIOBANK/train.npy",
+                    testDataSet  = DataSetNPY(filenames=np.load("/data1/brain/UKBIOBANK/train.npy").tolist(),
                                              imageBaseString="/data1/brain/UKBIOBANK/avgpool3x3x3/",
                                              imageBatchDims=GlobalOpts.imageBatchDims,
                                              labelBaseString="/data1/brain/UKBIOBANK/labels/",
