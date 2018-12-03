@@ -61,9 +61,9 @@ def main(inputFile='/data1/brain/PNC_AUGMENTED/combine/', outputFile='/data1/bra
             shuffle(train_set[i])
             shuffle(vald_set[i])
             shuffle(test_set[i])
-            train_set[i] = np.array(train_set[i])
-            vald_set[i] = np.array(vald_set[i])
-            test_set[i] = np.array(test_set[i])
+            train_set[i] = np.array(train_set[i]).astype(np.unicode_)
+            vald_set[i] = np.array(vald_set[i]).astype(np.unicode_)
+            test_set[i] = np.array(test_set[i]).astype(np.unicode_)
         train_set, vald_set, test_set = np.array(train_set), np.array(vald_set), np.array(test_set)
         np.save('{}train.npy'.format(outputFile), train_set)
         '''
