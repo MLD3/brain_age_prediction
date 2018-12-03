@@ -24,7 +24,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
             age = int(age)
             if age not in ageDistDict:
                 ageDistDict[age] = []
-            ageDistDict[age].append(subject)
+            ageDistDict[age].append(int(subject))
     else:
         df = np.load(group)
         if index is not None:
@@ -35,7 +35,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
             age = int(age[0])
             if age not in ageDistDict:
                 ageDistDict[age] = []
-            ageDistDict[age].append(subject)
+            ageDistDict[age].append(int(subject))
     for key, value in ageDistDict.items():
         ageList.append(key)
     ageList.sort()
