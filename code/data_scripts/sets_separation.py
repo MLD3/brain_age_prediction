@@ -40,10 +40,10 @@ def main(inputFile='/data1/brain/PNC_AUGMENTED/combine/', outputFile='/data1/bra
         file_index = 0
         # separate the whole dataset into five sets with the same distribution
         for filename in X:
-            index = _curr_order[file_index//5]
+            index = _curr_order[file_index % 5]
             fold[index].append(filename)
             file_index += 1
-            if file_index // 5 == 0:
+            if file_index % 5 == 0:
                 np.random.shuffle(_curr_order)
 
         for i in range(5):
@@ -65,7 +65,7 @@ def main(inputFile='/data1/brain/PNC_AUGMENTED/combine/', outputFile='/data1/bra
             vald_set[i] = np.array(vald_set[i])
             test_set[i] = np.array(test_set[i])
         train_set, vald_set, test_set = np.array(train_set), np.array(vald_set), np.array(test_set)
-        np.save('{}train_list.npy'.format(outputFile), train_set)
+        np.save('{}train.npy'.format(outputFile), train_set)
         '''
         set_size = 100
         for i in range(5):
@@ -97,8 +97,8 @@ def main(inputFile='/data1/brain/PNC_AUGMENTED/combine/', outputFile='/data1/bra
             train_set_dummy_dense = np.array(train_set_dummy_dense)
             np.save('{}combine_train_{}'.format(outputFile, density[i]), train_set_dummy_dense)
         '''
-        np.save('{}vald_list.npy'.format(outputFile), vald_set)
-        np.save('{}test_list.npy'.format(outputFile), test_set)
+        np.save('{}vald.npy'.format(outputFile), vald_set)
+        np.save('{}test.npy'.format(outputFile), test_set)
         #print("Successfully generated all the labels")
         print("Successfully generated all the set separations")
 
