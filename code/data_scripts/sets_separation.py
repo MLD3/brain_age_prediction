@@ -41,7 +41,7 @@ def main(inputFile='/data1/brain/PNC_AUGMENTED/combine/', outputFile='/data1/bra
         # separate the whole dataset into five sets with the same distribution
         for filename in X:
             index = _curr_order[file_index % 5]
-            fold[index].append(filename)
+            fold[index].append(int(filename))
             file_index += 1
             if file_index % 5 == 0:
                 np.random.shuffle(_curr_order)
