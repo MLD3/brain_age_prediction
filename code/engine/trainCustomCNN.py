@@ -186,8 +186,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.trainFiles = np.load(get('{}TRAIN'.format(baseString))).tolist()
         GlobalOpts.valdFiles = np.load(get('{}VALD'.format(baseString))).tolist()
         GlobalOpts.testFiles = np.load(get('{}TEST'.format(baseString))).tolist()
-        GlobalOpts.imageBaseString = get('BIOBANK.AVG_POOL{}'.format(GlobalOpts.dataScale))
-        GlobalOpts.labelBaseString = get('BIOBANK.LABELS')
+        GlobalOpts.imageBaseString = get('UKBIOBANK.AVG_POOL{}'.format(GlobalOpts.dataScale))
+        GlobalOpts.labelBaseString = get('UKBIOBANK.LABELS')
     GlobalOpts.numberTestItems = []
     GlobalOpts.numberValdItems = []
     for i in range(5):
