@@ -148,10 +148,8 @@
         "AVG_POOL1": "/data1/brain/UKBIOBANK/numpyArrays/",
         "AVG_POOL2": "/data1/brain/UKBIOBANK/avgpool2x2x2/",
         "AVG_POOL3": "/data1/brain/UKBIOBANK/avgpool3x3x3/",
-        "LABELS": "/data1/brain/UKBIOBANK/binary_labels/",
-        "AGES": "/data1/brain/UKBIOBANK/ages/",
+        "LABELS": "/data1/brain/UKBIOBANK/labels/",
         "GENDER": "/data1/brain/UKBIOBANK/gender/",
-        "TIV": "/data1/brain/UKBIOBANK/tivs/",
         "TEST": "/data1/brain/UKBIOBANK/test.npy",
         "VALD": "/data1/brain/UKBIOBANK/vald.npy",
         "TRAIN": "/data1/brain/UKBIOBANK/train.npy"
