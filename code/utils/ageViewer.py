@@ -8,6 +8,7 @@ import pandas as pd
 
 
 def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=False, index=None):
+    # age distribution dictionary
     ageDistDict = {}
     ageList = []
     ageDist = []
@@ -15,10 +16,10 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
     if not labelsloc:
         labelsloc = "/data1/brain/PNC/labels/"
     if not group:
-        df = pd.read_csv('/data1/brain/PNC/PNC_724_phenotypics.csv')
+        df = pd.read_csv('/data1/brain/UKBIOBANK/UKBiobank_T1_age.csv')
         for _, row in df.iterrows():
-            subject = row['Subject']
-            age = np.load('{}{}{}'.format(labelsloc, subject, '.npy'))
+            subject = row['eid']
+            age = row['age']
             ageEnum.append(age[0])        
             age = int(age[0])
             if age not in ageDistDict:
@@ -41,7 +42,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
     for age in ageList:
         ageDist.append(len(ageDistDict[age]))
     ind = np.arange(len(ageList))
-    width = 0.5 # arbitrarily chosen const
+    width = 0.5 # arbitrarily chosen constant
     ageEnum = np.array(ageEnum)
     print("The average age is " + str(np.mean(ageEnum)) + " with a std of " + str(np.std(ageEnum)) )
     print("The length of the set is :" + str(ageEnum.shape[0]))
@@ -53,7 +54,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
     ax.set_xticklabels(ageList)
     plt.show()
     if save:
-        with open('/data1/brain/PNC_AUGMENTED/ageDistribution.json', 'w') as fp:
+        with open('/data1/brain/UKBIOBANK/ageDistribution.json', 'w') as fp:
             json.dump(ageDistDict, fp)
 
 
