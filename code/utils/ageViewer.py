@@ -20,8 +20,8 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
         for _, row in df.iterrows():
             subject = row['eid']
             age = row['age']
-            ageEnum.append(age[0])        
-            age = int(age[0])
+            ageEnum.append(age)        
+            age = int(age)
             if age not in ageDistDict:
                 ageDistDict[age] = []
             ageDistDict[age].append(subject)
