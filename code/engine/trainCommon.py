@@ -130,7 +130,6 @@ class ModelTrainer(object):
         if setType == 'vald':
             numberIters = (self.valdSet[setIndex].maxItemsInQueue + self.valdSet[setIndex].batchSize - 1)\
                            //self.valdSet[setIndex].batchSize
-            print(numberIters)
             assert(numberIters > 0)
         elif setType == 'test':
             numberIters = self.testSet[setIndex].maxItemsInQueue
@@ -151,6 +150,7 @@ class ModelTrainer(object):
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
+            print("dict fed")
             sess.run(printOps.updateOps, feed_dict=feed_dict)
             print(i)
 
