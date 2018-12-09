@@ -137,6 +137,10 @@ class ModelTrainer(object):
         elif setType == 'train':
             numberIters = 1
 
+
+        if setType == 'vald':
+            self.valdSet[setIndex].RefreshNumEpochs()
+
         for i in range(numberIters):
             if setType == 'vald':
                 print(len(self.valdSet[setIndex].filenames))
@@ -149,9 +153,6 @@ class ModelTrainer(object):
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
             print(i)
-
-        if setType == 'vald':
-            self.valdSet[setIndex].RefreshNumEpochs()
 
         accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
@@ -175,12 +176,8 @@ class ModelTrainer(object):
     def TrainModel(self, sess, updateOp, printOps, name, setIndex=0):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
 
-        print("Before Initialization?")
         # Initialize relevant variables
         sess.run(tf.global_variables_initializer())
-
-        # debug
-        print("After initialization?")
 
         # Collect summary and graph update operations
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
