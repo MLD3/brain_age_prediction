@@ -244,6 +244,7 @@ class ModelTrainer(object):
             bestTestOpDict[opName] = []
 
         for i in range(numIters):
+            self.valdSet[i % 5].PreloadData()
             print('=========Training iteration {}========='.format(i))
             valdOpDict, testOpDict = self.TrainModel(sess,
                                                        updateOp,
@@ -253,6 +254,7 @@ class ModelTrainer(object):
             for opName in printOps.names:
                 bestValdOpDict[opName].append(valdOpDict[opName])
                 bestTestOpDict[opName].append(testOpDict[opName])
+            self.valdSet[i % 5].UnloadData()
 
         outputFile = open('{}performance.txt'.format(self.summaryDir), 'w')
 

@@ -584,8 +584,12 @@ def compareCustomCNN(validate=False):
     else:
         phenotypicsPL = None
 
+
+    # These lines will lead to resource exhausting error when loading huge data, such as the UKBIOBANK dataset.
+    '''
     for vald in valdDataSet:
         vald.PreloadData()
+    '''
 
     """
     Depthwise is used for depthwise convolution network.
