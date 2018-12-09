@@ -128,7 +128,10 @@ class ModelTrainer(object):
         sess.run(tf.local_variables_initializer())
         accumulatedOps = sess.run(printOps.ops)
         if setType == 'vald':
-            numberIters = self.valdSet[setIndex].maxItemsInQueue//self.valdSet[setIndex].batchSize + 1
+            numberIters = (self.valdSet[setIndex].maxItemsInQueue + self.valdSet[setIndex].batchSize - 1)\
+                           //self.valdSet[setIndex].batchSize
+            print(numberIters)
+            assert(numberIters > 0)
         elif setType == 'test':
             numberIters = self.testSet[setIndex].maxItemsInQueue
         elif setType == 'train':
@@ -136,6 +139,7 @@ class ModelTrainer(object):
 
         for i in range(numberIters):
             if setType == 'vald':
+                print(self.valdSet[setIndex])
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'test':
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
