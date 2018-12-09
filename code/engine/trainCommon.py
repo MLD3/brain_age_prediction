@@ -74,7 +74,7 @@ class ModelTrainer(object):
                         valdSet,
                         testSet,
                         numberOfSteps=501,
-                        batchStepsBetweenSummary=250,
+                        batchStepsBetweenSummary=2500,
                         phenotypicsPL=None
                         ):
         if not os.path.exists(checkpointDir) and GlobalOpts.validationDir is None:
