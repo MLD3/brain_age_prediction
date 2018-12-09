@@ -195,8 +195,8 @@ def DefineDataOpts(data='PNC', summaryName='test_comp'):
         GlobalOpts.trainFiles[i] = np.array(GlobalOpts.trainFiles[i]).tolist()
         GlobalOpts.testFiles[i] = np.array(GlobalOpts.testFiles[i]).tolist()
         GlobalOpts.valdFiles[i] = np.array(GlobalOpts.valdFiles[i]).tolist()
-        GlobalOpts.numberTestItems.append(len(GlobalOpts.testFiles))
-        GlobalOpts.numberValdItems.append(len(GlobalOpts.valdFiles))
+        GlobalOpts.numberTestItems.append(len(GlobalOpts.testFiles[i]))
+        GlobalOpts.numberValdItems.append(len(GlobalOpts.valdFiles[i]))
     GlobalOpts.name = '{}Scale{}Data{}Batch{}Rate{}'.format(GlobalOpts.type, GlobalOpts.scale, data, GlobalOpts.batchSize, GlobalOpts.learningRate)
     if GlobalOpts.sliceIndex is not None:
         GlobalOpts.name = '{}Slice{}'.format(GlobalOpts.name, GlobalOpts.sliceIndex)
