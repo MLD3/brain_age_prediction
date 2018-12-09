@@ -21,7 +21,8 @@ class DataSetNPY(object):
             maxItemsInQueue=100,
             shuffle=True,
             augment='none',
-            augRatio=None
+            augRatio=None,
+            numEpochs=None
         ):
         self.filenames = filenames
         self.batchSize = batchSize
@@ -34,8 +35,12 @@ class DataSetNPY(object):
         self.preloaded = False
         self.loadedImages = None
         self.loadedLabels = None
-        stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
-        dequeueOp = stringQueue.dequeue_many(batchSize)
+        self.shuffle = shuffle
+        stringQueue = tf.train.string_input_producer(filenames, num_epochs=numEpochs, shuffle=shuffle, capacity=maxItemsInQueue)
+        if not numEpochs:
+            dequeueOp = stringQueue.dequeue_many(batchSize)
+        else:
+            dequeueOp = stringQueue.dequeue_up_to(batchSize)
         self.dequeueOp = dequeueOp
         self.imageBatchOperation = tf.reshape(
             tf.py_func(self._loadImages, [dequeueOp], tf.float32),
@@ -89,6 +94,24 @@ class DataSetNPY(object):
             tf.py_func(self._loadLabels, [randomFilenames], tf.float32),
             self.labelBatchDims)
         return randomImageBatch, randomLabelBatch
+
+    def RefreshNumEpochs(self):
+        '''
+        This is a function that used to refresh the number of epochs.
+        Only used in validation set input produce process.
+        '''
+        stringQueue = tf.train.string_input_producer(self.filenames, num_epochs=self.numEpochs, shuffle=self.shuffle, capacity=self.maxItemsInQueue)
+        if not self.numEpochs:
+            dequeueOp = stringQueue.dequeue_many(self.batchSize)
+        else:
+            dequeueOp = stringQueue.dequeue_up_to(self.batchSize)
+        self.dequeueOp = dequeueOp
+        self.imageBatchOperation = tf.reshape(
+            tf.py_func(self._loadImages, [dequeueOp], tf.float32),
+            imageBatchDims)
+        self.labelBatchOperation = tf.reshape(
+            tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
+            labelBatchDims)
 
     def CreateAugmentOperations(self, augmentation='flip', augRatio=1):
         """

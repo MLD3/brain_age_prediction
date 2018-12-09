@@ -143,6 +143,9 @@ class ModelTrainer(object):
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
 
+        if setType == 'vald':
+            self.valdSet[setIndex].RefreshNumEpochs()
+
         accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
         opValueDict = {}
@@ -245,7 +248,7 @@ class ModelTrainer(object):
             bestTestOpDict[opName] = []
 
         for i in range(numIters):
-            self.valdSet[i % 5].PreloadData()
+            # self.valdSet[i % 5].PreloadData()
             print('=========Training iteration {}========='.format(i))
             valdOpDict, testOpDict = self.TrainModel(sess,
                                                        updateOp,
@@ -255,7 +258,7 @@ class ModelTrainer(object):
             for opName in printOps.names:
                 bestValdOpDict[opName].append(valdOpDict[opName])
                 bestTestOpDict[opName].append(testOpDict[opName])
-            self.valdSet[i % 5].UnloadData()
+            # self.valdSet[i % 5].UnloadData()
 
         outputFile = open('{}performance.txt'.format(self.summaryDir), 'w')
 

@@ -46,9 +46,10 @@ def GetDataSetInputs():
                                          imageBaseString=GlobalOpts.imageBaseString,
                                          imageBatchDims=GlobalOpts.imageBatchDims,
                                          labelBaseString=GlobalOpts.labelBaseString,
-                                         batchSize=1,
-                                         maxItemsInQueue=GlobalOpts.numberValdItems[i],
-                                         shuffle=False)
+                                         batchSize=64,
+                                         maxItemsInQueue=GlobalOpts.numberValdItems[i]//64+1,
+                                         shuffle=False,
+                                         numEpochs=1)
                 valdDataSets.append(valdDataSet)
         if GlobalOpts.pretrained:
             with tf.variable_scope('TestInputs'):
