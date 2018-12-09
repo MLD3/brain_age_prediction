@@ -36,6 +36,7 @@ class DataSetNPY(object):
         self.loadedImages = None
         self.loadedLabels = None
         self.shuffle = shuffle
+        self.numEpochs = numEpochs
         stringQueue = tf.train.string_input_producer(filenames, num_epochs=numEpochs, shuffle=shuffle, capacity=maxItemsInQueue)
         self.stringQueue = stringQueue
         if not numEpochs:
