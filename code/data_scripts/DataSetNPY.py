@@ -108,11 +108,12 @@ class DataSetNPY(object):
             self.labelBatchDims)
         return randomImageBatch, randomLabelBatch
 
+    '''
     def RefreshNumEpochs(self):
-        '''
-        This is a function that used to refresh the number of epochs.
-        Only used in validation set input produce process.
-        '''
+        # This is a function that used to refresh the number of epochs.
+        # Only used in validation set input produce process.
+        # Deprecated
+
         stringQueue = tf.train.string_input_producer(self.filenames, num_epochs=self.numEpochs, shuffle=self.shuffle, capacity=self.maxItemsInQueue)
         self.stringQueue = stringQueue
         if not self.numEpochs:
@@ -126,6 +127,7 @@ class DataSetNPY(object):
         self.labelBatchOperation = tf.reshape(
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
             self.labelBatchDims)
+    '''
 
     def CreateAugmentOperations(self, augmentation='flip', augRatio=1):
         """
