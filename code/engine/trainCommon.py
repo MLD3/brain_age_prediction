@@ -246,9 +246,6 @@ class ModelTrainer(object):
 
         for i in range(numIters):
             self.valdSet[i % 5].PreloadData()
-            with tf.device('/device:GPU:0'):  # Replace with device you are interested in
-                bytes_in_use = BytesInUse()
-            print(sess.run(bytes_in_use))
             print('=========Training iteration {}========='.format(i))
             valdOpDict, testOpDict = self.TrainModel(sess,
                                                        updateOp,
