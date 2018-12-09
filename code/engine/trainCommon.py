@@ -139,7 +139,8 @@ class ModelTrainer(object):
 
         for i in range(numberIters):
             if setType == 'vald':
-                print(self.valdSet[setIndex])
+                print(len(self.valdSet[setIndex].filenames))
+                print(len(self.valdSet[setIndex].stringQueue.shapes))
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'test':
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)

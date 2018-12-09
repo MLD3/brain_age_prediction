@@ -37,6 +37,7 @@ class DataSetNPY(object):
         self.loadedLabels = None
         self.shuffle = shuffle
         stringQueue = tf.train.string_input_producer(filenames, num_epochs=numEpochs, shuffle=shuffle, capacity=maxItemsInQueue)
+        self.stringQueue = stringQueue
         if not numEpochs:
             dequeueOp = stringQueue.dequeue_many(batchSize)
         else:
@@ -101,6 +102,7 @@ class DataSetNPY(object):
         Only used in validation set input produce process.
         '''
         stringQueue = tf.train.string_input_producer(self.filenames, num_epochs=self.numEpochs, shuffle=self.shuffle, capacity=self.maxItemsInQueue)
+        self.stringQueue = stringQueue
         if not self.numEpochs:
             dequeueOp = stringQueue.dequeue_many(self.batchSize)
         else:
