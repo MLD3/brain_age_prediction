@@ -130,15 +130,10 @@ class ModelTrainer(object):
         if setType == 'vald':
             numberIters = (self.valdSet[setIndex].maxItemsInQueue + self.valdSet[setIndex].batchSize - 1)\
                            //self.valdSet[setIndex].batchSize
-            assert(numberIters > 0)
         elif setType == 'test':
             numberIters = self.testSet[setIndex].maxItemsInQueue
         elif setType == 'train':
             numberIters = 1
-
-
-        if setType == 'vald':
-            self.valdSet[setIndex].RefreshNumEpochs()
 
         for i in range(numberIters):
             if setType == 'vald':

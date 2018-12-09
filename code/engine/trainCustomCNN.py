@@ -49,7 +49,7 @@ def GetDataSetInputs():
                                          batchSize=64,
                                          maxItemsInQueue=GlobalOpts.numberValdItems[i],
                                          shuffle=False,
-                                         numEpochs=1)
+                                         validate=True)
                 valdDataSets.append(valdDataSet)
         if GlobalOpts.pretrained:
             with tf.variable_scope('TestInputs'):
