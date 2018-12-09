@@ -47,7 +47,7 @@ def GetDataSetInputs():
                                          imageBatchDims=GlobalOpts.imageBatchDims,
                                          labelBaseString=GlobalOpts.labelBaseString,
                                          batchSize=64,
-                                         maxItemsInQueue=GlobalOpts.numberValdItems[i]//64+1,
+                                         maxItemsInQueue=GlobalOpts.numberValdItems[i],
                                          shuffle=False,
                                          numEpochs=1)
                 valdDataSets.append(valdDataSet)
