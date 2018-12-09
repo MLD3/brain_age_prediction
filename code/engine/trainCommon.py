@@ -10,7 +10,7 @@ from utils.config import get
 from placeholders.shared_placeholders import *
 from datetime import datetime
 from utils.args import *
-from tf.contrib.memory_stats import BytesInUse
+from tensorflow.contrib.memory_stats import BytesInUse
 
 
 class PrintOps(object):
