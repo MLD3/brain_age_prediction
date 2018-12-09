@@ -72,6 +72,7 @@ class DataSetNPY(object):
         if self.validate:
             # return only one epoch of every item in vald set
             start = self._index_in_epoch
+            _index_in_epoch = self._index_in_epoch
             if start + self.batchSize > self._num_data:
                 files = [x.encode() for x in self.filenames[_index_in_epoch:]]
                 self._index_in_epoch = 0
