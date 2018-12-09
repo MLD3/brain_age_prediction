@@ -236,7 +236,7 @@ def GetOps(labelsPL, outputLayer, learningRate=0.0001):
     Given the Global Opts defined, returns a loss operation, an update operation,
     and summary operations.
     """
-    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
+    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data or 'UKBIOBANK' in GlobalOpts.data:
         with tf.variable_scope('LossOperations'):
             lossOp = tf.losses.mean_squared_error(labels=labelsPL, predictions=outputLayer)
             MSEOp, MSEUpdateOp = tf.metrics.mean_squared_error(labels=labelsPL, predictions=outputLayer)

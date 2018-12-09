@@ -10,6 +10,7 @@ from utils.config import get
 from placeholders.shared_placeholders import *
 from datetime import datetime
 from utils.args import *
+from tf.contrib.memory_stats import BytesInUse
 
 
 class PrintOps(object):
@@ -179,7 +180,7 @@ class ModelTrainer(object):
         bestValdOpDict = {}
         bestLossStepIndex = 0
         stepsSinceLastBest = 0
-        maxStepsBeforeStop = 100000
+        maxStepsBeforeStop = 50000
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess, setIndex=setIndex)
@@ -245,6 +246,9 @@ class ModelTrainer(object):
 
         for i in range(numIters):
             self.valdSet[i % 5].PreloadData()
+            with tf.device('/device:GPU:0'):  # Replace with device you are interested in
+                bytes_in_use = BytesInUse()
+            print(sess.run(bytes_in_use))
             print('=========Training iteration {}========='.format(i))
             valdOpDict, testOpDict = self.TrainModel(sess,
                                                        updateOp,
