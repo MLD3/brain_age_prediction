@@ -175,6 +175,7 @@ class ModelTrainer(object):
     def TrainModel(self, sess, updateOp, printOps, name, setIndex=0):
         writer = tf.summary.FileWriter('{}{}/'.format(self.summaryDir, name))
 
+        print("Before Initialization?")
         # Initialize relevant variables
         sess.run(tf.global_variables_initializer())
 
