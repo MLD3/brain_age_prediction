@@ -178,6 +178,9 @@ class ModelTrainer(object):
         # Initialize relevant variables
         sess.run(tf.global_variables_initializer())
 
+        # debug
+        print("After initialization?")
+
         # Collect summary and graph update operations
         extraUpdateOps = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 
