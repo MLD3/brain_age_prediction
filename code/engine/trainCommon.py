@@ -142,6 +142,7 @@ class ModelTrainer(object):
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
             sess.run(printOps.updateOps, feed_dict=feed_dict)
+            print(i)
 
         if setType == 'vald':
             self.valdSet[setIndex].RefreshNumEpochs()

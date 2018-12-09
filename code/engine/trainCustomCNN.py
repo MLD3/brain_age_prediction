@@ -51,7 +51,6 @@ def GetDataSetInputs():
                                          shuffle=False,
                                          numEpochs=1)
                 valdDataSets.append(valdDataSet)
-                print(GlobalOpts.numberValdItems[i]//64+1)
         if GlobalOpts.pretrained:
             with tf.variable_scope('TestInputs'):
                 testDataSets = []
