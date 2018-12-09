@@ -22,7 +22,7 @@ class DataSetNPY(object):
             shuffle=True,
             augment='none',
             augRatio=None,
-            numEpochs=None
+            validate=False
         ):
         self.filenames = filenames
         self.batchSize = batchSize
@@ -36,14 +36,9 @@ class DataSetNPY(object):
         self.loadedImages = None
         self.loadedLabels = None
         self.shuffle = shuffle
-        self.numEpochs = numEpochs
-        stringQueue = tf.train.string_input_producer(filenames, num_epochs=numEpochs, shuffle=shuffle, capacity=maxItemsInQueue)
-        self.stringQueue = stringQueue
-        if not numEpochs:
-            dequeueOp = stringQueue.dequeue_many(batchSize)
-        else:
-            dequeueOp = stringQueue.dequeue_up_to(batchSize)
-        self.dequeueOp = dequeueOp
+        self.validate = validate
+        stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
+        dequeueOp = stringQueue.dequeue_many(batchSize)
         self.imageBatchOperation = tf.reshape(
             tf.py_func(self._loadImages, [dequeueOp], tf.float32),
             imageBatchDims)
@@ -51,6 +46,9 @@ class DataSetNPY(object):
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
             labelBatchDims)
         self.augment = augment
+        self._index_in_epoch = 0
+        self._num_data = len(filenames)
+        self._curr_order = np.arange(self._num_data)
         if self.augment != 'none':
             self.CreateAugmentOperations(augmentation=augment, augRatio=augRatio)
 
@@ -69,6 +67,19 @@ class DataSetNPY(object):
         
     def NextBatch(self, sess):
         if self.preloaded:
+            return self.loadedImages, self.loadedLabels
+
+        if self.validate:
+            # return only one epoch of every item in vald set
+            start = self._index_in_epoch
+            if start + self.batchSize > self._num_data:
+                files = [x.encode() for x in self.filenames[_index_in_epoch:]]
+                self._index_in_epoch = 0
+            else:
+                files = [x.encode() for x in self.filenames[_index_in_epoch:_index_in_epoch + self.batchSize]]
+                self._index_in_epoch += self.batchSize
+            self.loadedImages = np.reshape(self._loadImages(files), self.imageBatchDims).astype(np.float32)
+            self.loadedLabels = np.reshape(self._loadLabels(files), self.labelBatchDims).astype(np.float32)
             return self.loadedImages, self.loadedLabels
 
         if self.augment == 'none':

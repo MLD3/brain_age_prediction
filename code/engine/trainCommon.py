@@ -142,17 +142,12 @@ class ModelTrainer(object):
 
         for i in range(numberIters):
             if setType == 'vald':
-                print(len(self.valdSet[setIndex].filenames))
-                print(len(self.valdSet[setIndex].stringQueue.shapes))
-                print(self.valdSet[setIndex].stringQueue.shapes)
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'test':
                 feed_dict = self.GetFeedDict(sess, setType=setType, setIndex=setIndex)
             elif setType == 'train':
                 feed_dict = batchTrainFeedDict
-            print("dict fed")
             sess.run(printOps.updateOps, feed_dict=feed_dict)
-            print(i)
 
         accumulatedOps = sess.run(printOps.ops)
         summaryFeedDict = {}
