@@ -111,10 +111,10 @@ class DataSetNPY(object):
         self.dequeueOp = dequeueOp
         self.imageBatchOperation = tf.reshape(
             tf.py_func(self._loadImages, [dequeueOp], tf.float32),
-            imageBatchDims)
+            self.imageBatchDims)
         self.labelBatchOperation = tf.reshape(
             tf.py_func(self._loadLabels, [dequeueOp], tf.float32),
-            labelBatchDims)
+            self.labelBatchDims)
 
     def CreateAugmentOperations(self, augmentation='flip', augRatio=1):
         """
