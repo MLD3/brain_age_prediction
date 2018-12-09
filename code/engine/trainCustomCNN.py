@@ -563,7 +563,7 @@ def compareCustomCNN(validate=False):
         convLayers = [8, 16, 32, 64]
     elif GlobalOpts.type == 'reverse':
         convLayers = [64, 32, 16, 8]
-    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data:
+    if GlobalOpts.data == 'PNC' or 'AGE' in GlobalOpts.data or 'UKBIOBANK' in GlobalOpts.data:
         fullyConnectedLayers = [GlobalOpts.hiddenUnits, 1]
     else:
         fullyConnectedLayers = [GlobalOpts.hiddenUnits, 2]
