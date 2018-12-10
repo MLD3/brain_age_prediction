@@ -382,11 +382,9 @@ class ModelTrainer(object):
             })
         else:
             trueAges = resultConcat(trueAges, numbersIters)
+            predictedAges = resultConcat(predictedAges, numbersIters)
             absoluteErrors = resultConcat(absoluteErrors, numbersIters)
             squaredErrors = resultConcat(squaredErrors, numbersIters)
-            print(trueAges.shape)
-            print(absoluteErrors.shape)
-            print(squaredErrors.shape)
             df = pd.DataFrame(data = {
                 'Subject': np.array(name_arr),
                 'TrueAge': trueAges,
@@ -396,8 +394,8 @@ class ModelTrainer(object):
             })
 
         # print(df)
-        MAE = np.mean(absoluteErrors, axis=1)
-        MSE = np.mean(squaredErrors, axis=1)
+        MAE = np.mean(absoluteErrors)
+        MSE = np.mean(squaredErrors)
         print("MAE: " + str(MAE))
         print("MSE: " + str(MSE))
         # for j in range(numberIters):
