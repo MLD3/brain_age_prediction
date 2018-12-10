@@ -25,10 +25,13 @@ optional arguments:
                         as opposed to concatenating all regions along the
                         depth channel.
   --align ALIGN         Set to 1 to align channels, maximizes the intersection.
+					    Obsolete feature, will lead to a worse performance.
   --numberTrials NUMBERTRIALS
                         Number of repeated models to run.
-  --padding PADDING     Set this to an integer to crop the image to the brain
+  --padding PADDING     
+						Set this to an integer to crop the image to the brain
                         and then apply `padding` amount of padding.
+						Obsolete feature, will lead to a worse performance.
   --batchSize BATCHSIZE
                         Batch size to train with. Default is 4.
   --pheno PHENO         Specify 1 to add phenotypics to the model.
@@ -53,10 +56,10 @@ optional arguments:
 						If set, dataScale cannot be specified.
   --listType LISTTYPE   Only valid for ABIDE and ADHD. One of strat or site.
   --depthwise DEPTHWISE
-						Set to 1 to use depthwise convolutions for the entire network.
+						Set to 1 to use depthwise convolutions for the entire network. (Untested Feature)
   --skipConnection SKIPCONNECTION
 						Set to 1 to allow skip connection layer, add residuals
-						to the network (like ResNet).
+						to the network (like ResNet). (Will lead to a worse performance.)
   --maxRatio MAXRATIO
 						Ratio of max pooling in the pool_mix augmentation. Default to 0.25.
 						The ratio should fall within the range [0.05, 0.75] and also be a multiple of 0.05.
@@ -65,6 +68,13 @@ optional arguments:
 						Ratio of augmented images versus pure average images in the pool_mix augmentation. Default to 2. Useful only when pool_mix type is selected.
   --testType TESTTYPE
 						One of AVG, MAX. Type of validation and test file preprocessing setting used in concat augmentation. Default to AVG.
+  --augment AUGMENT     
+						One of FLIP, TRANSLATE. Type of standard augmentation. Default to None.
+  --origSize
+						Size of the original sample before augmentation. One of 100, 200, 300.
+						If None, then all samples are used. Default to None
+  --pretrained
+						Set to 1 to use the pretrained model to test on the UKBiobank Dataset.
 ```
   
   The scripts assume that you have the following directories, which you will have to create yourself:   
