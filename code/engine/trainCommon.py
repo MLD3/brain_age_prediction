@@ -400,7 +400,7 @@ class ModelTrainer(object):
         print("MSE: " + str(MSE))
         # for j in range(numberIters):
         #     print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
-        df.to_csv('{}{}.csv'.format("/data3/hyhuang/brain_age_prediction/reports/",name), index=False)
+        df.to_csv('{}{}.csv'.format("/data3/hyhuang/brain_age_prediction/reports/", name), index=False)
         coord.request_stop()
         coord.join(threads)
 
@@ -413,5 +413,5 @@ def resultConcat(results, numbersIters):
     for i in range(5):
         result_separated[i] = results[i, 0:numbersIters[i]]
     result = np.array(result_separated)
-    result = np.concatenate([result[0], result[1], result[2], result[3], result[4]])
+    result = np.concatenate((result[0], result[1], result[2], result[3], result[4]))
     return result
