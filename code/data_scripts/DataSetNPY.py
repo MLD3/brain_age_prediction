@@ -39,6 +39,7 @@ class DataSetNPY(object):
         self.validate = validate
         stringQueue = tf.train.string_input_producer(filenames, shuffle=shuffle, capacity=maxItemsInQueue)
         dequeueOp = stringQueue.dequeue_many(batchSize)
+        self.dequeueOp = dequeueOp
         self.imageBatchOperation = tf.reshape(
             tf.py_func(self._loadImages, [dequeueOp], tf.float32),
             imageBatchDims)

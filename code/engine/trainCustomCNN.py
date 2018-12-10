@@ -54,8 +54,10 @@ def GetDataSetInputs():
         if GlobalOpts.pretrained:
             with tf.variable_scope('TestInputs'):
                 testDataSets = []
+                temp = np.load("/data1/brain/UKBIOBANK/test.npy")
+                temp = np.concatenate((temp[0], temp[1], temp[2], temp[3], temp[4]))
                 for i in range(5):
-                    testDataSet  = DataSetNPY(filenames=np.load("/data1/brain/UKBIOBANK/train.npy").tolist(),
+                    testDataSet  = DataSetNPY(filenames=temp.tolist(),
                                              imageBaseString="/data1/brain/UKBIOBANK/avgpool3x3x3/",
                                              imageBatchDims=GlobalOpts.imageBatchDims,
                                              labelBaseString="/data1/brain/UKBIOBANK/labels/",

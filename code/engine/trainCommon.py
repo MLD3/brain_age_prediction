@@ -315,15 +315,17 @@ class ModelTrainer(object):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         nameOp, labelOp, imageOp = [], [], []
+        numbersIters = []
         for i in range(5):
             nameOp.append(self.testSet[i].dequeueOp)
             labelOp.append(self.testSet[i].labelBatchOperation)
             imageOp.append(self.testSet[i].imageBatchOperation)
-        numberIters = self.testSet[0].maxItemsInQueue
+            numbersIters.append(self.testSet[i].maxItemsInQueue)
+        numberIters = self.testSet[0].maxItemsInQueue + 1
         predictedAges = np.zeros((numIters, numberIters))
         absoluteErrors = np.zeros((numIters, numberIters))
         squaredErrors = np.zeros((numIters, numberIters))
-        trueAges = np.zeros((numberIters, ))
+        trueAges = np.zeros((numIters, numberIters))
         name_arr = []
         print('Model: {}'.format(name))
 
@@ -334,6 +336,8 @@ class ModelTrainer(object):
             saver = tf.train.Saver()
             savePath = '{}run_{}/'.format(GlobalOpts.validationDir, i)
             saveModel.restore(sess, saver, savePath)
+            numberIters = numbersIters[i]
+            print("This model has {} test images.".format(numberIters))
 
             for j in range(numberIters):
                 images, labels, names = sess.run([imageOp[i], labelOp[i], nameOp[i]])
@@ -343,39 +347,51 @@ class ModelTrainer(object):
                     self.trainingPL: False
                 }
                 names = names[0].decode('UTF-8')
-                if i == 0:
+                if i == 0 or not GlobalOpts.pretrained:
                     name_arr.append(names)
                 labels = labels[0, 0]
                 predictions = sess.run([predictionOp], feed_dict=feed_dict)
                 predictions = np.squeeze(predictions[0])
-                trueAges[j] = labels
+                trueAges[i, j] = labels
                 predictedAges[i, j] = predictions
                 absoluteErrors[i, j] = np.abs(predictions - labels)
                 squaredErrors[i, j] = np.square(predictions - labels)
 #                print('{}\t{:.4f}\t{:.4f}'.format(names, labels, predictions))
-        df = pd.DataFrame(data = {
-            'Subject': np.array(name_arr),
-            'TrueAge': trueAges,
-            'Run_1': predictedAges[0, :],
-            'Run_2': predictedAges[1, :],
-            'Run_3': predictedAges[2, :],
-            'Run_4': predictedAges[3, :],
-            'Run_5': predictedAges[4, :],
-            'MinPredicted': np.min(predictedAges, axis=0),
-            'MaxPredicted': np.max(predictedAges, axis=0),
-            'sdPredicted': np.std(predictedAges, axis=0),
-            'AE_1': predictedAges[0, :],
-            'AE_2': predictedAges[1, :],
-            'AE_3': predictedAges[2, :],
-            'AE_4': predictedAges[3, :],
-            'AE_5': predictedAges[4, :],
-            'SE_1': predictedAges[0, :],
-            'SE_2': predictedAges[1, :],
-            'SE_3': predictedAges[2, :],
-            'SE_4': predictedAges[3, :],
-            'SE_5': predictedAges[4, :],
+        if GlobalOpts.pretrained:
+            df = pd.DataFrame(data = {
+                'Subject': np.array(name_arr),
+                'TrueAge': trueAges[0],
+                'Run_1': predictedAges[0, :],
+                'Run_2': predictedAges[1, :],
+                'Run_3': predictedAges[2, :],
+                'Run_4': predictedAges[3, :],
+                'Run_5': predictedAges[4, :],
+                'MinPredicted': np.min(predictedAges, axis=0),
+                'MaxPredicted': np.max(predictedAges, axis=0),
+                'sdPredicted': np.std(predictedAges, axis=0),
+                'AE_1': absoluteErrors[0, :],
+                'AE_2': absoluteErrors[1, :],
+                'AE_3': absoluteErrors[2, :],
+                'AE_4': absoluteErrors[3, :],
+                'AE_5': absoluteErrors[4, :],
+                'SE_1': squaredErrors[0, :],
+                'SE_2': squaredErrors[1, :],
+                'SE_3': squaredErrors[2, :],
+                'SE_4': squaredErrors[3, :],
+                'SE_5': squaredErrors[4, :],
+            })
+        else:
+            trueAges = resultConcat(trueAges, numbersIters)
+            absoluteErrors = resultConcat(absoluteErrors, numbersIters)
+            squaredErrors = resultConcat(squaredErrors, numbersIters)
+            df = pd.DataFrame(data = {
+                'Subject': np.array(name_arr),
+                'TrueAge': trueAges,
+                'PredictedAges': predictedAges,
+                'AbsoluteErrors': absoluteErrors,
+                'SquaredErrors' : squaredErrors,
+            })
 
-        })
         # print(df)
         MAE = np.mean(absoluteErrors, axis=1)
         MSE = np.mean(squaredErrors, axis=1)
@@ -383,6 +399,18 @@ class ModelTrainer(object):
         print("MSE: " + str(MSE))
         # for j in range(numberIters):
         #     print('{}\t{}\t{}'.format(name_arr[j], trueAges[j], predictedAges[:, j]))
-        df.to_csv('{}{}.csv'.format("/home/hyhuang/brain_age_prediction/reports/",name), index=False)
+        df.to_csv('{}{}.csv'.format("/data3/hyhuang/brain_age_prediction/reports/",name), index=False)
         coord.request_stop()
         coord.join(threads)
+
+
+def resultConcat(results, numbersIters):
+    '''
+    This is a helper function used to merge the results in five loops.
+    '''
+    result_separated = [0,0,0,0,0]
+    for i in range(5):
+        result_separated[i] = results[i, 0:numberIters]
+    result = np.array(result_separated)
+    result = np.concat([result[0], result[1], result[2], result[3], result[4]])
+    return result
