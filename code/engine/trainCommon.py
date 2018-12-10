@@ -412,5 +412,5 @@ def resultConcat(results, numbersIters):
     for i in range(5):
         result_separated[i] = results[i, 0:numbersIters[i]]
     result = np.array(result_separated)
-    result = np.concat([result[0], result[1], result[2], result[3], result[4]])
+    result = np.concatenate([result[0], result[1], result[2], result[3], result[4]])
     return result
