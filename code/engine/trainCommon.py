@@ -385,6 +385,8 @@ class ModelTrainer(object):
             absoluteErrors = resultConcat(absoluteErrors, numbersIters)
             squaredErrors = resultConcat(squaredErrors, numbersIters)
             print(trueAges.shape)
+            print(absoluteErrors.shape)
+            print(squaredErrors.shape)
             df = pd.DataFrame(data = {
                 'Subject': np.array(name_arr),
                 'TrueAge': trueAges,
