@@ -49,6 +49,7 @@ def viewAgeDistribution(labelsloc="/data1/brain/PNC/labels/", group=None, save=F
     fig, ax = plt.subplots()
     rect = ax.bar(ind, ageDist, color='r')
     ax.set_ylabel('Number of MRI in this age')
+    ax.set_xlabel('Age (in years)')
     ax.set_title('MRI distribution by the age')
     ax.set_xticks(ind)
     ax.set_xticklabels(ageList)
