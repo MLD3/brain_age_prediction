@@ -526,6 +526,24 @@ def GetArgs():
         'dest': 'pretrained',
         'required': False,
         'const': None
+        },
+        {
+        'flag': '--batchSteps',
+        'help': 'Steps between each validation performance check, default to 250',
+        'action': 'store',
+        'type': int,
+        'dest': 'batchSteps',
+        'required': False,
+        'const': None
+        },
+        {
+        'flag': '--maxStepsBeforeStop',
+        'help': 'Hyperparameter used to determine when should we stop, default to 20000',
+        'action': 'store',
+        'type': int,
+        'dest': 'maxStepsBeforeStop',
+        'required': False,
+        'const': None
         }
         ]
     ParseArgs('Run 3D CNN over structural MRI volumes', additionalArgs=additionalArgs)
@@ -633,7 +651,9 @@ def compareCustomCNN(validate=False):
                                 valdDataSet,
                                 testDataSet,
                                 GlobalOpts.numSteps,
-                                phenotypicsPL=phenotypicsPL)
+                                GlobalOpts.batchSteps,
+                                phenotypicsPL=phenotypicsPL,
+                                maxStepsBeforeStop=GlobalOpts.maxStepsBeforeStop)
     config  = tf.ConfigProto()
     config.gpu_options.per_process_gpu_memory_fraction = GlobalOpts.gpuMemory
     with tf.Session(config=config) as sess:

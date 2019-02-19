@@ -74,8 +74,9 @@ class ModelTrainer(object):
                         valdSet,
                         testSet,
                         numberOfSteps=501,
-                        batchStepsBetweenSummary=2500,
-                        phenotypicsPL=None
+                        batchStepsBetweenSummary=250,
+                        phenotypicsPL=None,
+                        maxStepsBeforeStop=20000
                         ):
         if not os.path.exists(checkpointDir) and GlobalOpts.validationDir is None:
             os.makedirs(checkpointDir)
@@ -90,6 +91,7 @@ class ModelTrainer(object):
         self.valdSet       = valdSet
         self.testSet       = testSet
         self.phenotypicsPL = phenotypicsPL
+        self.maxStepsBeforeStop = maxStepsBeforeStop
 
     def GetFeedDict(self, sess, setType='train', setIndex=0):
         if self.phenotypicsPL is not None:
@@ -181,7 +183,7 @@ class ModelTrainer(object):
         bestValdOpDict = {}
         bestLossStepIndex = 0
         stepsSinceLastBest = 0
-        maxStepsBeforeStop = 20000
+        maxStepsBeforeStop = self.maxStepsBeforeStop
 
         for batchIndex in range(self.numberOfSteps):
             batchTrainFeedDict = self.GetFeedDict(sess, setIndex=setIndex)
